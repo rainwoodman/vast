@@ -16,3 +16,17 @@ make use of DBUS. That's far down the road.
 
 This is an unfunded project.
 
+Build
+=====
+
+We use meson to build the vala project.
+
+On Fedora, the following commands shall work
+
+.. code::
+
+    mkdir build
+    cd build
+    meson ..
+    ninja-build
+
