@@ -4,6 +4,8 @@ vast_sources = [
     'typedescr.vala',
     'numeric.vala',
     'array.vala',
+    'arrayiterator.vala',
+    'slice.vala',
      ]
 
 vast_lib = library('vast-1.0', vast_sources,

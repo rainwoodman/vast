@@ -10,7 +10,7 @@ namespace Vast {
 
     public class Array : Object
     {
-        public size_t ndim {get; construct; }
+        public int ndim {get; construct; }
         public TypeDescr dtype {get; construct; }
         public size_t * shape {
             get {
@@ -46,7 +46,7 @@ namespace Vast {
             }
         }
 
-        public Array.full(size_t ndim,
+        public Array.full(int ndim,
                 TypeDescr dtype,
                 size_t * shape, 
                 ssize_t * strides=null)
@@ -58,7 +58,7 @@ namespace Vast {
                 if(ndim > 0) {
                     strides[ndim - 1] = (ssize_t) dtype.elsize;
 
-                    for(var i = (ssize_t) ndim - 2; i >= 0; i --) {
+                    for(var i = ndim - 2; i >= 0; i --) {
                         strides[i] = strides[i+1] * (ssize_t) shape[i+1];
                     }
                 }
@@ -93,13 +93,20 @@ namespace Vast {
 
         public Array.range(TypeDescr dtype, ssize_t start, ssize_t end, ssize_t step=1)
         {
-            size_t shape[1] = {(end - start) / step};
+            ssize_t size = (end - start) / step;
+
+            message("%td", size);
+            assert(size >= 0);
+
+            size_t shape[1] = {(size_t)size};
+            
             this.empty(dtype, shape);
             unowned CastFunction cast = TypeFactory.find_cast(Vast.dtype("i8"), dtype, CastStyle.UNSAFE);
 
             int64 i = (int64) start;
 
             foreach(var p in this) {
+                message("%td", i);
                 cast(&i, p);
                 i += step;
             }
@@ -110,7 +117,7 @@ namespace Vast {
             return new ArrayIterator(this);
         }
 
-        public new Array get_item(Slice [] index) throws IndexError
+        public Array view(Slice [] index) throws IndexError
         {
             var slices = Slice.indices(index, this);
 
@@ -133,7 +140,33 @@ namespace Vast {
             return result;
         }
 
-        public void * get_pointer(ssize_t [] index)
+        public Array reshape(size_t [] shape)
+        {
+            var result = new Array.full(shape.length, this.dtype, shape);
+            /*FIXME: this is wrong if the array has non-contignous strides */
+            /* we shall check if the dimensions are dense by comparing shape and strides */
+            /* dense dimensions can be reshaped ?*/
+            result.base = this;
+            result.data = data;
+            return result;
+        }
+
+        public Array transpose(int [] index)
+        {
+            var shape = new size_t [this.ndim];
+            var strides = new ssize_t [this.ndim];
+            for(var i = 0; i < this.ndim; i ++)
+            {
+                shape[i] = this.shape[index[i]];
+                strides[i] = this.strides[index[i]];
+            }
+            var result = new Array.full(this.ndim, this.dtype, shape, strides);
+            result.base = this;
+            result.data = data;
+            return result; 
+        }
+
+        public void * peek(ssize_t [] index)
         {
             assert(index.length == this.ndim);
             ssize_t offset = 0;
@@ -151,7 +184,6 @@ namespace Vast {
                     );
             }
             var result = new Array.empty(dtype, this._shape[0:this.ndim]);
-            message(result.size.to_string());
             var i1 = this.iterator();
             var i2 = result.iterator();
             while(i1.next() && i2.next()) {
