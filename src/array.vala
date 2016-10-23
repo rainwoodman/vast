@@ -1,6 +1,6 @@
 namespace Vast {
 
-    errordomain IndexError {
+    public errordomain IndexError {
         OUT_OF_BOUNDS,
     }
     public struct Slice {
@@ -12,7 +12,7 @@ namespace Vast {
             this.end = end;
             this.step = step;
         }
-        public static Slice [] index(Slice [] index, Array array) throws IndexError {
+        public static Slice [] indices(Slice [] index, Array array) throws IndexError {
             var result = new Slice[array.ndim];
             for(var i = 0; i < array.ndim; i ++) {
                 if(i < index.length)
@@ -65,19 +65,74 @@ namespace Vast {
             get {
                 return _shape;
             }
-            construct {}
+            construct {
+                for(var i = 0; i < this.ndim; i ++) {
+                    _shape[i] = value[i];
+                }
+            }
         }
         [CCode (has_array_length = false) ]
         public ssize_t [] strides {
             get {
                 return _strides;
             }
-            construct {}
+            construct {
+                for(var i = 0; i < this.ndim; i ++) {
+                    _strides[i] = value[i];
+                }
+            }
         }
         size_t _shape[32];
         ssize_t _strides[32];
 
-        public Array get(Slice [] index)
+        public size_t size {get; construct; }
+        public void * data {get; set; }
+        public Object base {get; set; }
+
+        construct {
+            this.size = 1;
+            for(var i = 0; i < ndim; i ++) {
+                this.size *= this.shape[i];
+            }
+        }
+
+        public Array.full(size_t ndim,
+                TypeDescr dtype,
+                [CCode (has_array_length = false)]
+                size_t [] shape, 
+                [CCode (has_array_length = false)]
+                ssize_t [] strides)
+        {
+            base(ndim : ndim, dtype : dtype,
+                shape : shape, strides : strides
+                );
+        }
+                
+        ~Array() {
+            if(self.@base == null) {
+                delete this.data;
+            }
+        }
+
+        public Array.empty_with_strides(TypeDescr dtype, size_t [] shape, ssize_t [] strides)
+        {
+            this.full(shape.length, dtype, shape, strides);
+
+            this.data = (void*) new uint8[dtype.elsize * this.size];
+        }
+        public Array.empty(TypeDescr dtype, size_t [] shape)
+        {
+            var strides = new ssize_t [shape.length];
+
+            strides[shape.length - 1] = (ssize_t) dtype.elsize;
+
+            for(var i = strides.length - 2; i >= 0; i --) {
+                strides[i] = strides[i+1] * (ssize_t) shape[i+1];
+            }
+            this.empty_with_strides(dtype, shape, strides);
+        }
+
+        public new Array get(Slice [] index) throws IndexError
         {
             var slices = Slice.indices(index, this);
 
@@ -94,9 +149,9 @@ namespace Vast {
             }
 
             var data = (void*) (((uint8*) this.data) + offset);
-            var result = new Array.full(this.ndim, this.dtype, this.shape, this.strides, data);
+            var result = new Array.full(this.ndim, this.dtype, this.shape, this.strides);
             result.base = this;
-
+            result.data = data;
             return result;
         }
 
