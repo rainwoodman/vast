@@ -143,6 +143,20 @@ namespace Vast {
             this.base = null;
         }
 
+        public Array.range(TypeDescr dtype, ssize_t start, ssize_t end, ssize_t step=1)
+        {
+            size_t shape[1] = {(end - start) / step};
+            this.empty(dtype, shape);
+            unowned CastFunction cast = TypeFactory.find_cast(Vast.dtype("i8"), dtype, CastStyle.UNSAFE);
+
+            int64 i = (int64) start;
+
+            foreach(var p in this) {
+                cast(&i, p);
+                i += step;
+            }
+        }
+
         public ArrayIterator iterator()
         {
             return new ArrayIterator(this);
@@ -192,24 +206,18 @@ namespace Vast {
             message(result.size.to_string());
             var i1 = this.iterator();
             var i2 = result.iterator();
-            while(!i1.ended) {
+            while(i1.next() && i2.next()) {
                 cast(i1.get(), i2.get());
-                i1.next();
-                i2.next();
             }
             return result;
         }
         public string to_string() {
             var sb = new StringBuilder();
-/*
-            for(var i = this.iterator();!i.ended; i.next()) {
-                var p = i.get();
-                sb.append_printf("%s ", this.dtype.format(p));
-            }
-*/
+            sb.append("[ ");
             foreach(var p in this) {
                 sb.append_printf("%s ", this.dtype.format(p));
             }
+            sb.append("]");
             return sb.str;
         }
     }

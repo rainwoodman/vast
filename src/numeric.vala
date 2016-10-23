@@ -1,6 +1,83 @@
 namespace Vast {
     public class Numeric {
 
+        /* safe */
+        private static void f4_to_f8(float * from, double * to) { *to = * from; }
+        private static void i4_to_i8(int32 * from, int64 * to) { *to = * from; }
+        private static void u4_to_i8(uint32 * from, int64 * to) { *to = * from; }
+        private static void i4_to_f8(int32 * from, double * to) { *to = * from; }
+        private static void u4_to_f8(uint32 * from, double * to) { *to = * from; }
+        private static void u4_to_u8(uint32 * from, uint64 * to) { *to = *from; }
+
+        private static void register_safe_casts() {
+
+            TypeFactory.register_cast(dtype("f4"), dtype("f8"), f4_to_f8, CastStyle.SAFE);
+            TypeFactory.register_cast(dtype("i4"), dtype("i8"), i4_to_i8, CastStyle.SAFE);
+            TypeFactory.register_cast(dtype("u4"), dtype("i8"), u4_to_i8, CastStyle.SAFE);
+            TypeFactory.register_cast(dtype("i4"), dtype("f8"), i4_to_f8, CastStyle.SAFE);
+            TypeFactory.register_cast(dtype("u4"), dtype("f8"), u4_to_f8, CastStyle.SAFE);
+            TypeFactory.register_cast(dtype("u4"), dtype("u8"), u4_to_u8, CastStyle.SAFE);
+        }
+
+        /* unsafe, same class */
+
+        private static void i8_to_i4(int64 * from, int32 * to) { *to = *from; }
+        private static void u8_to_u4(uint64 * from, uint32 * to) { *to = *from; }
+        private static void f8_to_f4(double * from, float * to) { *to = *from; }
+
+        private static void register_unsafe_casts1() {
+            TypeFactory.register_cast(dtype("i8"), dtype("i4"), i8_to_i4, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("u8"), dtype("u4"), u8_to_u4, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("f8"), dtype("f4"), f8_to_f4, CastStyle.UNSAFE);
+        }
+
+        /* unsafe, loosing precision */
+        private static void i8_to_f8( int64 * from, double * to) { *to = *from; }
+        private static void u8_to_f8(uint64 * from, double * to) { *to = *from; }
+        private static void i8_to_f4( int64 * from,  float * to) { *to = *from; }
+        private static void u8_to_f4(uint64 * from,  float * to) { *to = *from; }
+        private static void i4_to_f4( int32 * from,  float * to) { *to = *from; }
+        private static void u4_to_f4(uint32 * from,  float * to) { *to = *from; }
+
+        private static void register_unsafe_casts2() {
+            TypeFactory.register_cast(dtype("i8"), dtype("f8"), i8_to_f8, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("u8"), dtype("f8"), u8_to_f8, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("i8"), dtype("f4"), i8_to_f4, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("u8"), dtype("f4"), u8_to_f4, CastStyle.UNSAFE);
+
+            TypeFactory.register_cast(dtype("i4"), dtype("f4"), i4_to_f4, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("u4"), dtype("f4"), u4_to_f4, CastStyle.UNSAFE);
+        }
+
+
+        /* unsafe, overflow */
+        private static void u8_to_i8(uint64 * from, int64 * to) { *to = *from; }
+        private static void i8_to_u8(int64 * from, uint64 * to) { *to = *from; }
+        private static void f8_to_i8(double * from, int64 * to) { *to = *from; }
+        private static void f4_to_i8(float * from, int64 * to) { *to = *from; }
+        private static void f8_to_u8(double * from, uint64 * to) { *to = *from; }
+        private static void f4_to_u8(float * from, uint64 * to) { *to = *from; }
+
+        private static void u8_to_i4(uint64 * from, int32 * to) { *to = *from; }
+        private static void i8_to_u4(int64 * from, uint32 * to) { *to = *from; }
+        private static void f4_to_i4(float * from, int32 * to) { *to = *from; }
+        private static void f4_to_u4(float * from, uint32 * to) { *to = *from; }
+
+        private static void register_unsafe_casts3() {
+            TypeFactory.register_cast(dtype("u8"), dtype("i8"), u8_to_i8, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("i8"), dtype("u8"), i8_to_u8, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("f8"), dtype("i8"), f8_to_i8, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("f4"), dtype("i8"), f4_to_i8, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("f8"), dtype("u8"), f8_to_u8, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("f4"), dtype("u8"), f4_to_u8, CastStyle.UNSAFE);
+
+            TypeFactory.register_cast(dtype("u8"), dtype("i4"), u8_to_i4, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("i8"), dtype("u4"), i8_to_u4, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("f4"), dtype("i4"), f4_to_i4, CastStyle.UNSAFE);
+            TypeFactory.register_cast(dtype("f4"), dtype("u4"), f4_to_u4, CastStyle.UNSAFE);
+        }
+
+
         public static void init()
         {
             var instance = new Numeric();
@@ -14,10 +91,10 @@ namespace Vast {
             TypeFactory.register_type("u4", new UInt32());
             TypeFactory.register_type("u8", new UInt64());
 
-            TypeFactory.register_cast(dtype("u8"), dtype("u4"), u8_to_u4, CastStyle.UNSAFE);
-            TypeFactory.register_cast(dtype("u4"), dtype("u8"), u4_to_u8, CastStyle.SAFE);
-            TypeFactory.register_cast(dtype("f8"), dtype("f4"), f8_to_f4, CastStyle.UNSAFE);
-            TypeFactory.register_cast(dtype("f4"), dtype("f8"), f4_to_f8, CastStyle.SAFE);
+            register_safe_casts();
+            register_unsafe_casts1();
+            register_unsafe_casts2();
+            register_unsafe_casts3();
         }
 
         private class Float32: TypeDescr
@@ -69,26 +146,5 @@ namespace Vast {
             }
         }
 
-        private static void u8_to_u4(void * from, void * to)
-        {
-
-            *((uint32*) to) = *((uint64*) from);
-        }
-
-        private static void u4_to_u8(void * from, void * to)
-        {
-            *((uint64*) to) = *((uint32*) from);
-        }
-
-        private static void f8_to_f4(void * from, void * to)
-        {
-
-            *((float*) to) = *((double*) from);
-        }
-
-        private static void f4_to_f8(float * from, double * to)
-        {
-            *to = * from;
-        }
     }
 }

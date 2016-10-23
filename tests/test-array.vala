@@ -6,7 +6,7 @@ int main (string[] args) {
 
     message("hello");
 
-    var a = new Vast.Array.zeros(dtype("f4"), new size_t[] {3, 3});
+    var a = new Vast.Array.range(dtype("f4"), 0, 10);
     message(a.to_string());
 
     var b = a.cast(dtype("f8"));
