@@ -25,18 +25,18 @@ namespace Vast {
                 && result[i].end == 0
                 && result[i].step == 0) {
                     result[i].start = 0;
-                    result[i].end = array.shape[i];
+                    result[i].end = (ssize_t) array.shape[i];
                     result[i].step = 1;
                 }
             }
             for(var i = 0; i < array.ndim; i ++) {
-                if(result[i].start < 0) result[i].start += array.shape[i];
-                if(result[i].end < 0) result[i].end == array.shape[i];
+                if(result[i].start < 0) result[i].start += (ssize_t) array.shape[i];
+                if(result[i].end < 0) result[i].end += (ssize_t) array.shape[i];
             }
             for(var i = 0; i < array.ndim; i ++) {
-                if(results[i].start < 0 || results[i].start > array.shape[i]
-                || results[i].end < 0 || results[i].end > array.shape[i]) {
-                    throw new IndexError.OUT_OF_BOUNDS("Slices %s is out of bounds", Slice.v_to_string(result));
+                if(result[i].start < 0 || result[i].start > array.shape[i]
+                || result[i].end < 0 || result[i].end > array.shape[i]) {
+                    throw new IndexError.OUT_OF_BOUNDS("Slices %s is out of bounds", Slice.array_to_string(result));
                 }
             }
             return result;
@@ -109,7 +109,7 @@ namespace Vast {
         }
                 
         ~Array() {
-            if(self.@base == null) {
+            if(this.@base == null) {
                 delete this.data;
             }
         }
