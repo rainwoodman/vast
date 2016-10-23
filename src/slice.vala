@@ -13,6 +13,8 @@ namespace Vast {
             this.has_end = true;
             this.has_start = true;
         }
+
+        /* [:end:step] */
         public Slice.till (ssize_t end, ssize_t step=1) {
             this.start = 0;
             this.end = end;
@@ -21,6 +23,7 @@ namespace Vast {
             this.has_start = false;
         }
 
+        /* [start::step] */
         public Slice.from (ssize_t start, ssize_t step=1) {
             this.start = start;
             this.end = 0;
@@ -28,6 +31,7 @@ namespace Vast {
             this.has_end = false;
             this.has_start = true;
         }
+        /* [::step] */
         public Slice.every (ssize_t step=1) {
             this.start = 0;
             this.end = 0;
