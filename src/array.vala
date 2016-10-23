@@ -88,7 +88,7 @@ namespace Vast {
         ssize_t _strides[32];
 
         public size_t size {get; construct; }
-        public void * data {get; set; }
+        public void * data;
         public Object base {get; set; }
 
         construct {
@@ -100,11 +100,22 @@ namespace Vast {
 
         public Array.full(size_t ndim,
                 TypeDescr dtype,
-                [CCode (array_length = false)]
-                size_t [] shape, 
-                [CCode (array_length = false)]
-                ssize_t [] strides)
+                size_t * shape, 
+                ssize_t * strides=null)
         {
+            var astrides = new ssize_t [ndim];
+
+            if(strides == null) {
+                strides = astrides;
+                if(ndim > 0) {
+                    strides[ndim - 1] = (ssize_t) dtype.elsize;
+
+                    for(var i = (ssize_t) ndim - 2; i >= 0; i --) {
+                        strides[i] = strides[i+1] * (ssize_t) shape[i+1];
+                    }
+                }
+            }
+
             base(ndim : ndim, dtype : dtype,
                 shape : shape, strides : strides
                 );
@@ -116,25 +127,28 @@ namespace Vast {
             }
         }
 
-        public Array.empty_with_strides(TypeDescr dtype, size_t [] shape, ssize_t [] strides)
-        {
-            this.full(shape.length, dtype, shape, strides);
-
-            this.data = (void*) new uint8[dtype.elsize * this.size];
-        }
         public Array.empty(TypeDescr dtype, size_t [] shape)
         {
-            var strides = new ssize_t [shape.length];
-
-            strides[shape.length - 1] = (ssize_t) dtype.elsize;
-
-            for(var i = strides.length - 2; i >= 0; i --) {
-                strides[i] = strides[i+1] * (ssize_t) shape[i+1];
-            }
-            this.empty_with_strides(dtype, shape, strides);
+            this.full(shape.length, dtype, shape, null);
+            this.data = (void*) new uint8[dtype.elsize * this.size];
+            this.base = null;
         }
-/*
-        public new Array get(Slice [] index) throws IndexError
+
+        public Array.zeros(TypeDescr dtype, size_t [] shape)
+        {
+            this.full(shape.length, dtype, shape, null);
+            size_t bytes = dtype.elsize * this.size;
+            this.data = (void*) new uint8[bytes];
+            Memory.set(this.data, 0, bytes);
+            this.base = null;
+        }
+
+        public ArrayIterator iterator()
+        {
+            return new ArrayIterator(this);
+        }
+
+        public new Array get_item(Slice [] index) throws IndexError
         {
             var slices = Slice.indices(index, this);
 
@@ -156,7 +170,7 @@ namespace Vast {
             result.data = data;
             return result;
         }
-*/
+
         public void * get_pointer(ssize_t [] index)
         {
             assert(index.length == this.ndim);
@@ -167,19 +181,15 @@ namespace Vast {
             return (void*) (((uint8*) this.data) + offset);
         }
 
-        public ArrayIterator iterator()
-        {
-            return new ArrayIterator(this);
-        }
-
         public Array cast(TypeDescr dtype) throws CastError {
-            var cast = TypeFactory.find_cast(this.dtype, dtype);
+            unowned CastFunction cast = TypeFactory.find_cast(this.dtype, dtype);
             if(cast == null) {
                 throw new CastError.UNSUPPORTED("from %s to %s is unsupported",
                             this.dtype.to_string(), dtype.to_string()
                     );
             }
-            var result = new Array.empty(dtype, this._shape);
+            var result = new Array.empty(dtype, this._shape[0:this.ndim]);
+            message(result.size.to_string());
             var i1 = this.iterator();
             var i2 = result.iterator();
             while(!i1.ended) {
@@ -190,9 +200,15 @@ namespace Vast {
             return result;
         }
         public string to_string() {
-            StringBuilder sb = new StringBuilder();
-            foreach(var i in this) {
-                sb.append_printf("%s ", this.dtype.format(i));
+            var sb = new StringBuilder();
+/*
+            for(var i = this.iterator();!i.ended; i.next()) {
+                var p = i.get();
+                sb.append_printf("%s ", this.dtype.format(p));
+            }
+*/
+            foreach(var p in this) {
+                sb.append_printf("%s ", this.dtype.format(p));
             }
             return sb.str;
         }

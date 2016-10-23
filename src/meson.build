@@ -8,7 +8,7 @@ vast_sources = [
 
 vast_lib = library('vast-1.0', vast_sources,
                     vala_args: ['--vapidir=' + meson.current_source_dir()],
-                    c_args: ['-g', '-O0'],
+                    c_args: ['-g', '-O0', '-Wno-unused'],
                     dependencies: [glib, gobject, gmodule, gio],
                     install: true)
 
