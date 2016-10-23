@@ -3,6 +3,9 @@ namespace Vast {
     public errordomain IndexError {
         OUT_OF_BOUNDS,
     }
+    public errordomain CastError {
+        UNSUPPORTED,
+    }
     public struct Slice {
         ssize_t start;
         ssize_t end;
@@ -53,6 +56,7 @@ namespace Vast {
                 sb.append(", ");
             }
             sb.append("]");
+            return sb.str;
         }
     }
 
@@ -60,8 +64,7 @@ namespace Vast {
     {
         public size_t ndim {get; construct; }
         public TypeDescr dtype {get; construct; }
-        [CCode (has_array_length = false) ]
-        public size_t [] shape {
+        public size_t * shape {
             get {
                 return _shape;
             }
@@ -71,8 +74,7 @@ namespace Vast {
                 }
             }
         }
-        [CCode (has_array_length = false) ]
-        public ssize_t [] strides {
+        public ssize_t * strides {
             get {
                 return _strides;
             }
@@ -98,9 +100,9 @@ namespace Vast {
 
         public Array.full(size_t ndim,
                 TypeDescr dtype,
-                [CCode (has_array_length = false)]
+                [CCode (array_length = false)]
                 size_t [] shape, 
-                [CCode (has_array_length = false)]
+                [CCode (array_length = false)]
                 ssize_t [] strides)
         {
             base(ndim : ndim, dtype : dtype,
@@ -131,7 +133,7 @@ namespace Vast {
             }
             this.empty_with_strides(dtype, shape, strides);
         }
-
+/*
         public new Array get(Slice [] index) throws IndexError
         {
             var slices = Slice.indices(index, this);
@@ -154,7 +156,7 @@ namespace Vast {
             result.data = data;
             return result;
         }
-
+*/
         public void * get_pointer(ssize_t [] index)
         {
             assert(index.length == this.ndim);
@@ -165,6 +167,28 @@ namespace Vast {
             return (void*) (((uint8*) this.data) + offset);
         }
 
+        public ArrayIterator iterator()
+        {
+            return new ArrayIterator(this);
+        }
+
+        public Array cast(TypeDescr dtype) throws CastError {
+            var cast = TypeFactory.find_cast(this.dtype, dtype);
+            if(cast == null) {
+                throw new CastError.UNSUPPORTED("from %s to %s is unsupported",
+                            this.dtype.to_string(), dtype.to_string()
+                    );
+            }
+            var result = new Array.empty(dtype, this._shape);
+            var i1 = this.iterator();
+            var i2 = result.iterator();
+            while(!i1.ended) {
+                cast(i1.get(), i2.get());
+                i1.next();
+                i2.next();
+            }
+            return result;
+        }
         public string to_string() {
             StringBuilder sb = new StringBuilder();
             foreach(var i in this) {
