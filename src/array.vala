@@ -117,9 +117,9 @@ namespace Vast {
             return new ArrayIterator(this);
         }
 
-        public Array view(Slice [] index) throws IndexError
+        public Array view(ArraySlice [] index) throws IndexError
         {
-            var slices = Slice.indices(index, this);
+            var slices = ArraySlice.indices(index, this);
 
             assert(slices.length == this.ndim);
             
