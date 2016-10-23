@@ -5,13 +5,7 @@ namespace Vast {
         UNSAFE,
     }
 
-    public struct CastOperand
-    {
-        void * ptr;
-        ssize_t step;
-    }
-
-    public delegate void CastFunction(CastOperand from, CastOperand to, size_t N);
+    public delegate void CastFunction(void * from, void * to);
 
     public class TypeFactory : Object
     {

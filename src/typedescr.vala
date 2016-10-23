@@ -1,4 +1,7 @@
 namespace Vast {
+    public errordomain ParseError {
+        BAD_FORMAT;
+    }
     public class TypeDescr : Object
     {
         /**
@@ -22,14 +25,25 @@ namespace Vast {
             }
             this.elsize = elsize;
             this.id = -1;
-            this.name = "UnnamedType";
+            this.name = null;
         }
 
         public virtual string to_string()
         {
-            return "TypeDescr(name=%s, id=%d, shape.length=%d, elsize=%td)"
-             .printf(this.name, this.id, this.shape.length, this.elsize);
+            if(this.name != null) {
+                return this.name;
+            }
+            return "TypeDescr(id=%d, shape.length=%d, elsize=%td)"
+             .printf(this.id, this.shape.length, this.elsize);
+        }
+
+        public virtual string format(void * ptr)
+        {
+            return "";
+        }
+        public virtual void parse(string str, void * ptr) throws ParseError
+        {
+            return;
         }
     }
-
 }
