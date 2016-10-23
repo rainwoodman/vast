@@ -1,5 +1,10 @@
 vast_sources = [
-    'vast.vala' ]
+    'vast.vala',
+    'typefactory.vala',
+    'typedescr.vala',
+    'numeric.vala',
+
+     ]
 vast_lib = library('vast-1.0', vast_sources,
                     vala_args: ['--vapidir=' + meson.current_source_dir()],
                     dependencies: [glib, gobject, gmodule, gio],

@@ -1,5 +1,15 @@
-using GLib;
 namespace Vast {
+
+    public void init()
+    {
+        TypeFactory.init();
+        Numeric.init();
+    }
+
+    public TypeDescr dtype(string str)
+    {
+        return TypeFactory.from_string(str);
+    }
 
     public class Function : GLib.Object
     {
@@ -8,8 +18,9 @@ namespace Vast {
 
         }
 
-        virtual public get_gradient() {
-
+        public virtual Function? get_gradient()
+        {
+            return null;
         }
     }
 
