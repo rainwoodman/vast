@@ -58,6 +58,24 @@ namespace Vast {
 
     public class Array : Object
     {
+        public size_t ndim {get; construct; }
+        public TypeDescr dtype {get; construct; }
+        [CCode (has_array_length = false) ]
+        public size_t [] shape {
+            get {
+                return _shape;
+            }
+            construct {}
+        }
+        [CCode (has_array_length = false) ]
+        public ssize_t [] strides {
+            get {
+                return _strides;
+            }
+            construct {}
+        }
+        size_t _shape[32];
+        ssize_t _strides[32];
 
         public Array get(Slice [] index)
         {
