@@ -227,8 +227,6 @@ namespace Vast {
         {
             this.array = array;
             this.cursor = new ssize_t[array.ndim];
-            this.ended = false;
-            this.started = false;
             this.reset();
         }
 
