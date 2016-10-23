@@ -165,7 +165,7 @@ namespace Vast {
             }
 
             var data = (void*) (((uint8*) this.data) + offset);
-            var result = new Array.full(this.ndim, this.dtype, this.shape, this.strides);
+            var result = new Array.full(this.ndim, this.dtype, shape, strides);
             result.base = this;
             result.data = data;
             return result;
