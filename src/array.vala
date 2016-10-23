@@ -222,17 +222,22 @@ namespace Vast {
         private ssize_t offset;
 
         public bool ended;
-
+        private bool started;
         public ArrayIterator(Array array)
         {
             this.array = array;
             this.cursor = new ssize_t[array.ndim];
             this.ended = false;
+            this.started = false;
             this.reset();
         }
 
         public bool next()
         {
+            if(! this.started) {
+                this.started = true;
+                return !this.ended;
+            }
             ssize_t dim = (ssize_t) array.ndim - 1;
             this.cursor[dim] ++;
             while(dim >= 0 && this.cursor[dim] == array.shape[dim]) {
@@ -258,6 +263,7 @@ namespace Vast {
         public void reset()
         {
             this.ended = false;
+            this.started = false;
             var zero = new ssize_t[array.ndim];
             for(var i = 0; i < zero.length; i ++) {
                 zero[i] = 0;
