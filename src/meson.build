@@ -3,6 +3,7 @@ vast_sources = [
     'typefactory.vala',
     'typedescr.vala',
     'numeric.vala',
+    'array.vala',
 
      ]
 vast_lib = library('vast-1.0', vast_sources,

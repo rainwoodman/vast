@@ -1,26 +1,16 @@
-using GLib;
-
-/*
 namespace Vast {
-
-    public class TypeDescr : GLib.Object
-    {
-        public GLib.Type type;
-        public size_t shape[];
-        public size_t elsize {
-            get() {
-                return 0;
-            }
-        }
-    }
-
-    public class ArrayObject : GLib.Object
+    public class Array: Object
     {
         public TypeDescr dtype;
-        public void * data;
-        public GLib.Object? base;
 
+        public Object? base;
         
+        public void * data;
+
+        public Array(TypeDescr dtype, size_t [] shape)
+        {
+        }
+
     }
 
     public class UFunc : GLib.Object
@@ -28,4 +18,3 @@ namespace Vast {
 
     }
 }
-*/

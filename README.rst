@@ -30,3 +30,8 @@ On Fedora, the following commands shall work
     meson ..
     ninja-build
 
+VALA
+====
+
+- To declare an array inline, use `new int[]{1, 2, 3, }`.
+
