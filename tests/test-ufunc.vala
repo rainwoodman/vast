@@ -9,10 +9,10 @@ int main (string[] args) {
     var mul = ufunc("mul");
 
     var src = range(0, 10, 1, dtype("f8"));
-    var factor = zeros(new size_t [0], dtype("f8"));
-    var dest = empty({(size_t)10, });
+    var factor = zeros({}, dtype("f8"));
+    var dest = empty({10, });
 
-    * (double*) src.get_dataptr({1}) = 3.0;
+    * (double*) src.get_dataptr({ 1, }) = 3.0;
 
     * (double*) factor.get_dataptr() = Math.PI / 10.0;
 
