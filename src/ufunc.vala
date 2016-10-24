@@ -29,7 +29,6 @@ namespace Vast {
         }
 
         public void register(TypeDescr [] dtype_in, TypeDescr [] dtype_out, UFunction func)
-            throws UFuncError
         {
             UFunctionHandler us = UFunctionHandler();
             us.dtype_in = dtype_in;
@@ -47,7 +46,6 @@ namespace Vast {
 
         private UFunctionHandler? find_ufunc(TypeDescr [] dtype_in, TypeDescr [] dtype_out)
         {
-            UFunctionHandler? found = null;
             
             foreach(var entry in list) {
                 if(!compare_dtypes(dtype_in, entry.dtype_in)) continue;

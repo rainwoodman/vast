@@ -34,7 +34,7 @@ namespace Vast {
         if (_dtype == null) {
             _dtype = Vast.dtype("f8");
         }
-        return new Array.empty(dtype, shape);
+        return new Array.empty(_dtype, shape);
     }
 
     public Array zeros(size_t [] shape, TypeDescr? dtype=null)
@@ -43,7 +43,7 @@ namespace Vast {
         if (_dtype == null) {
             _dtype = Vast.dtype("f8");
         }
-        return new Array.zeros(dtype, shape);
+        return new Array.zeros(_dtype, shape);
     }
 
     public class Function : GLib.Object

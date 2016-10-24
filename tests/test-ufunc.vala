@@ -6,8 +6,8 @@ int main (string[] args) {
 
     message("hello");
     var sin = ufunc("sin");
-    var src = new Vast.Array.range(dtype("f8"), 0, 10);
-    var dest = new Vast.Array.empty(dtype("f8"), {(size_t)10, });
+    var src = range(0, 10, 1, dtype("f8"));
+    var dest = empty({(size_t)10, });
 
     sin.apply({src}, {dest});
 
