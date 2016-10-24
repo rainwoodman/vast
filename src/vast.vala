@@ -4,11 +4,17 @@ namespace Vast {
     {
         TypeFactory.init();
         Numeric.init();
+        UFuncFactory.init();
     }
 
     public TypeDescr dtype(string str)
     {
         return TypeFactory.from_string(str);
+    }
+
+    public UFunc ufunc(string str)
+    {
+        return UFuncFactory.from_string(str);
     }
 
     public class Function : GLib.Object

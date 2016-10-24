@@ -15,3 +15,9 @@ test('test-array', executable('test-array', 'test-array.vala',
                           c_args: ['-g', '-O0', '-Wno-unused'],
                           dependencies: [glib, gobject, gmodule, gio, vast]),
      args: '')
+
+test('test-ufunc', executable('test-ufunc', 'test-ufunc.vala',
+                          vala_args: ['--vapidir=' + meson.current_source_dir() + '/../src'],
+                          c_args: ['-g', '-O0', '-Wno-unused'],
+                          dependencies: [glib, gobject, gmodule, gio, vast]),
+     args: '')

@@ -6,12 +6,13 @@ vast_sources = [
     'array.vala',
     'arrayiterator.vala',
     'arrayslice.vala',
+    'ufunc.vala',
      ]
 
 vast_lib = library('vast-1.0', vast_sources,
                     vala_args: ['--vapidir=' + meson.current_source_dir()],
                     c_args: ['-g', '-O0', '-Wno-unused'],
-                    dependencies: [glib, gobject, gmodule, gio],
+                    dependencies: [glib, gobject, gmodule, gio, math],
                     install: true)
 
 vast = declare_dependency(link_with: vast_lib,

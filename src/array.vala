@@ -191,6 +191,7 @@ namespace Vast {
             }
             return result;
         }
+
         public string to_string() {
             var sb = new StringBuilder();
             sb.append("[ ");
@@ -202,9 +203,4 @@ namespace Vast {
         }
     }
 
-    public class UFunc : Object
-    {
-        size_t nin;
-        size_t nout;
-    }
 }
