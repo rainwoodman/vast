@@ -7,54 +7,6 @@ namespace Vast {
 
     public delegate void UFunction (void ** input, void** output);
     
-    public class MultiIterator
-    {
-        ArrayIterator [] iterators;
-        void * [] dataptrs;
-
-        public MultiIterator(Array [] array)
-        {
-            iterators = new ArrayIterator [array.length];
-            for(var i = 0; i < array.length; i ++) {
-                iterators[i] = array[i].iterator();
-            }
-            dataptrs = new void* [array.length];
-        }
-
-        public bool next()
-        {
-            var flag = true;
-            for(var i = 0; i < iterators.length; i ++) {
-                flag &= iterators[i].next();
-            }
-            return flag;
-        }
-
-        public void ** get()
-        {
-            for(var i = 0; i < iterators.length; i ++) {
-                dataptrs[i] = iterators[i].get();
-            }
-            return dataptrs;
-        }
-    }
-
-    private TypeDescr [] get_dtypes(Array [] array)
-    {
-        var result = new TypeDescr[array.length];
-        for(var i = 0; i < array.length; i ++) {
-            result[i] = array[i].dtype;
-        }
-        return result;
-    }
-    private bool compare_dtypes(TypeDescr [] d1, TypeDescr [] d2)
-    {
-        for(var i = 0; i < d1.length; i ++) {
-            if(d1[i] != d2[i]) return false;
-        }
-        return true;
-    }
-
     public class UFunc : Object
     {
         public string? name;
@@ -123,58 +75,53 @@ namespace Vast {
         }
     }
 
-    private class Sin : UFunc
+    private class MultiIterator
     {
-        construct {
-            register({dtype("f8")}, {dtype("f8")}, sin_dd);
-            register({dtype("f4")}, {dtype("f4")}, sin_ff);
+        ArrayIterator [] iterators;
+        void * [] dataptrs;
+
+        public MultiIterator(Array [] array)
+        {
+            iterators = new ArrayIterator [array.length];
+            for(var i = 0; i < array.length; i ++) {
+                iterators[i] = array[i].iterator();
+            }
+            dataptrs = new void* [array.length];
         }
 
-        public Sin()
+        public bool next()
         {
-            base(1, 1);
+            var flag = true;
+            for(var i = 0; i < iterators.length; i ++) {
+                flag &= iterators[i].next();
+            }
+            return flag;
         }
 
-        private void sin_dd(void ** from, void ** to)
+        public void ** get()
         {
-            *(double*)(to[0]) = Math.sin(*(double*)(from[0]));
-        }
-
-        private void sin_ff(void ** from, void ** to)
-        {
-            *(float*)(to[0]) = Math.sin(*(float*)(from[0]));
+            for(var i = 0; i < iterators.length; i ++) {
+                dataptrs[i] = iterators[i].get();
+            }
+            return dataptrs;
         }
     }
 
-    public class UFuncFactory : Object
+    private TypeDescr [] get_dtypes(Array [] array)
     {
-        
-        static HashTable<string, UFunc> table;
-
-        static construct {
-            table = new HashTable<string, UFunc>(str_hash, str_equal);
+        var result = new TypeDescr[array.length];
+        for(var i = 0; i < array.length; i ++) {
+            result[i] = array[i].dtype;
         }
-
-        public static void init() {
-            /* initializes the class */
-            var o = new UFuncFactory();
-            assert (o != null);
-
-            register_ufunc("sin", new Sin());
-        }
-
-        public static void register_ufunc(string str, UFunc ufunc)
-        {
-            table.insert(str, ufunc);
-            ufunc.name = str;
-        } 
-
-        public static UFunc from_string(string str)
-        {
-            var item = table.get(str);
-            if(item != null) return item;
-
-            assert_not_reached();
-        }
+        return result;
     }
+    private bool compare_dtypes(TypeDescr [] d1, TypeDescr [] d2)
+    {
+        for(var i = 0; i < d1.length; i ++) {
+            if(d1[i] != d2[i]) return false;
+        }
+        return true;
+    }
+
+
 }

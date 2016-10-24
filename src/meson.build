@@ -7,6 +7,8 @@ vast_sources = [
     'arrayiterator.vala',
     'arrayslice.vala',
     'ufunc.vala',
+    'ufuncfactory.vala',
+    'umath.vala',
      ]
 
 vast_lib = library('vast-1.0', vast_sources,
