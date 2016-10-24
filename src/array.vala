@@ -166,8 +166,12 @@ namespace Vast {
             return result; 
         }
 
-        public void * peek(ssize_t [] index)
+        public void * get_dataptr(ssize_t []? index=null)
         {
+            if(index == null) {
+                return this.data;
+            }
+
             assert(index.length == this.ndim);
             ssize_t offset = 0;
             for(var i = 0; i < this.ndim; i ++) {
@@ -194,11 +198,13 @@ namespace Vast {
 
         public string to_string() {
             var sb = new StringBuilder();
-            sb.append("[ ");
+            if(ndim > 0)
+                sb.append("[ ");
             foreach(var p in this) {
                 sb.append_printf("%s ", this.dtype.format(p));
             }
-            sb.append("]");
+            if(ndim > 0)
+                sb.append("]");
             return sb.str;
         }
     }

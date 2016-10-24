@@ -22,6 +22,11 @@ namespace Vast {
                 this.started = true;
                 return !this.ended;
             }
+            if(this.array.ndim == 0) {
+                /* special case for scalar. This could have been merged with below? */
+                this.ended = true;
+                return !this.ended;
+            }
             ssize_t dim = (ssize_t) array.ndim - 1;
             this.cursor[dim] ++;
             while(dim >= 0 && this.cursor[dim] == array.shape[dim]) {
@@ -62,10 +67,10 @@ namespace Vast {
                 this.cursor[i] = cursor[i];
                 this.offset += this.cursor[i] * this.array.strides[i];
             }
-            this.ended = true; 
+            this.ended = false; 
             for(var i = 0; i < cursor.length; i ++) {
-                if(cursor[i] < array.shape[i]) {
-                    this.ended = false;
+                if(cursor[i] >= array.shape[i]) {
+                    this.ended = true;
                     break;
                 }
             }

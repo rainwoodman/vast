@@ -54,7 +54,7 @@ namespace Vast {
             }
             return null;
         }
-        public void apply(Array [] from, Array [] to) throws UFuncError
+        public void apply(Array [] from, Array [] to) throws UFuncError, BroadcastError
         {
             assert (from.length == nin);
             assert (to.length == nout);
@@ -64,7 +64,8 @@ namespace Vast {
             if(handler == null)
                 throw new UFuncError.UNSUPPORTED("No suitable ufunc is found for %s", this.to_string());
 
-            var ifrom = new MultiIterator(from);
+            var bfrom = broadcast(from);
+            var ifrom = new MultiIterator(bfrom);
             var ito = new MultiIterator(to);
 
             while(ifrom.next() && ito.next()) {
@@ -72,7 +73,60 @@ namespace Vast {
             }
         }
     }
+    public errordomain BroadcastError {
+        INCOMPATIBLE_SHAPE,
+    }
+    private string format_shapes(Array [] src) {
+        var sb = new StringBuilder();
+        for(var i = 0; i < src.length; i ++) {
+            sb.append("[");
+            for(var d = 0; d < src[i].ndim; d ++) {
+                sb.append_printf("%td, ", src[i].shape[d]);
+            }
+            sb.append("]");
+            sb.append(" ");
+        }
+        return sb.str;
+    }
 
+    private Array [] broadcast(Array [] src) throws BroadcastError
+    {
+        var dst = new Array [src.length];
+        var max_ndim = 0;
+        for(var i = 0; i < src.length; i ++) {
+            if(max_ndim < src[i].ndim) max_ndim = src[i].ndim;
+        }
+        var shape = new size_t [max_ndim];
+        for(var d = 0; d < max_ndim; d ++) {
+            shape[d] = 1;
+        }
+        for(var i = 0; i < src.length; i ++) {
+            for(var d = 0; d < src[i].ndim; d ++) {
+                if(shape[d] == 1) {
+                    shape[d] = src[i].shape[d];
+                    continue;
+                }
+                if(src[i].shape[d] != shape[d]) {
+                    throw new BroadcastError.INCOMPATIBLE_SHAPE("shape is incompatible: %s", format_shapes(src));
+                }
+            }
+        }
+
+        for(var i = 0; i < src.length; i ++) {
+            var strides = new ssize_t [max_ndim];
+            for(var d = 0; d < max_ndim; d ++) {
+                if(d < src[i].ndim && shape[d] == src[i].shape[d]) {
+                    strides[d] = src[i].strides[d];
+                } else {
+                    strides[d] = 0;
+                }
+            }
+            dst[i] = new Array.full(max_ndim, src[i].dtype, shape, strides);
+            dst[i].data = src[i].data;
+            dst[i].base = src[i];
+        }
+        return dst;
+    }
     private class MultiIterator
     {
         ArrayIterator [] iterators;
