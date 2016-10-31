@@ -99,6 +99,10 @@ public class Array<ScalarType>: Object
 
         return (ScalarType) (this.data + p);
     }
+    public ArrayIterator<ScalarType> iterator()
+    {
+        return new ArrayIterator<ScalarType>(this);
+    }
 
     public void
     set_scalar(ssize_t [] index, ScalarType val)
@@ -128,7 +132,5 @@ public class Array<ScalarType>: Object
     }
 
 }
-
-
 
 }

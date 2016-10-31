@@ -14,6 +14,11 @@ int main (string[] args) {
     for(var i = 0; i < 10; i ++) {
         message("i = %d a[i] = %g b[i] = %g", i, a.get_scalar({i}), b.get_scalar({i}));
     }
-
+    var iter = a.iterator();
+    while(iter.next()) {
+        message("%g", iter.get());
+        iter.set((double) 0);
+        message("%g", iter.get());
+    }
     return 0;
 }

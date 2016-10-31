@@ -1,5 +1,7 @@
 vast_sources = [
-    'vast.vala',
+    'array.vala',
+    'arrayiterator.vala',
+    'function.vala',
      ]
 
 vast_lib = library('vast-1.0', vast_sources,
