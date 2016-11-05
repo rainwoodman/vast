@@ -54,37 +54,23 @@ public class Array<T>: Object
         }
     }
 
-    private bool _is_view;
+    public Bytes data { get; construct; }
 
-    private int8 * _data;
-
-    public int8 * data {
-        get {
-            return _data;
-        }
-        construct {
-            if (value == null) {
-                _data = new int8[this.size * this.scalar_size];
-                _is_view = false;
-            } else {
-                _data    = value;
-                _is_view = true;
-            }
-        }
-    }
-
-    ~Array()
+    private static inline size_t
+    _size_from_shape (size_t[] shape)
     {
-        if (!_is_view) {
-            delete data;
+        size_t size = 1;
+        for(var i = 0; i < shape.length; i ++) {
+            size *= shape[i];
         }
+        return size;
     }
 
     public Array (size_t     scalar_size,
                   size_t[]   shape,
                   [CCode (array_length=false)]
                   ssize_t[]? strides = null,
-                  void*      data    = null)
+                  Bytes?     data    = null)
     {
         base(
             scalar_type : typeof(T),
@@ -92,7 +78,7 @@ public class Array<T>: Object
             ndim : shape.length,
             shape : shape,
             strides : strides,
-            data : data
+            data : data ?? new Bytes (new uint8[scalar_size * _size_from_shape (shape)])
             );
     }
 
@@ -109,7 +95,7 @@ public class Array<T>: Object
     public unowned T
     get_scalar(ssize_t [] index)
     {
-        return (T) (_data + _offset_for_index (index));
+        return (T) ((uint8*) _data.get_data () + _offset_for_index (index));
     }
 
     public ArrayIterator<T> iterator()
@@ -123,7 +109,27 @@ public class Array<T>: Object
         /* What is the best way of doing this the vala way?
          * get triggers a dup function, but looks like there
          * is no clear way doing lvalue?*/
-        Memory.copy(_data + _offset_for_index (index), val, scalar_size);
+        Memory.copy((uint8*) data.get_data () + _offset_for_index (index), val, scalar_size);
+    }
+
+    private inline size_t[]
+    _shape_from_slice (ssize_t[] from, ssize_t[] to)
+    {
+        var shape = new size_t[ndim];
+        for (int i = 0; i < ndim; i++)
+        {
+            shape[i] = to[i] - from[i];
+        }
+        return shape;
+    }
+
+    public Array<T>
+    slice (ssize_t[] from, ssize_t[] to)
+    {
+        return new Array<T> (scalar_size,
+                                      _shape_from_slice (from, to),
+                                      _strides,
+                                      data.slice ((int) _offset_for_index (from), (int) _offset_for_index (to)));
     }
 
     public string
@@ -133,7 +139,6 @@ public class Array<T>: Object
         sb.append("<Array>");
         sb.append("(");
         sb.append_printf("Type=%s,", this.scalar_type.name());
-        sb.append_printf ("is_view=%s,", this._is_view ? "yes" : "no");
         sb.append_printf("data=%p,", _data);
         sb.append(")");
         return sb.str;

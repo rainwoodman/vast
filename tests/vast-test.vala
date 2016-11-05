@@ -82,6 +82,27 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/slice", () => {
+        var a = new Vast.Array<int64?> (sizeof (int64), {30, 30});
+
+        for (var i = 0; i < 30; i++) {
+            for (var j = 0; j < 30; j++) {
+                a.set_scalar ({i, j}, i * j);
+            }
+        }
+
+        var b = a.slice ({10, 10}, {20, 20});
+        assert (100 == b.get_scalar ({0, 0}));
+        assert (10 == b.shape[0]);
+        assert (10 == b.shape[1]);
+
+        // negative indexing
+        var c = a.slice ({-10, -10}, {-1, -1});
+        assert (400 == c.get_scalar ({0, 0}));
+        assert (9 == c.shape[0]);
+        assert (9 == c.shape[1]);
+    });
+
     Test.add_func ("/array/mapped", () => {
         FileUtils.set_contents ("test", "a");
         MappedFile mapped_file;
@@ -95,7 +116,7 @@ int main (string[] args) {
         var a = new Vast.Array<char?> (sizeof (char),
                                       {1},
                                       null,
-                                      mapped_file.get_contents ());
+                                      mapped_file.get_bytes ());
 
         assert ('a' == a.get_scalar ({0}));
 

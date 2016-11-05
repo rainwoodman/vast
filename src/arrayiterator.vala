@@ -47,11 +47,11 @@ namespace Vast {
         }
 
         public unowned T get() {
-            return (T) (array.data + offset);
+            return (T) ((uint8*) array.data.get_data () + offset);
         }
 
         public void set(T val) {
-            Memory.copy(array.data + offset, val, sizeof(T));
+            Memory.copy((uint8*) array.data.get_data () + offset, val, sizeof(T));
         }
 
         public void reset()
