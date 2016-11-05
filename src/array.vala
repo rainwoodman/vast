@@ -63,9 +63,9 @@ public class Array<ScalarType>: Object
         }
     }
 
-    public Array()
+    public Array(size_t scalar_size, size_t[] shape)
     {
-
+        base (scalar_size: scalar_size, ndim: shape.length, shape: shape, strides: null);
     }
 
     public Array.full(size_t scalar_size,
