@@ -1,6 +1,6 @@
 namespace Vast {
 
-public class Array<ScalarType>: Object
+public class Array<T>: Object
 {
     public Type scalar_type {get; construct;}
 
@@ -87,7 +87,7 @@ public class Array<ScalarType>: Object
                   void*      data    = null)
     {
         base(
-            scalar_type : typeof(ScalarType),
+            scalar_type : typeof(T),
             scalar_size: scalar_size,
             ndim : shape.length,
             shape : shape,
@@ -106,19 +106,19 @@ public class Array<ScalarType>: Object
         return p;
     }
 
-    public unowned ScalarType
+    public unowned T
     get_scalar(ssize_t [] index)
     {
-        return (ScalarType) (_data + _offset_for_index (index));
+        return (T) (_data + _offset_for_index (index));
     }
 
-    public ArrayIterator<ScalarType> iterator()
+    public ArrayIterator<T> iterator()
     {
-        return new ArrayIterator<ScalarType>(this);
+        return new ArrayIterator<T>(this);
     }
 
     public void
-    set_scalar(ssize_t [] index, ScalarType val)
+    set_scalar(ssize_t [] index, T val)
     {
         /* What is the best way of doing this the vala way?
          * get triggers a dup function, but looks like there

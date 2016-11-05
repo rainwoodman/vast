@@ -1,8 +1,8 @@
 namespace Vast {
 
-    public class ArrayIterator<ScalarType>
+    public class ArrayIterator<T>
     {
-        public Array<ScalarType> array;
+        public Array<T> array;
 
         public ssize_t [] cursor;
         private ssize_t offset;
@@ -46,12 +46,12 @@ namespace Vast {
             return !this.ended;
         }
 
-        public unowned ScalarType get() {
-            return (ScalarType) (array.data + offset);
+        public unowned T get() {
+            return (T) (array.data + offset);
         }
 
-        public void set(ScalarType val) {
-            Memory.copy(array.data + offset, val, sizeof(ScalarType));
+        public void set(T val) {
+            Memory.copy(array.data + offset, val, sizeof(T));
         }
 
         public void reset()
