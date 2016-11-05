@@ -35,6 +35,29 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/large", () => {
+        assert (sizeof (Value) > sizeof (void*));
+
+        var a = new Vast.Array<Value?> (sizeof (Value), {10});
+
+        var val = Value (typeof (string));
+        val.set_string ("test");
+
+        a.set_scalar ({0}, val);
+
+        assert (val != a.get_scalar ({0}));
+        assert ("test" == a.get_scalar ({0}).get_string ());
+    });
+
+    Test.add_func ("/array/compact", () => {
+        var a = new Vast.Array<uint8?> (sizeof (uint8), {200});
+
+        assert (sizeof (uint8) * 200 == a.size);
+
+        a.set_scalar ({0}, 10);
+        assert (10 == a.get_scalar ({0}));
+    });
+
     Test.add_func ("/array/negative_indexing", () => {
         var a = new Vast.Array<double?> (sizeof (double), {10, 20});
 
