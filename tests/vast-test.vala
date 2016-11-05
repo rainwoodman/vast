@@ -6,9 +6,9 @@ int main (string[] args) {
 
     Test.add_func ("/array", () => {
         message("hello");
-        var a = new Vast.Array<double?>.full(1, {10,});
+        var a = new Vast.Array<double?>.full(sizeof (double), {10});
         message("a = %s", a.to_string());
-        var b = new Vast.Array<double?>.full(1, {10,}, null, a, a.data);
+        var b = new Vast.Array<double?>.full(sizeof (double), {10}, null, a, a.data);
         message("b = %s", b.to_string());
 
         for(var i = 0; i < 10; i ++) {
@@ -36,7 +36,7 @@ int main (string[] args) {
     });
 
     Test.add_func ("/array/negative_indexing", () => {
-        var a = new Vast.Array<double?>.full(2, {10, 20});
+        var a = new Vast.Array<double?>.full(sizeof (double), {10, 20});
 
         for(var i = 0; i < 10; i ++) {
             for (var j = 0; j < 20; j++) {

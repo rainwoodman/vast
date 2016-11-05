@@ -3,7 +3,7 @@ namespace Vast {
 public class Array<ScalarType>: Object
 {
     public int ndim {get; construct; }
-    public size_t elsize {get; construct;}
+    public size_t scalar_size {get; construct;}
     public Type scalar_type {get; construct;}
 
     public size_t * shape {
@@ -24,7 +24,7 @@ public class Array<ScalarType>: Object
         construct {
             if(value == null) {
                 if(ndim > 0) {
-                    _strides[ndim - 1] = (ssize_t) this.elsize;
+                    _strides[ndim - 1] = (ssize_t) this.scalar_size;
 
                     for(var i = ndim - 2; i >= 0; i --) {
                         _strides[i] = _strides[i+1] * (ssize_t) _shape[i+1];
@@ -52,7 +52,7 @@ public class Array<ScalarType>: Object
         }
 
         if(this.base == null && this.data == null) {
-            this.data = new int8[this.size * this.elsize];
+            this.data = new int8[this.size * this.scalar_size];
         }
     }
 
@@ -68,9 +68,8 @@ public class Array<ScalarType>: Object
 
     }
 
-    public Array.full(int ndim, 
-        [CCode (array_length=false)]
-        ssize_t [] shape,
+    public Array.full(size_t scalar_size,
+        size_t [] shape,
         [CCode (array_length=false)]
         ssize_t []? strides = null,
         Object ? @base = null,
@@ -78,11 +77,12 @@ public class Array<ScalarType>: Object
         )
     {
 
-        base(ndim : ndim,
+        base(
+            scalar_size: scalar_size,
+            scalar_type : typeof(ScalarType),
+            ndim : shape.length,
             shape : shape,
             strides : strides,
-            elsize : sizeof(ScalarType),
-            scalar_type : typeof(ScalarType),
             @base : @base,
             data : data
             );
