@@ -88,16 +88,20 @@ public class Array<ScalarType>: Object
             );
     }
 
+    private inline size_t _offset_for_index (ssize_t[] index)
+        requires (index.length == ndim)
+    {
+        size_t p = 0;
+        for(var i = 0; i < this.ndim; i ++) {
+            p += (size_t) (index[i] < 0 ? shape[i] + index[i] : index[i]) * strides[i];
+        }
+        return p;
+    }
+
     public unowned ScalarType
     get_scalar(ssize_t [] index)
     {
-        assert(index.length == this.ndim);
-        ssize_t p = 0;
-        for(var i = 0; i < this.ndim; i ++) {
-            p += index[i] * this.strides[i];
-        }
-
-        return (ScalarType) (this.data + p);
+        return (ScalarType) (this.data + _offset_for_index (index));
     }
     public ArrayIterator<ScalarType> iterator()
     {
@@ -107,15 +111,10 @@ public class Array<ScalarType>: Object
     public void
     set_scalar(ssize_t [] index, ScalarType val)
     {
-        assert(index.length == this.ndim);
-        ssize_t p = 0;
-        for(var i = 0; i < this.ndim; i ++) {
-            p += index[i] * this.strides[i];
-        }
         /* What is the best way of doing this the vala way?
          * get triggers a dup function, but looks like there
          * is no clear way doing lvalue?*/
-        Memory.copy(this.data + p, val, sizeof(ScalarType));
+        Memory.copy(this.data + _offset_for_index (index), val, sizeof(ScalarType));
     }
 
     public string
