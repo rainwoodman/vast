@@ -2,9 +2,13 @@ namespace Vast {
 
 public class Array<ScalarType>: Object
 {
-    public int ndim {get; construct; }
-    public size_t scalar_size {get; construct;}
     public Type scalar_type {get; construct;}
+
+    public size_t scalar_size {get; construct;}
+
+    public int ndim {get; construct; }
+
+    size_t _shape[32];
 
     public size_t * shape {
         get {
@@ -16,6 +20,8 @@ public class Array<ScalarType>: Object
             }
         }
     }
+
+    ssize_t _strides[32];
 
     public ssize_t * strides {
         get {
@@ -37,59 +43,61 @@ public class Array<ScalarType>: Object
             }
         }
     }
-    size_t _shape[32];
-    ssize_t _strides[32];
 
-    public size_t size {get; construct; }
-    public int8 * data {get; construct; }
-    public Object? base {get; set; }
-
-    construct
-    {
-        this.size = 1;
-        for(var i = 0; i < ndim; i ++) {
-            this.size *= this.shape[i];
+    public size_t size {
+        get {
+            size_t size = 1;
+            for(var i = 0; i < ndim; i ++) {
+                size *= this.shape[i];
+            }
+            return size;
         }
+    }
 
-        if(this.base == null && this.data == null) {
-            this.data = new int8[this.size * this.scalar_size];
+    private bool _is_view;
+
+    private int8 * _data;
+
+    public int8 * data {
+        get {
+            return _data;
+        }
+        construct {
+            if (value == null) {
+                _data = new int8[this.size * this.scalar_size];
+                _is_view = false;
+            } else {
+                _data    = value;
+                _is_view = true;
+            }
         }
     }
 
     ~Array()
     {
-        if(this.base == null) {
+        if (!_is_view) {
             delete data;
         }
     }
 
-    public Array(size_t scalar_size, size_t[] shape)
+    public Array (size_t     scalar_size,
+                  size_t[]   shape,
+                  [CCode (array_length=false)]
+                  ssize_t[]? strides = null,
+                  void*      data    = null)
     {
-        base (scalar_size: scalar_size, ndim: shape.length, shape: shape, strides: null);
-    }
-
-    public Array.full(size_t scalar_size,
-        size_t [] shape,
-        [CCode (array_length=false)]
-        ssize_t []? strides = null,
-        Object ? @base = null,
-        void * data = null
-        )
-    {
-
         base(
-            scalar_size: scalar_size,
             scalar_type : typeof(ScalarType),
+            scalar_size: scalar_size,
             ndim : shape.length,
             shape : shape,
             strides : strides,
-            @base : @base,
             data : data
             );
     }
 
-    private inline size_t _offset_for_index (ssize_t[] index)
-        requires (index.length == ndim)
+    private inline size_t
+    _offset_for_index (ssize_t[] index) requires (index.length == ndim)
     {
         size_t p = 0;
         for(var i = 0; i < this.ndim; i ++) {
@@ -101,8 +109,9 @@ public class Array<ScalarType>: Object
     public unowned ScalarType
     get_scalar(ssize_t [] index)
     {
-        return (ScalarType) (this.data + _offset_for_index (index));
+        return (ScalarType) (_data + _offset_for_index (index));
     }
+
     public ArrayIterator<ScalarType> iterator()
     {
         return new ArrayIterator<ScalarType>(this);
@@ -114,7 +123,7 @@ public class Array<ScalarType>: Object
         /* What is the best way of doing this the vala way?
          * get triggers a dup function, but looks like there
          * is no clear way doing lvalue?*/
-        Memory.copy(this.data + _offset_for_index (index), val, sizeof(ScalarType));
+        Memory.copy(_data + _offset_for_index (index), val, scalar_size);
     }
 
     public string
@@ -124,8 +133,8 @@ public class Array<ScalarType>: Object
         sb.append("<Array>");
         sb.append("(");
         sb.append_printf("Type=%s,", this.scalar_type.name());
-        sb.append_printf("base=%p,", this.@base);
-        sb.append_printf("data=%p,", this.data);
+        sb.append_printf ("is_view=%s,", this._is_view ? "yes" : "no");
+        sb.append_printf("data=%p,", _data);
         sb.append(")");
         return sb.str;
     }

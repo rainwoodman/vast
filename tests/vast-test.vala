@@ -8,7 +8,7 @@ int main (string[] args) {
         message("hello");
         var a = new Vast.Array<double?> (sizeof (double), {10});
         message("a = %s", a.to_string());
-        var b = new Vast.Array<double?>.full(sizeof (double), {10}, null, a, a.data);
+        var b = new Vast.Array<double?> (sizeof (double), {10}, null, a.data);
         message("b = %s", b.to_string());
 
         for(var i = 0; i < 10; i ++) {
@@ -80,6 +80,28 @@ int main (string[] args) {
         for (var i = -1, j = -1; i > -10 && j > -10; i-- + j--) {
             assert ((10 + i) * (20 + j) == a.get_scalar ({i, j}));
         }
+    });
+
+    Test.add_func ("/array/mapped", () => {
+        FileUtils.set_contents ("test", "a");
+        MappedFile mapped_file;
+
+        try {
+            mapped_file = new MappedFile ("test", true);
+        } catch (FileError err) {
+            assert_not_reached ();
+        }
+
+        var a = new Vast.Array<char?> (sizeof (char),
+                                      {1},
+                                      null,
+                                      mapped_file.get_contents ());
+
+        assert ('a' == a.get_scalar ({0}));
+
+        a.set_scalar ({0}, 'b');
+
+        assert ('b' == mapped_file.get_contents ()[0]);
     });
 
     return Test.run ();
