@@ -1,6 +1,6 @@
 namespace Vast {
 
-public class Array<T>: Object
+public class Array : Object
 {
     public Type scalar_type {get; construct;}
 
@@ -57,7 +57,7 @@ public class Array<T>: Object
     public Bytes data { get; construct; }
 
     private static inline size_t
-    _size_from_shape (size_t[] shape)
+    _size_for_shape (size_t[] shape)
     {
         size_t size = 1;
         for(var i = 0; i < shape.length; i ++) {
@@ -66,24 +66,23 @@ public class Array<T>: Object
         return size;
     }
 
-    public Array (size_t     scalar_size,
+    public Array (Type       scalar_type,
+                  size_t     scalar_size,
                   size_t[]   shape,
                   [CCode (array_length=false)]
                   ssize_t[]? strides = null,
                   Bytes?     data    = null)
     {
-        base(
-            scalar_type : typeof(T),
-            scalar_size: scalar_size,
-            ndim : shape.length,
-            shape : shape,
-            strides : strides,
-            data : data ?? new Bytes (new uint8[scalar_size * _size_from_shape (shape)])
-            );
+        base (scalar_type: scalar_type,
+              scalar_size: scalar_size,
+              ndim:        shape.length,
+              shape:       shape,
+              strides:     strides,
+              data:        data ?? new Bytes (new uint8[scalar_size * _size_for_shape (shape)]));
     }
 
     private inline size_t
-    _offset_for_index (ssize_t[] index) requires (index.length == ndim)
+    _offset_for_index ([CCode (array_length = false)] ssize_t[] index)
     {
         size_t p = 0;
         for(var i = 0; i < this.ndim; i ++) {
@@ -92,19 +91,59 @@ public class Array<T>: Object
         return p;
     }
 
-    public unowned T
-    get_scalar(ssize_t [] index)
+    public unowned void*
+    get_pointer ([CCode (array_length = false)] ssize_t[] index)
     {
-        return (T) ((uint8*) _data.get_data () + _offset_for_index (index));
+        return (uint8*) _data.get_data () + _offset_for_index (index);
     }
 
-    public ArrayIterator<T> iterator()
+    public Value
+    get_value ([CCode (array_length = false)] ssize_t[] index)
     {
-        return new ArrayIterator<T>(this);
+        var _value = Value (scalar_type);
+
+        if (scalar_type == typeof (string)) {
+            _value.set_string ((string) get_pointer (index));
+        }
+
+        else if (_value.fits_pointer ()) {
+            Memory.copy (_value.peek_pointer (), get_pointer (index), scalar_size);
+        }
+
+        else if (scalar_type == Type.BOXED) {
+            _value.set_boxed (get_pointer (index));
+        }
+
+        else if (scalar_type == typeof (char)) {
+            _value.set_char (*(char*) get_pointer (index));
+        }
+
+        else if (scalar_type == typeof (uint8)) {
+            _value.set_uchar (*(uchar*) get_pointer (index));
+        }
+
+        else if (scalar_type == typeof (int64)) {
+            _value.set_int64 (*(int64*) get_pointer (index));
+        }
+
+        else if (scalar_type == typeof (double)) {
+            _value.set_double (*((double*) get_pointer (index)));
+        }
+
+        else {
+            assert_not_reached ();
+        }
+
+        return _value;
+    }
+
+    public ArrayIterator iterator()
+    {
+        return new ArrayIterator(this);
     }
 
     public void
-    set_scalar(ssize_t [] index, T val)
+    set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {
         /* What is the best way of doing this the vala way?
          * get triggers a dup function, but looks like there
@@ -112,8 +151,55 @@ public class Array<T>: Object
         Memory.copy((uint8*) data.get_data () + _offset_for_index (index), val, scalar_size);
     }
 
+    public void
+    set_value ([CCode (array_length = false)] ssize_t[] index, Value val)
+    {
+        var dest_value = Value (scalar_type);
+
+        if (val.transform (ref dest_value)) {
+            if (scalar_type == typeof (string)) {
+                set_pointer (index, val.get_string ());
+            }
+
+            else if (dest_value.fits_pointer ()) {
+                set_pointer (index, dest_value.peek_pointer ());
+            }
+
+            else if (scalar_type == Type.BOXED) {
+                set_pointer (index, dest_value.get_boxed ());
+            }
+
+            else if (scalar_type == typeof (char)) {
+                var _ = dest_value.get_char ();
+                set_pointer (index, (&_));
+            }
+
+            else if (scalar_type == typeof (uint8)) {
+                var _ = dest_value.get_uchar ();
+                set_pointer (index, (&_));
+            }
+
+            else if (scalar_type == typeof (int64)) {
+                var _ = dest_value.get_int64 ();
+                set_pointer (index, (&_));
+            }
+
+            else if (scalar_type == typeof (double)) {
+                var _ = dest_value.get_double ();
+                set_pointer (index, &_);
+            }
+
+            else {
+                assert_not_reached ();
+            }
+        } else {
+            error ("Could not transform '%s' into '%s'.", val.type ().name (),
+                                                          dest_value.type ().name ());
+        }
+    }
+
     private inline size_t[]
-    _shape_from_slice (ssize_t[] from, ssize_t[] to)
+    _shape_for_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
         var shape = new size_t[ndim];
         for (int i = 0; i < ndim; i++)
@@ -123,8 +209,15 @@ public class Array<T>: Object
         return shape;
     }
 
-    public Array<T>
-    slice (ssize_t[] from, ssize_t[] to)
+    public Array
+    slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
+    {
+        return new Array (scalar_type,
+                          scalar_size,
+                          _shape_for_slice (from, to),
+                          _strides,
+                          data.slice ((int) _offset_for_index (from), (int) _offset_for_index (to)));
+    }
     {
         return new Array<T> (scalar_size,
                                       _shape_from_slice (from, to),

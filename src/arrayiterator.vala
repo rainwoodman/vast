@@ -1,8 +1,8 @@
 namespace Vast {
 
-    public class ArrayIterator<T>
+    public class ArrayIterator
     {
-        public Array<T> array;
+        public Array array;
 
         public ssize_t [] cursor;
         private ssize_t offset;
@@ -46,12 +46,26 @@ namespace Vast {
             return !this.ended;
         }
 
-        public unowned T get() {
-            return (T) ((uint8*) array.data.get_data () + offset);
+        public void* get()
+        {
+            return (uint8*) array.data.get_data () + offset;
         }
 
-        public void set(T val) {
-            Memory.copy((uint8*) array.data.get_data () + offset, val, sizeof(T));
+        public Value
+        get_value ()
+        {
+            return array.get_value (cursor);
+        }
+
+        public void set(void* val)
+        {
+            Memory.copy((uint8*) array.data.get_data () + offset, val, array.scalar_size);
+        }
+
+        public void
+        set_value (Value val)
+        {
+            array.set_value (cursor, val);
         }
 
         public void reset()
@@ -72,7 +86,7 @@ namespace Vast {
                 this.cursor[i] = cursor[i];
                 this.offset += this.cursor[i] * this.array.strides[i];
             }
-            this.ended = false; 
+            this.ended = false;
             for(var i = 0; i < cursor.length; i ++) {
                 if(cursor[i] >= array.shape[i]) {
                     this.ended = true;
@@ -85,7 +99,7 @@ namespace Vast {
         {
             return this.ended;
         }
-        
+
     }
 
 }
