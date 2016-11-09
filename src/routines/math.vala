@@ -1,7 +1,7 @@
 namespace Vast.Math
 {
     public void
-    sin (Array x, ref Array z)
+    sin (Array x, Array z)
         requires (x.size == z.size)
     {
         var x_iter = x.iterator ();

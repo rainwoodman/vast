@@ -10,11 +10,10 @@ vast_sources = [
 subdir('routines')
 
 vast_lib = library('vast-1.0', vast_sources + routines_sources,
-                    vala_args: ['--vapidir=' + meson.current_source_dir()],
                     vala_header: 'vast.h',
                     vala_gir: 'Vast-1.0.gir',
                     c_args: ['-g', '-O0', '-Wno-unused'],
-                    dependencies: [glib, gobject, gio, math, posix],
+                    dependencies: [glib, gobject, gobject_introspection, gio, math, posix],
                     install: true)
 
 install_headers(meson.current_build_dir() + '/vast.h', subdir: 'vast-1.0')

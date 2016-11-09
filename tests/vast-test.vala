@@ -524,6 +524,32 @@ int main (string[] args) {
         assert ('b' == mapped_file.get_contents ()[0]);
     });
 
+    Test.add_func ("/function", () => {
+        unowned GI.Typelib tl = GI.Repository.get_default ().require ("Vast", null, 0);
+        assert (tl != null);
+        var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
+        assert (sin != null);
+        assert (GI.InfoType.FUNCTION == sin.get_type ());
+
+        var function = new Vast.Function ((GI.FunctionInfo) sin, (void*) Vast.Math.sin);
+
+        var a = new Vast.Array (typeof (double),
+                                sizeof (double),
+                                {100});
+
+        a.fill_value (GLib.Math.PI / 2);
+
+        var b = new Vast.Array (typeof (double),
+                                sizeof (double),
+                                {100});
+
+        function.invoke ({a, b, null});
+
+        for (var i = 0; i < 100; i++) {
+            assert (1 == b.get_value ({i}).get_double ());
+        }
+    });
+
     Test.add_func ("/vast/routines/math/sin", () => {
         var a = new Vast.Array (typeof (double),
                                 sizeof (double),
@@ -535,7 +561,7 @@ int main (string[] args) {
                                 sizeof (double),
                                 {100});
 
-        Vast.Math.sin (a, ref b);
+        Vast.Math.sin (a, b);
 
         for (var i = 0; i < 100; i++) {
             assert (1 == b.get_value ({i}).get_double ());
