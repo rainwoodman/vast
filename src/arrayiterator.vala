@@ -4,6 +4,7 @@ namespace Vast {
     {
         public Array<T> array;
 
+        [CCode (array_length = false)]
         public ssize_t [] cursor;
         private ssize_t offset;
 

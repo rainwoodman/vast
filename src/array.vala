@@ -83,7 +83,7 @@ public class Array<T>: Object
     }
 
     private inline size_t
-    _offset_for_index (ssize_t[] index) requires (index.length == ndim)
+    _offset_for_index ([CCode (array_length = false)] ssize_t[] index)
     {
         size_t p = 0;
         for(var i = 0; i < this.ndim; i ++) {
@@ -93,7 +93,7 @@ public class Array<T>: Object
     }
 
     public unowned T
-    get_scalar(ssize_t [] index)
+    get_scalar([CCode (array_length = false)] ssize_t [] index)
     {
         return (T) ((uint8*) _data.get_data () + _offset_for_index (index));
     }
@@ -104,7 +104,7 @@ public class Array<T>: Object
     }
 
     public void
-    set_scalar(ssize_t [] index, T val)
+    set_scalar([CCode (array_length = false)] ssize_t [] index, T val)
     {
         /* What is the best way of doing this the vala way?
          * get triggers a dup function, but looks like there
@@ -113,7 +113,7 @@ public class Array<T>: Object
     }
 
     private inline size_t[]
-    _shape_from_slice (ssize_t[] from, ssize_t[] to)
+    _shape_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
         var shape = new size_t[ndim];
         for (int i = 0; i < ndim; i++)
@@ -124,7 +124,7 @@ public class Array<T>: Object
     }
 
     public Array<T>
-    slice (ssize_t[] from, ssize_t[] to)
+    slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
         return new Array<T> (scalar_size,
                                       _shape_from_slice (from, to),
