@@ -2,6 +2,8 @@ vast_sources = [
     'array.vala',
     'arrayiterator.vala',
     'function.vala',
+    'formatter.vala',
+    'string-formatter.vala'
      ]
 
 vast_lib = library('vast-1.0', vast_sources,
