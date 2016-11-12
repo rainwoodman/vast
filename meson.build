@@ -1,5 +1,6 @@
 project('vast', 'c', 'vala',
-        version: '0.0.1')
+        version: '0.0.1',
+        meson_version: '>=0.36')
 
 glib = dependency('glib-2.0', version: '>=2.32')
 gobject = dependency('gobject-2.0', version: '>=2.32')
