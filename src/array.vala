@@ -132,6 +132,33 @@ public class Array<T>: Object
                              new Bytes.from_bytes (data, (int) _offset_for_index (from), (int) _offset_for_index (to) - _offset_for_index (from)));
     }
 
+    private inline ssize_t[] _strides_from_steps (ssize_t[] steps)
+    {
+        var strides = new ssize_t[ndim];
+        for (var i = 0; i < ndim; i++) {
+            strides[i] = _strides[i] * steps[i];
+        }
+        return strides;
+    }
+
+    private inline size_t[] _shape_from_steps (ssize_t[] steps)
+    {
+        var shape = new size_t[ndim];
+        for (var i = 0; i < ndim; i++) {
+            shape[i] = _shape[i] / steps[i]; // round down
+        }
+        return shape;
+    }
+
+    public Array<T>
+    step ([CCode (array_length = false)] ssize_t[] steps)
+    {
+        return new Array<T> (scalar_size,
+                             _shape_from_steps (steps),
+                             _strides_from_steps (steps),
+                             data);
+    }
+
     private inline int _dim_from_dim (int dim)
     {
         return dim < 0 ? ndim + dim : dim;

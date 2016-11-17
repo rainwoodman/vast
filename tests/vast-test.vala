@@ -107,6 +107,27 @@ int main (string[] args) {
         assert (9 == c.shape[1]);
     });
 
+    Test.add_func ("/array/step", () => {
+        var array = new Vast.Array<int64?> (sizeof (int64), {10});
+
+        for (var i = 0; i < 10; i++) {
+            array.set_scalar ({i}, i);
+        }
+
+        assert (5 == array.step ({2}).shape[0]);
+        assert (10 == array.step ({1}).shape[0]);
+        assert (2 == array.step ({5}).shape[0]);
+        assert (3 == array.step ({3}).shape[0]);
+
+        var stepped = array.step ({2});
+
+        assert (0 == stepped.get_scalar ({0}));
+        assert (2 == stepped.get_scalar ({1}));
+        assert (4 == stepped.get_scalar ({2}));
+        assert (6 == stepped.get_scalar ({3}));
+        assert (8 == stepped.get_scalar ({4}));
+    });
+
     Test.add_func ("/array/transpose", () => {
         var array = new Vast.Array<double?> (sizeof (double), {2, 2});
 
