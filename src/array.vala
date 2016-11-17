@@ -138,28 +138,22 @@ public class Array<T>: Object
     }
 
     public Array<T>
-    transpose (int from_dim = 0, int to_dim = 1)
-        requires (_dim_from_dim (from_dim) < ndim)
-        requires (_dim_from_dim (to_dim)   < ndim)
+    transpose ([CCode (array_length = false)] int[]? dims = null)
     {
         var transposed_strides = new ssize_t[ndim];
         var transposed_shape   = new size_t[ndim];
         for (var i = 0; i < ndim; i++)
         {
-            if (i == _dim_from_dim (from_dim)) {
-                transposed_strides[i] = _strides[_dim_from_dim (to_dim)];
-                transposed_shape[i]   = _shape[_dim_from_dim (to_dim)];
-            } else if (i == _dim_from_dim (to_dim)) {
-                transposed_strides[i] = _strides[_dim_from_dim (from_dim)];
-                transposed_shape[i]   = _shape[_dim_from_dim (from_dim)];
+            if (dims == null) {
+                transposed_strides[i] = _strides[(i + 1) % ndim];
+                transposed_shape[i]   = _shape[(i + 1) % ndim];
             } else {
-                transposed_strides[i] = _strides[i];
-                transposed_shape[i]   = _shape[i];
+                transposed_strides[i] = _strides[_dim_from_dim (dims[i])];
+                transposed_shape[i]   = _shape[_dim_from_dim (dims[i])];
             }
         }
         return new Array<T> (scalar_size, transposed_shape, transposed_strides, data);
     }
-
 
     public string
     to_string()

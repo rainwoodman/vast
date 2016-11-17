@@ -118,7 +118,7 @@ int main (string[] args) {
         assert (3 == transposed.get_scalar ({0, 1}));
         assert (4 == transposed.get_scalar ({1, 1}));
 
-        var identity = array.transpose (1, 0);
+        var identity = array.transpose ({1, 0});
 
         assert (1 == identity.get_scalar ({0, 0}));
         assert (2 == identity.get_scalar ({1, 0}));
@@ -134,7 +134,7 @@ int main (string[] args) {
         array.set_scalar ({1, 0}, 3);
         array.set_scalar ({1, 1}, 4);
 
-        var transposed = array.transpose (-2, -1); // two last dims
+        var transposed = array.transpose ({-1, -2}); // two last dims
 
         assert (1 == transposed.get_scalar ({0, 0}));
         assert (2 == transposed.get_scalar ({1, 0}));
