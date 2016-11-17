@@ -96,6 +96,10 @@ int main (string[] args) {
         assert (10 == b.shape[0]);
         assert (10 == b.shape[1]);
 
+        assert (100 == a.get_scalar ({10, 10}));
+        b.set_scalar ({0, 0}, 0);
+        assert (0 == a.get_scalar ({10, 10}));
+
         // negative indexing
         var c = a.slice ({-10, -10}, {-1, -1});
         assert (400 == c.get_scalar ({0, 0}));

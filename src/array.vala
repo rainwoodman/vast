@@ -127,9 +127,9 @@ public class Array<T>: Object
     slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
         return new Array<T> (scalar_size,
-                                      _shape_from_slice (from, to),
-                                      _strides,
-                                      data.slice ((int) _offset_for_index (from), (int) _offset_for_index (to)));
+                             _shape_from_slice (from, to),
+                             _strides,
+                             new Bytes.from_bytes (data, (int) _offset_for_index (from), (int) _offset_for_index (to) - _offset_for_index (from)));
     }
 
     private inline int _dim_from_dim (int dim)
