@@ -6,7 +6,7 @@ public class Array<T>: Object
 
     public size_t scalar_size {get; construct;}
 
-    public int dimension {get; construct; }
+    public size_t dimension {get; construct; }
 
     size_t _shape[32];
 
@@ -32,7 +32,7 @@ public class Array<T>: Object
                 if(dimension > 0) {
                     _strides[dimension - 1] = (ssize_t) this.scalar_size;
 
-                    for(var i = dimension - 2; i >= 0; i --) {
+                    for(ssize_t i = (ssize_t) dimension - 2; i >= 0; i --) {
                         _strides[i] = _strides[i+1] * (ssize_t) _shape[i+1];
                     }
                 }
@@ -116,7 +116,7 @@ public class Array<T>: Object
     _shape_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
         var shape = new size_t[dimension];
-        for (int i = 0; i < dimension; i++)
+        for (var i = 0; i < dimension; i++)
         {
             shape[i] = to[i] - from[i];
         }
@@ -159,13 +159,13 @@ public class Array<T>: Object
                              data);
     }
 
-    private inline int _axis_from_axis (int dim)
+    private inline size_t _axis_from_external_axis (ssize_t axis)
     {
-        return dim < 0 ? dimension + dim : dim;
+        return axis < 0 ? dimension + axis : axis;
     }
 
     public Array<T>
-    transpose ([CCode (array_length = false)] int[]? axes = null)
+    transpose ([CCode (array_length = false)] ssize_t[]? axes = null)
     {
         var transposed_strides = new ssize_t[dimension];
         var transposed_shape   = new size_t[dimension];
@@ -175,26 +175,26 @@ public class Array<T>: Object
                 transposed_strides[i] = _strides[(i + 1) % dimension];
                 transposed_shape[i]   = _shape[(i + 1) % dimension];
             } else {
-                transposed_strides[i] = _strides[_axis_from_axis (axes[i])];
-                transposed_shape[i]   = _shape[_axis_from_axis (axes[i])];
+                transposed_strides[i] = _strides[_axis_from_external_axis (axes[i])];
+                transposed_shape[i]   = _shape[_axis_from_external_axis (axes[i])];
             }
         }
         return new Array<T> (scalar_size, transposed_shape, transposed_strides, data);
     }
 
     public Array<T>
-    swap (int from_dim = 0, int to_dim = 1)
-        requires (_axis_from_axis (from_dim) < dimension)
-        requires (_axis_from_axis (to_dim)   < dimension)
+    swap (ssize_t from_axis = 0, ssize_t to_axis = 1)
+        requires (_axis_from_external_axis (from_axis) < dimension)
+        requires (_axis_from_external_axis (to_axis)   < dimension)
     {
-        var axes = new int[dimension];
+        var axes = new ssize_t[dimension];
         for (var i = 0; i < dimension; i++) {
             axes[i] = i; // identity
         }
 
         // swap dimensions
-        axes[_axis_from_axis (from_dim)] = _axis_from_axis (to_dim);
-        axes[_axis_from_axis (to_dim)]   = _axis_from_axis (from_dim);
+        axes[_axis_from_external_axis (from_axis)] = to_axis;
+        axes[_axis_from_external_axis (to_axis)]   = from_axis;
 
         return transpose (axes);
     }
