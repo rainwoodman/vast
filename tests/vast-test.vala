@@ -103,6 +103,45 @@ int main (string[] args) {
         assert (9 == c.shape[1]);
     });
 
+    Test.add_func ("/array/transpose", () => {
+        var array = new Vast.Array<double?> (sizeof (double), {2, 2});
+
+        array.set_scalar ({0, 0}, 1);
+        array.set_scalar ({0, 1}, 2);
+        array.set_scalar ({1, 0}, 3);
+        array.set_scalar ({1, 1}, 4);
+
+        var transposed = array.transpose (); // implicit dim 0 and 1
+
+        assert (1 == transposed.get_scalar ({0, 0}));
+        assert (2 == transposed.get_scalar ({1, 0}));
+        assert (3 == transposed.get_scalar ({0, 1}));
+        assert (4 == transposed.get_scalar ({1, 1}));
+
+        var identity = array.transpose (1, 0);
+
+        assert (1 == identity.get_scalar ({0, 0}));
+        assert (2 == identity.get_scalar ({1, 0}));
+        assert (3 == identity.get_scalar ({0, 1}));
+        assert (4 == identity.get_scalar ({1, 1}));
+    });
+
+    Test.add_func ("/array/transpose/negative_indexing", () => {
+        var array = new Vast.Array<double?> (sizeof (double), {2, 2});
+
+        array.set_scalar ({0, 0}, 1);
+        array.set_scalar ({0, 1}, 2);
+        array.set_scalar ({1, 0}, 3);
+        array.set_scalar ({1, 1}, 4);
+
+        var transposed = array.transpose (-2, -1); // two last dims
+
+        assert (1 == transposed.get_scalar ({0, 0}));
+        assert (2 == transposed.get_scalar ({1, 0}));
+        assert (3 == transposed.get_scalar ({0, 1}));
+        assert (4 == transposed.get_scalar ({1, 1}));
+    });
+
     Test.add_func ("/array/mapped", () => {
         FileUtils.set_contents ("test", "a");
         MappedFile mapped_file;
