@@ -107,6 +107,27 @@ int main (string[] args) {
         assert (9 == c.shape[1]);
     });
 
+    Test.add_func ("/array/flatten", () => {
+        var array = new Vast.Array<double?> (sizeof (double), {2, 2});
+
+        array.set_scalar ({0, 0}, 1);
+        array.set_scalar ({0, 1}, 2);
+        array.set_scalar ({1, 0}, 3);
+        array.set_scalar ({1, 1}, 4);
+
+        var flattened = array.flatten ();
+
+        assert (4 == flattened.shape[0]);
+        //assert (1 == flattened.strides[0]);
+        for (var i = 0; i < 4; i++) {
+            message ("%lf", flattened.get_scalar ({i}));
+        }
+        assert (1 == flattened.get_scalar ({0}));
+        assert (2 == flattened.get_scalar ({2}));
+        assert (4 == flattened.get_scalar ({1}));
+        assert (3 == flattened.get_scalar ({3}));
+    });
+
     Test.add_func ("/array/transpose", () => {
         var array = new Vast.Array<double?> (sizeof (double), {2, 2});
 
