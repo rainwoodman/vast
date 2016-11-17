@@ -155,6 +155,23 @@ public class Array<T>: Object
         return new Array<T> (scalar_size, transposed_shape, transposed_strides, data);
     }
 
+    public Array<T>
+    swap (int from_dim = 0, int to_dim = 1)
+        requires (_dim_from_dim (from_dim) < ndim)
+        requires (_dim_from_dim (to_dim)   < ndim)
+    {
+        var dims = new int[ndim];
+        for (var i = 0; i < ndim; i++) {
+            dims[i] = i; // identity
+        }
+
+        // swap dimensions
+        dims[_dim_from_dim (from_dim)] = _dim_from_dim (to_dim);
+        dims[_dim_from_dim (to_dim)]   = _dim_from_dim (from_dim);
+
+        return transpose (dims);
+    }
+
     public string
     to_string()
     {

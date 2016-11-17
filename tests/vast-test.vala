@@ -142,6 +142,22 @@ int main (string[] args) {
         assert (4 == transposed.get_scalar ({1, 1}));
     });
 
+    Test.add_func ("/array/swap", () => {
+        var array = new Vast.Array<double?> (sizeof (double), {2, 2});
+
+        array.set_scalar ({0, 0}, 1);
+        array.set_scalar ({0, 1}, 2);
+        array.set_scalar ({1, 0}, 3);
+        array.set_scalar ({1, 1}, 4);
+
+        var swapped = array.swap (0, 1);
+
+        assert (1 == swapped.get_scalar ({0, 0}));
+        assert (2 == swapped.get_scalar ({1, 0}));
+        assert (3 == swapped.get_scalar ({0, 1}));
+        assert (4 == swapped.get_scalar ({1, 1}));
+    });
+
     Test.add_func ("/array/mapped", () => {
         FileUtils.set_contents ("test", "a");
         MappedFile mapped_file;
