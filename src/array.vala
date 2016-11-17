@@ -138,6 +138,12 @@ public class Array<T>: Object
     }
 
     public Array<T>
+    flatten ()
+    {
+        return new Array<T> (scalar_size, {_size_from_shape (_shape[0:ndim])}, {4}, data);
+    }
+
+    public Array<T>
     transpose ([CCode (array_length = false)] int[]? dims = null)
     {
         var transposed_strides = new ssize_t[ndim];
