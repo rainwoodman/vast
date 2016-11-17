@@ -14,7 +14,7 @@ namespace Vast {
         public ArrayIterator(Array array)
         {
             this.array = array;
-            this.cursor = new ssize_t[array.ndim];
+            this.cursor = new ssize_t[array.dimension];
             this.reset();
         }
 
@@ -24,12 +24,12 @@ namespace Vast {
                 this.started = true;
                 return !this.ended;
             }
-            if(this.array.ndim == 0) {
+            if(this.array.dimension == 0) {
                 /* special case for scalar. This could have been merged with below? */
                 this.ended = true;
                 return !this.ended;
             }
-            ssize_t dim = (ssize_t) array.ndim - 1;
+            ssize_t dim = (ssize_t) array.dimension - 1;
             this.cursor[dim] ++;
             while(dim >= 0 && this.cursor[dim] == array.shape[dim]) {
                 this.cursor[dim] = 0;
@@ -59,7 +59,7 @@ namespace Vast {
         {
             this.ended = false;
             this.started = false;
-            var zero = new ssize_t[array.ndim];
+            var zero = new ssize_t[array.dimension];
             for(var i = 0; i < zero.length; i ++) {
                 zero[i] = 0;
             }
@@ -73,7 +73,7 @@ namespace Vast {
                 this.cursor[i] = cursor[i];
                 this.offset += this.cursor[i] * this.array.strides[i];
             }
-            this.ended = false; 
+            this.ended = false;
             for(var i = 0; i < cursor.length; i ++) {
                 if(cursor[i] >= array.shape[i]) {
                     this.ended = true;

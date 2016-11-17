@@ -6,7 +6,7 @@ public class Array<T>: Object
 
     public size_t scalar_size {get; construct;}
 
-    public int ndim {get; construct; }
+    public int dimension {get; construct; }
 
     size_t _shape[32];
 
@@ -15,7 +15,7 @@ public class Array<T>: Object
             return _shape;
         }
         construct {
-            for(var i = 0; i < this.ndim; i ++) {
+            for(var i = 0; i < this.dimension; i ++) {
                 _shape[i] = value[i];
             }
         }
@@ -29,15 +29,15 @@ public class Array<T>: Object
         }
         construct {
             if(value == null) {
-                if(ndim > 0) {
-                    _strides[ndim - 1] = (ssize_t) this.scalar_size;
+                if(dimension > 0) {
+                    _strides[dimension - 1] = (ssize_t) this.scalar_size;
 
-                    for(var i = ndim - 2; i >= 0; i --) {
+                    for(var i = dimension - 2; i >= 0; i --) {
                         _strides[i] = _strides[i+1] * (ssize_t) _shape[i+1];
                     }
                 }
             } else {
-                for(var i = 0; i < this.ndim; i ++) {
+                for(var i = 0; i < this.dimension; i ++) {
                     _strides[i] = value[i];
                 }
             }
@@ -47,7 +47,7 @@ public class Array<T>: Object
     public size_t size {
         get {
             size_t size = 1;
-            for(var i = 0; i < ndim; i ++) {
+            for(var i = 0; i < dimension; i ++) {
                 size *= this.shape[i];
             }
             return size;
@@ -75,7 +75,7 @@ public class Array<T>: Object
         base(
             scalar_type : typeof(T),
             scalar_size: scalar_size,
-            ndim : shape.length,
+            dimension : shape.length,
             shape : shape,
             strides : strides,
             data : data ?? new Bytes (new uint8[scalar_size * _size_from_shape (shape)])
@@ -86,7 +86,7 @@ public class Array<T>: Object
     _offset_for_index ([CCode (array_length = false)] ssize_t[] index)
     {
         size_t p = 0;
-        for(var i = 0; i < this.ndim; i ++) {
+        for(var i = 0; i < this.dimension; i ++) {
             p += (size_t) (index[i] < 0 ? shape[i] + index[i] : index[i]) * strides[i];
         }
         return p;
@@ -115,8 +115,8 @@ public class Array<T>: Object
     private inline size_t[]
     _shape_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
-        var shape = new size_t[ndim];
-        for (int i = 0; i < ndim; i++)
+        var shape = new size_t[dimension];
+        for (int i = 0; i < dimension; i++)
         {
             shape[i] = to[i] - from[i];
         }
@@ -134,8 +134,8 @@ public class Array<T>: Object
 
     private inline ssize_t[] _strides_from_steps (ssize_t[] steps)
     {
-        var strides = new ssize_t[ndim];
-        for (var i = 0; i < ndim; i++) {
+        var strides = new ssize_t[dimension];
+        for (var i = 0; i < dimension; i++) {
             strides[i] = _strides[i] * steps[i];
         }
         return strides;
@@ -143,8 +143,8 @@ public class Array<T>: Object
 
     private inline size_t[] _shape_from_steps (ssize_t[] steps)
     {
-        var shape = new size_t[ndim];
-        for (var i = 0; i < ndim; i++) {
+        var shape = new size_t[dimension];
+        for (var i = 0; i < dimension; i++) {
             shape[i] = _shape[i] / steps[i]; // round down
         }
         return shape;
@@ -159,24 +159,24 @@ public class Array<T>: Object
                              data);
     }
 
-    private inline int _dim_from_dim (int dim)
+    private inline int _axis_from_axis (int dim)
     {
-        return dim < 0 ? ndim + dim : dim;
+        return dim < 0 ? dimension + dim : dim;
     }
 
     public Array<T>
-    transpose ([CCode (array_length = false)] int[]? dims = null)
+    transpose ([CCode (array_length = false)] int[]? axes = null)
     {
-        var transposed_strides = new ssize_t[ndim];
-        var transposed_shape   = new size_t[ndim];
-        for (var i = 0; i < ndim; i++)
+        var transposed_strides = new ssize_t[dimension];
+        var transposed_shape   = new size_t[dimension];
+        for (var i = 0; i < dimension; i++)
         {
-            if (dims == null) {
-                transposed_strides[i] = _strides[(i + 1) % ndim];
-                transposed_shape[i]   = _shape[(i + 1) % ndim];
+            if (axes == null) {
+                transposed_strides[i] = _strides[(i + 1) % dimension];
+                transposed_shape[i]   = _shape[(i + 1) % dimension];
             } else {
-                transposed_strides[i] = _strides[_dim_from_dim (dims[i])];
-                transposed_shape[i]   = _shape[_dim_from_dim (dims[i])];
+                transposed_strides[i] = _strides[_axis_from_axis (axes[i])];
+                transposed_shape[i]   = _shape[_axis_from_axis (axes[i])];
             }
         }
         return new Array<T> (scalar_size, transposed_shape, transposed_strides, data);
@@ -184,19 +184,19 @@ public class Array<T>: Object
 
     public Array<T>
     swap (int from_dim = 0, int to_dim = 1)
-        requires (_dim_from_dim (from_dim) < ndim)
-        requires (_dim_from_dim (to_dim)   < ndim)
+        requires (_axis_from_axis (from_dim) < dimension)
+        requires (_axis_from_axis (to_dim)   < dimension)
     {
-        var dims = new int[ndim];
-        for (var i = 0; i < ndim; i++) {
-            dims[i] = i; // identity
+        var axes = new int[dimension];
+        for (var i = 0; i < dimension; i++) {
+            axes[i] = i; // identity
         }
 
         // swap dimensions
-        dims[_dim_from_dim (from_dim)] = _dim_from_dim (to_dim);
-        dims[_dim_from_dim (to_dim)]   = _dim_from_dim (from_dim);
+        axes[_axis_from_axis (from_dim)] = _axis_from_axis (to_dim);
+        axes[_axis_from_axis (to_dim)]   = _axis_from_axis (from_dim);
 
-        return transpose (dims);
+        return transpose (axes);
     }
 
     public string
