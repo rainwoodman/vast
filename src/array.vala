@@ -309,7 +309,7 @@ public class Array : Object
         } catch (Error err) {
             error (err.message);
         }
-        return (string) @out.steal_data ();
+        return sb.str + (string) @out.steal_data ();
     }
 
 }
