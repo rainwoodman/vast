@@ -8,10 +8,16 @@ public class Vast.StringFormatter : Vast.Formatter
     private inline void
     _append_from_index (DataOutputStream @out, ssize_t[] index, Cancellable? cancellable = null) throws Error
     {
+        // scalar style
         @out.put_byte ('\n', cancellable);
+        if (index.length == array.dimension) {
+            @out.put_byte ('[');
+            @out.put_string (array.get_value (index).strdup_contents (), cancellable);
+            @out.put_byte (']', cancellable);
+        }
 
         // vector style
-        if (index.length == array.dimension - 1) {
+        else if (index.length == array.dimension - 1) {
             @out.put_byte ('[');
             for (var i = 0; i < array.shape[index.length]; i++) {
                 if (i > 0)
