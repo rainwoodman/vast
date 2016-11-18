@@ -8,26 +8,28 @@ public class Array : Object
 
     public size_t dimension {get; construct; }
 
-    size_t _shape[32];
+    [CCode (array_length = false)]
+    private size_t[] _shape;
 
     public size_t * shape {
         get {
             return _shape;
         }
         construct {
-            for(var i = 0; i < this.dimension; i ++) {
-                _shape[i] = value[i];
-            }
+            _shape = new size_t[dimension];
+            Memory.copy (_shape, value, dimension * sizeof (size_t));
         }
     }
 
-    ssize_t _strides[32];
+    [CCode (array_length = false)]
+    ssize_t[] _strides;
 
     public ssize_t * strides {
         get {
             return _strides;
         }
         construct {
+            _strides = new ssize_t[dimension];
             if(value == null) {
                 if(dimension > 0) {
                     _strides[dimension - 1] = (ssize_t) this.scalar_size;
@@ -37,9 +39,7 @@ public class Array : Object
                     }
                 }
             } else {
-                for(var i = 0; i < this.dimension; i ++) {
-                    _strides[i] = value[i];
-                }
+                Memory.copy (_strides, value, dimension * sizeof (ssize_t));
             }
         }
     }
