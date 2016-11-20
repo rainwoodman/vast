@@ -40,6 +40,8 @@ public class Vast.Array : Object
         }
     }
 
+    public size_t origin { get; construct; default = 0; }
+
     public size_t size {
         get {
             size_t size = 1;
@@ -67,20 +69,22 @@ public class Vast.Array : Object
                   size_t[]   shape,
                   [CCode (array_length=false)]
                   ssize_t[]? strides = null,
-                  Bytes?     data    = null)
+                  Bytes?     data    = null,
+                  size_t     origin  = 0)
     {
         base (scalar_type: scalar_type,
               scalar_size: scalar_size,
               dimension:   shape.length,
               shape:       shape,
               strides:     strides,
-              data:        data ?? new Bytes (new uint8[scalar_size * _size_from_shape (shape)]));
+              data:        data ?? new Bytes (new uint8[scalar_size * _size_from_shape (shape)]),
+              origin:      origin);
     }
 
     private inline size_t
     _offset_from_index ([CCode (array_length = false)] ssize_t[] index)
     {
-        size_t p = 0;
+        size_t p = origin;
         for (var i = 0; i < dimension; i++) {
             p += (size_t) (index[i] < 0 ? _shape[i] + index[i] : index[i]) * _strides[i];
         }
@@ -209,7 +213,8 @@ public class Vast.Array : Object
                           scalar_size,
                           _shape_from_slice (from, to),
                           _strides,
-                          new Bytes.from_bytes (data, (int) _offset_from_index (from), (int) _offset_from_index (to) - _offset_from_index (from)));
+                          data,
+                          _offset_from_index (from));
     }
 
     private inline ssize_t[] _strides_from_steps (ssize_t[] steps)
