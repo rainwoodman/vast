@@ -5,7 +5,8 @@ vast_sources = [
     'function.vala',
     'gradient.vala',
     'formatter.vala',
-    'string-formatter.vala'
+    'string-formatter.vala',
+    'graph.vala',
      ]
 
 subdir('routines')
