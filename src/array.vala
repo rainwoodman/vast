@@ -1,17 +1,17 @@
-namespace Vast {
+using GLib;
 
-public class Array : Object
+public class Vast.Array : Object
 {
-    public Type scalar_type {get; construct;}
+    public Type scalar_type { get; construct; }
 
-    public size_t scalar_size {get; construct;}
+    public size_t scalar_size { get; construct; }
 
-    public size_t dimension {get; construct; }
+    public size_t dimension { get; construct; }
 
     [CCode (array_length = false)]
     private size_t[] _shape;
 
-    public size_t * shape {
+    public size_t* shape {
         get {
             return _shape;
         }
@@ -24,17 +24,17 @@ public class Array : Object
     [CCode (array_length = false)]
     ssize_t[] _strides;
 
-    public ssize_t * strides {
+    public ssize_t* strides {
         get {
             return _strides;
         }
         construct {
             _strides = new ssize_t[dimension];
-            if(value == null) {
-                if(dimension > 0) {
-                    _strides[dimension - 1] = (ssize_t) this.scalar_size;
+            if (value == null) {
+                if (dimension > 0) {
+                    _strides[dimension - 1] = (ssize_t) scalar_size;
 
-                    for(ssize_t i = (ssize_t) dimension - 2; i >= 0; i --) {
+                    for (ssize_t i = (ssize_t) dimension - 2; i >= 0; i --) {
                         _strides[i] = _strides[i+1] * (ssize_t) _shape[i+1];
                     }
                 }
@@ -47,8 +47,8 @@ public class Array : Object
     public size_t size {
         get {
             size_t size = 1;
-            for(var i = 0; i < dimension; i ++) {
-                size *= this.shape[i];
+            for (var i = 0; i < dimension; i++) {
+                size *= _shape[i];
             }
             return size;
         }
@@ -60,7 +60,7 @@ public class Array : Object
     _size_from_shape (size_t[] shape)
     {
         size_t size = 1;
-        for(var i = 0; i < shape.length; i ++) {
+        for (var i = 0; i < shape.length; i++) {
             size *= shape[i];
         }
         return size;
@@ -85,8 +85,8 @@ public class Array : Object
     _offset_from_index ([CCode (array_length = false)] ssize_t[] index)
     {
         size_t p = 0;
-        for(var i = 0; i < this.dimension; i ++) {
-            p += (size_t) (index[i] < 0 ? shape[i] + index[i] : index[i]) * strides[i];
+        for (var i = 0; i < dimension; i++) {
+            p += (size_t) (index[i] < 0 ? _shape[i] + index[i] : index[i]) * _strides[i];
         }
         return p;
     }
@@ -137,18 +137,10 @@ public class Array : Object
         return _value;
     }
 
-    public ArrayIterator iterator()
-    {
-        return new ArrayIterator(this);
-    }
-
     public void
     set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {
-        /* What is the best way of doing this the vala way?
-         * get triggers a dup function, but looks like there
-         * is no clear way doing lvalue?*/
-        Memory.copy((uint8*) data.get_data () + _offset_from_index (index), val, scalar_size);
+        Memory.copy ((uint8*) data.get_data () + _offset_from_index (index), val, scalar_size);
     }
 
     public void
@@ -198,12 +190,17 @@ public class Array : Object
         }
     }
 
+    public ArrayIterator
+    iterator ()
+    {
+        return new ArrayIterator (this);
+    }
+
     private inline size_t[]
     _shape_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
         var shape = new size_t[dimension];
-        for (var i = 0; i < dimension; i++)
-        {
+        for (var i = 0; i < dimension; i++) {
             shape[i] = to[i] - from[i];
         }
         return shape;
@@ -228,7 +225,8 @@ public class Array : Object
         return strides;
     }
 
-    private inline size_t[] _shape_from_steps (ssize_t[] steps)
+    private inline size_t[]
+    _shape_from_steps (ssize_t[] steps)
     {
         var shape = new size_t[dimension];
         for (var i = 0; i < dimension; i++) {
@@ -247,7 +245,8 @@ public class Array : Object
                           data);
     }
 
-    private inline size_t _axis_from_external_axis (ssize_t axis)
+    private inline size_t
+    _axis_from_external_axis (ssize_t axis)
     {
         return axis < 0 ? dimension + axis : axis;
     }
@@ -288,11 +287,11 @@ public class Array : Object
     }
 
     public string
-    to_string()
+    to_string ()
     {
-        StringBuilder sb = new StringBuilder();
-        sb.append_printf("dtype: %s, ", scalar_type.name ());
-        sb.append_printf("dsize: %" + size_t.FORMAT + ", ", scalar_size);
+        StringBuilder sb = new StringBuilder ();
+        sb.append_printf ("dtype: %s, ", scalar_type.name ());
+        sb.append_printf ("dsize: %" + size_t.FORMAT + ", ", scalar_size);
         sb.append_printf ("shape: (");
         for (var i = 0; i < dimension; i++) {
             sb.append_printf ("%" + size_t.FORMAT, shape[i]);
@@ -311,7 +310,4 @@ public class Array : Object
         }
         return sb.str + (string) @out.steal_data ();
     }
-
-}
-
 }
