@@ -33,6 +33,7 @@ public class Vast.Network.Variable : Object
 
     public int vincount {get; internal set;}
     public int voutcount {get; internal set;}
+    static int _counter = 0;
 
     construct
     {
@@ -42,17 +43,31 @@ public class Vast.Network.Variable : Object
 
     public Variable.dummy()
     {
-        name = "D%08p".printf((void*) this);
+        var name = "D%08d".printf(_counter);
         base(name : name);
+        _counter++;
     }
 
-    public Variable(string? name=null)
+    public Variable()
     {
-        var name1 = name;
-        if(name1 == null) {
-            name1 = "V%08p".printf((void*) this);
-        }
+        var name1 = "V%08d".printf(_counter);
         base(name : name1);
+        _counter++;
+    }
+    public string to_string()
+    {
+        var type = "unknown";
+        if(vincount == voutcount) {
+            type = "dummy";
+        }
+        if(vincount == 0) {
+            type = "output";
+        }
+        if(voutcount == 0) {
+            type = "output";
+        }
+        return "%s:%s(as vin %d, as vout %d)".printf(
+                name, type, vincount, voutcount);
     }
 }
 
@@ -74,8 +89,8 @@ public class Vast.Network.Operation: Object
 public class Vast.Network.Node: Object
 {
     public Vast.Network.Operation operation;
-    public unowned Vast.Network.Variable [] vout;
-    public unowned Vast.Network.Variable [] vin;
+    public Vast.Network.Variable [] vout;
+    public Vast.Network.Variable [] vin;
 
     public Node(
         /* FIXME: can we use Object(a : a) type constructor here? */
@@ -87,6 +102,21 @@ public class Vast.Network.Node: Object
         this.operation = operation;
         this.vin = vin;
         this.vout = vout;
+    }
+
+    public string
+    to_string()
+    {
+        var sb = new StringBuilder();
+        foreach(var v in vout) {
+            sb.append_printf("%s, ", v.name);
+        }
+        sb.append_printf("= %s (", operation.name);
+        foreach(var v in vin) {
+            sb.append_printf("%s, ", v.name);
+        }
+        sb.append_printf(")");
+        return sb.str;
     }
 }
 
@@ -112,12 +142,16 @@ public class Vast.Network.Graph : Object
     /* create a variable */
     public Vast.Network.Variable variable()
     {
-        return new Vast.Network.Variable();
+        var v = new Vast.Network.Variable();
+        this.variables.append(v);
+        return v;
     }
 
     public Vast.Network.Variable dummy()
     {
-        return new Vast.Network.Variable.dummy();
+        var v = new Vast.Network.Variable.dummy();
+        this.variables.append(v);
+        return v;
     }
 
     /* create a node connecting some variables */
@@ -136,7 +170,7 @@ public class Vast.Network.Graph : Object
         foreach(var v in vin) {
             v.vincount += 1;
         }
-        foreach(var v in vin) {
+        foreach(var v in vout) {
             v.voutcount += 1;
         }
     }
@@ -157,17 +191,19 @@ public class Vast.Network.Graph : Object
     }
 
     /* */
-    public string tostring()
+    public string to_string()
     {
-        /* write something like this:
-
-            Graph: (%P)
-            Input Variables :
-            Output Variables :
-            Dummy Variables :
-            Edges :
-        */
-        return "Graph";
+        var sb = new StringBuilder();
+        sb.append_printf("Graph (0x%p)\n", this);
+        sb.append("Variables:\n");
+        foreach(var v in variables) {
+            sb.append_printf("%s\n", v.to_string());
+        }
+        sb.append("Nodes:\n");
+        foreach(var node in nodes) {
+            sb.append_printf("%s\n", node.to_string());
+        }
+        return sb.str;
     }
 }
 
