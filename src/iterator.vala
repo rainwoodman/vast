@@ -1,6 +1,6 @@
 using GLib;
 
-public class Vast.ArrayIterator : Object
+public class Vast.Iterator : Object
 {
     public Array array { get; construct; }
 
@@ -31,7 +31,7 @@ public class Vast.ArrayIterator : Object
         return cursor;
     }
 
-    public ArrayIterator (Array array)
+    public Iterator (Array array)
     {
         base (array: array, cursor: _fill_cursor (0, array.dimension));
     }

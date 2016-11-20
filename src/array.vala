@@ -186,10 +186,10 @@ public class Vast.Array : Object
         }
     }
 
-    public ArrayIterator
+    public Iterator
     iterator ()
     {
-        return new ArrayIterator (this);
+        return new Iterator (this);
     }
 
     private inline size_t[]
