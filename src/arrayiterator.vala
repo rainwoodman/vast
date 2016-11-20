@@ -5,17 +5,35 @@ public class Vast.ArrayIterator : Object
     public Array array { get; construct; }
 
     [CCode (array_length = false)]
-    public ssize_t [] cursor;
+    private ssize_t[] _cursor;
 
-    private ssize_t offset;
-    private bool    ended;
-    private bool    started;
+    public ssize_t* cursor {
+        get {
+            return _cursor;
+        }
+        construct {
+            _cursor = new ssize_t[array.dimension];
+            Memory.copy (_cursor, value, array.dimension * sizeof (ssize_t));
+        }
+    }
+
+    private ssize_t offset  = 0;
+    private bool    ended   = false;
+    private bool    started = false;
+
+    private static inline ssize_t[]
+    _fill_cursor (ssize_t initial, size_t dimension)
+    {
+        var cursor = new ssize_t[dimension];
+        for (var i = 0; i < dimension; i++) {
+            cursor[i] = initial;
+        }
+        return cursor;
+    }
 
     public ArrayIterator (Array array)
     {
-        base (array: array);
-        cursor = new ssize_t[array.dimension];
-        reset ();
+        base (array: array, cursor: _fill_cursor (0, array.dimension));
     }
 
     public bool
@@ -31,12 +49,12 @@ public class Vast.ArrayIterator : Object
             return !ended;
         }
         ssize_t dim = (ssize_t) array.dimension - 1;
-        cursor[dim]++;
-        while (dim >= 0 && cursor[dim] == array.shape[dim]) {
+        _cursor[dim]++;
+        while (dim >= 0 && _cursor[dim] == array.shape[dim]) {
             cursor[dim] = 0;
             dim --;
             if (dim >= 0) {
-                cursor[dim]++;
+                _cursor[dim]++;
             } else {
                 ended = true;
             }
@@ -53,7 +71,7 @@ public class Vast.ArrayIterator : Object
     public Value
     get_value ()
     {
-        return array.get_value (cursor);
+        return array.get_value (_cursor);
     }
 
     public void
@@ -65,7 +83,7 @@ public class Vast.ArrayIterator : Object
     public void
     set_value (Value val)
     {
-        array.set_value (cursor, val);
+        array.set_value (_cursor, val);
     }
 
     public void
@@ -73,23 +91,19 @@ public class Vast.ArrayIterator : Object
     {
         ended   = false;
         started = false;
-        var zero = new ssize_t[array.dimension];
-        for (var i = 0; i < zero.length; i++) {
-            zero[i] = 0;
-        }
-        move (zero);
+        move (_fill_cursor (0, array.dimension));
     }
 
     public void
-    move (ssize_t [] cursor)
+    move ([CCode (array_length = false)] ssize_t[] cursor)
     {
         offset = 0;
-        for (var i = 0; i < cursor.length; i++) {
-            cursor[i] = cursor[i];
+        for (var i = 0; i < array.dimension; i++) {
+            _cursor[i] = cursor[i];
             offset += cursor[i] * array.strides[i];
         }
         ended = false;
-        for (var i = 0; i < cursor.length; i++) {
+        for (var i = 0; i < array.dimension; i++) {
             if (cursor[i] >= array.shape[i]) {
                 ended = true;
                 break;
