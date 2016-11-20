@@ -187,9 +187,9 @@ public class Vast.Array : Object
     }
 
     public Iterator
-    iterator ()
+    iterator (IteratorStyle style = IteratorStyle.ROW_MAJOR)
     {
-        return new Iterator (this);
+        return new Iterator (this, style);
     }
 
     private inline size_t[]
