@@ -31,12 +31,8 @@ public class Vast.Array : Object
         construct {
             _strides = new ssize_t[dimension];
             if (value == null) {
-                if (dimension > 0) {
-                    _strides[dimension - 1] = (ssize_t) scalar_size;
-
-                    for (ssize_t i = (ssize_t) dimension - 2; i >= 0; i --) {
-                        _strides[i] = _strides[i+1] * (ssize_t) _shape[i+1];
-                    }
+                for (var i = dimension; i > 0; i--) {
+                    _strides[i - 1] = (i == dimension) ? (ssize_t) scalar_size : _strides[i] * (ssize_t) _shape[i];
                 }
             } else {
                 Memory.copy (_strides, value, dimension * sizeof (ssize_t));
