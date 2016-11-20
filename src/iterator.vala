@@ -17,9 +17,9 @@ public class Vast.Iterator : Object
         }
     }
 
-    private ssize_t offset  = 0;
-    private bool    ended   = false;
-    private bool    started = false;
+    private size_t offset  = 0;
+    private bool   ended   = false;
+    private bool   started = false;
 
     private static inline ssize_t[]
     _fill_cursor (ssize_t initial, size_t dimension)
