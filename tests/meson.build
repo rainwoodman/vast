@@ -5,7 +5,7 @@ test('vast', executable('vast-test', 'vast-test.vala',
 
 test('graph', executable('vast-test-graph', 'vast-test-graph.vala',
                           vala_args: ['--vapidir=' + meson.current_source_dir() + '/../src'],
-                          dependencies: [glib, gobject, gobject_introspection, gio, vast]))
+                          dependencies: [glib, gobject, gobject_introspection, gio, vast, math]))
 
 if g_ir_compiler.found()
     test('gi', find_program('gi-test.py'),

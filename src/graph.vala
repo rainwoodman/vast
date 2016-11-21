@@ -71,7 +71,7 @@ public class Vast.Network.Variable : Object
     }
 }
 
-public class Vast.Network.Operation: Object
+public abstract class Vast.Network.Operation : Object
 {
     public int nin {get; construct set;}
     public int nout {get; construct set;}
@@ -84,6 +84,23 @@ public class Vast.Network.Operation: Object
     {
         base(name : name, nin : nin, nout : nout);
     }
+
+    public abstract void
+    prepare(Object [] inputs,
+            Object? [] outputs);
+        /* For any operation and given inputs, we shall be able to infer the output types*/
+
+        /* check if the input arrays are correct */
+
+        /* create array in outputs if the item is null */
+
+    public abstract void
+    execute(Object[] inputs, Object[] outputs);
+        /* carry out the operation */
+
+        /* Look up the operation via GIR */
+
+        /* call it. */
 }
 
 public class Vast.Network.Node: Object
@@ -207,45 +224,22 @@ public class Vast.Network.Graph : Object
     }
 }
 
-public class Vast.Network.ArrayExecutor : Object
+public class Vast.Network.Executor : Object
 {
     public Vast.Network.Graph graph {get; construct set;}
 
-    public HashTable<Vast.Network.Variable, Vast.Array> cache;
+    public HashTable<Vast.Network.Variable, Object> cache;
 
     construct {
-        cache = new HashTable<Vast.Network.Variable, Vast.Array>(direct_hash, direct_equal);
+        cache = new HashTable<Vast.Network.Variable, Object>(direct_hash, direct_equal);
     }
 
-    public ArrayExecutor(Vast.Network.Graph graph)
+    public Executor(Vast.Network.Graph graph)
     {
         base(graph : graph);
     }
 
-    public void
-    create_outputs(Vast.Network.Operation operation,
-            Vast.Array [] inputs,
-            Vast.Array? [] outputs
-        )
-    {
-        /* For any operation and given inputs, we shall be able to infer the output types*/
-
-        /* check if the input arrays are correct */
-
-        /* create array in outputs if the item is null */
-    }
-
-    public void
-    execute_node(Vast.Network.Operation operation, Vast.Array [] inputs, Vast.Array [] outputs)
-    {
-        /* carry out the operation */
-
-        /* Look up the operation via GIR */
-
-        /* call it. */
-    }
-
-    public void initialize(Vast.Network.Variable V, Vast.Array array)
+    public void initialize(Vast.Network.Variable V, Object array)
     {
         /* FIXME: is V a src of graph? If not we may want to die here */
         cache.set(V, array);
@@ -256,8 +250,8 @@ public class Vast.Network.ArrayExecutor : Object
         /* ensure input variables are computed */
         this.compute(node.vin);
 
-        var ai = new Vast.Array [node.vin.length];
-        var ao = new Vast.Array? [node.vout.length];
+        var ai = new Object [node.vin.length];
+        var ao = new Object? [node.vout.length];
 
         for(var i = 0; i < ai.length; i ++) {
             ai[i] = cache.get(node.vin[i]);
@@ -267,7 +261,7 @@ public class Vast.Network.ArrayExecutor : Object
         for(var i = 0; i < ao.length; i ++) {
             ao[i] = cache.get(node.vout[i]);
         }
-        create_outputs(node.operation, ai, ao);
+        node.operation.prepare(ai,  ao);
 
         /* this will remember the output variables */
         for(var i = 0; i < ao.length; i ++) {
@@ -286,14 +280,14 @@ public class Vast.Network.ArrayExecutor : Object
             }
         }
 
-        execute_node(node.operation, ai, ao);
+        node.operation.execute(ai, ao);
     }
 
 
     /* compute the graph till all variables in V are realized */
-    public Vast.Array [] compute(Vast.Network.Variable [] V)
+    public Object [] compute(Vast.Network.Variable [] V)
     {
-        var result = new Vast.Array[V.length];
+        var result = new Object[V.length];
 
         for(var i = 0; i < V.length; i ++) {
             var v = V[i];
