@@ -196,6 +196,18 @@ public class Vast.Array : Object
         return new Iterator (this);
     }
 
+    public Array
+    reshape (size_t[] new_shape)
+        requires (_shape == null || _size_from_shape (_shape) == _size_from_shape (new_shape))
+    {
+        return new Array (scalar_type,
+                          scalar_size,
+                          new_shape,
+                          _strides, // TODO: compute proper strides
+                          data,
+                          origin);
+    }
+
     private inline size_t[]
     _shape_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
