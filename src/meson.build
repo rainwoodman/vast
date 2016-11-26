@@ -17,7 +17,9 @@ vast = declare_dependency(link_with: vast_lib,
                           include_directories: include_directories('.'))
 
 g_ir_compiler = find_program('g-ir-compiler')
-custom_target('typelib', command: [g_ir_compiler, '--output', '@OUTPUT', meson.current_build_dir() + '/Vast-1.0.gir'],
+custom_target('typelib', command: [g_ir_compiler, '--output', '@OUTPUT@',
+                                                  '--shared-library', vast_lib.full_path(),
+                                                  meson.current_build_dir() + '/Vast-1.0.gir'],
               output: 'Vast-1.0.typelib',
               depends: vast_lib,
               install: true,
