@@ -1,6 +1,7 @@
 vast_sources = [
     'array.vala',
     'iterator.vala',
+    'iterator-style.vala',
     'function.vala',
     'formatter.vala',
     'string-formatter.vala'

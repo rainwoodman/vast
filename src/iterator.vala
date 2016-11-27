@@ -4,6 +4,8 @@ public class Vast.Iterator : Object
 {
     public Array array { get; construct; }
 
+    public IteratorStyle style { get; construct; }
+
     [CCode (array_length = false)]
     private ssize_t[] _cursor;
 
@@ -31,9 +33,9 @@ public class Vast.Iterator : Object
         return cursor;
     }
 
-    public Iterator (Array array)
+    public Iterator (Array array, IteratorStyle style)
     {
-        base (array: array, cursor: _fill_cursor (0, array.dimension));
+        base (array: array, style: style, cursor: _fill_cursor (0, array.dimension));
     }
 
     public bool
@@ -50,16 +52,28 @@ public class Vast.Iterator : Object
         }
         ssize_t dim = (ssize_t) array.dimension - 1;
         _cursor[dim]++;
-        while (dim >= 0 && _cursor[dim] == array.shape[dim]) {
-            cursor[dim] = 0;
-            dim --;
-            if (dim >= 0) {
-                _cursor[dim]++;
-            } else {
-                ended = true;
-            }
+        switch (style) {
+            case IteratorStyle.ROW_MAJOR:
+                for (var i = array.dimension; i > 0; i--) {
+                    if (_cursor[i - 1] < array.shape[i - 1]) {
+                        _cursor[i]++;
+                        return i == 0 && _cursor[i - 1] == array.shape[i - 1];
+                    }
+                }
+                break;
+            case IteratorStyle.COLUMN_MAJOR:
+                for (var i = 0; i < array.dimension; i++) {
+                    if (_cursor[i] < array.shape[i]) {
+                        _cursor[i]++;
+                        return i == array.dimension && _cursor[i] == array.shape[i];
+                    }
+                }
+                break;
+            default:
+                assert_not_reached ();
         }
-        return !ended;
+
+        return false; // no style could increment the cursor, so we're done
     }
 
     public void*
