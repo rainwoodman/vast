@@ -62,7 +62,7 @@ public class Vast.Iterator : Object
         return !ended;
     }
 
-    public void*
+    public unowned void*
     get ()
     {
         return (uint8*) array.data.get_data () + offset;
