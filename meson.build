@@ -8,5 +8,7 @@ gmodule = dependency('gmodule-2.0', version: '>=2.32')
 gio = dependency('gio-2.0', version: '>=2.32')
 math = meson.get_compiler('c').find_library('m')
 
+g_ir_compiler = find_program('g-ir-compiler', required: false)
+
 subdir('src')
 subdir('tests')
