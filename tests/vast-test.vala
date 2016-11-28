@@ -32,6 +32,35 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/iterator", () => {
+        var a = new Vast.Array (typeof (double), sizeof (double), {5, 2});
+
+        for (var i = 0; i < 5; i++) {
+            for (var j = 0; j < 2; j++) {
+                a.set_value ({i, j}, i * j);
+            }
+        }
+
+        var iter = new Iterator (a);
+
+        for (var i = 0; i < 5; i++) {
+            for (var j = 0; j < 2; j++) {
+                assert (iter.next ());
+                assert (i * j == iter.get_value ().get_double ());
+                message ("%" + size_t.FORMAT, iter.offset);
+                assert ((i * 2 + j) * sizeof (double) == iter.offset);
+            }
+        }
+
+        assert (!iter.next ());
+
+        iter.move ({0, 0});
+        assert (0 == iter.get_value ().get_double ());
+
+        iter.move ({0, 0});
+        assert (0 == iter.get_value ().get_double ());
+    });
+
     Test.add_func ("/array/to_string", () => {
         var s = new Vast.Array (typeof (double), sizeof (double), {1});
         s.set_value ({1}, 1);

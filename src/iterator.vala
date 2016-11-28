@@ -5,67 +5,54 @@ public class Vast.Iterator : Object
     public Array array { get; construct; }
 
     [CCode (array_length = false)]
-    private ssize_t[] _cursor;
+    private ssize_t[] _cursor = null;
 
     public ssize_t* cursor {
         get {
             return _cursor;
         }
-        construct {
-            _cursor = new ssize_t[array.dimension];
-            Memory.copy (_cursor, value, array.dimension * sizeof (ssize_t));
-        }
     }
 
-    private size_t offset  = 0;
-    private bool   ended   = false;
-    private bool   started = false;
+    private size_t _offset;
 
-    private static inline ssize_t[]
-    _fill_cursor (ssize_t initial, size_t dimension)
-    {
-        var cursor = new ssize_t[dimension];
-        for (var i = 0; i < dimension; i++) {
-            cursor[i] = initial;
-        }
-        return cursor;
+    public size_t offset {
+        get { return _offset; }
     }
 
     public Iterator (Array array)
     {
-        base (array: array, cursor: _fill_cursor (0, array.dimension));
+        base (array: array);
     }
 
     public bool
     next ()
     {
-        if (!started) {
-            started = true;
-            return !ended;
+        if (_cursor == null) {
+            _cursor = new ssize_t[array.dimension];
+            Memory.set (_cursor, 0, array.dimension * sizeof (ssize_t));
+            _offset = 0;
+            return true;
         }
-        if (array.dimension == 0) {
-            /* special case for scalar. This could have been merged with below? */
-            ended = true;
-            return !ended;
-        }
-        ssize_t dim = (ssize_t) array.dimension - 1;
-        _cursor[dim]++;
-        while (dim >= 0 && _cursor[dim] == array.shape[dim]) {
-            cursor[dim] = 0;
-            dim --;
-            if (dim >= 0) {
-                _cursor[dim]++;
+
+        for (var i = array.dimension; i > 0; i--) {
+            _cursor[i - 1] = _cursor[i - 1] + 1;
+            _offset        = _offset + array.strides[i - 1];
+            if (_cursor[i - 1] < array.shape[i - 1]) {
+                return true;
             } else {
-                ended = true;
+                _cursor[i - 1] -= (ssize_t) array.shape[i - 1];
+                _offset        -= array.shape[i - 1] * array.strides[i - 1];
             }
         }
-        return !ended;
+
+        // could not increment the cursor
+        return false;
     }
 
     public unowned void*
     get ()
     {
-        return (uint8*) array.data.get_data () + offset;
+        return (uint8*) array.data.get_data () + _offset;
     }
 
     public Value
@@ -77,7 +64,7 @@ public class Vast.Iterator : Object
     public void
     set (void* val)
     {
-        Memory.copy ((uint8*) array.data.get_data () + offset, val, array.scalar_size);
+        Memory.copy ((uint8*) array.data.get_data () + _offset, val, array.scalar_size);
     }
 
     public void
@@ -89,31 +76,19 @@ public class Vast.Iterator : Object
     public void
     reset ()
     {
-        ended   = false;
-        started = false;
-        move (_fill_cursor (0, array.dimension));
+        _cursor = null;
     }
 
     public void
-    move ([CCode (array_length = false)] ssize_t[] cursor)
+    move ([CCode (array_length = false)] ssize_t[] destination)
     {
-        offset = 0;
-        for (var i = 0; i < array.dimension; i++) {
-            _cursor[i] = cursor[i];
-            offset += cursor[i] * array.strides[i];
+        if (_cursor == null) {
+            _cursor = new ssize_t[array.dimension];
         }
-        ended = false;
+        _offset = 0;
         for (var i = 0; i < array.dimension; i++) {
-            if (cursor[i] >= array.shape[i]) {
-                ended = true;
-                break;
-            }
+            _cursor[i] = destination[i];
+            _offset   += destination[i] * array.strides[i];
         }
-    }
-
-    public bool
-    end ()
-    {
-        return ended;
     }
 }
