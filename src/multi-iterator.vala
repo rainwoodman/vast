@@ -34,11 +34,16 @@ public class Vast.MultiIterator : Object
     }
 
     public MultiIterator (
-        [CCode (array_null_terminated = true)]
         Array[] arrays
     )
     {
-        base (arrays: arrays);
+        var arrays_null_terminated = new Array[arrays.length + 1];
+        
+        for(var i = 0; i < arrays.length; i ++) {
+            arrays_null_terminated[i] = arrays[i];
+        }
+        arrays_null_terminated[arrays.length] = null;
+        base (arrays: arrays_null_terminated);
     }
 
     /* ** avoid vala array duplication when the receiver declares var */

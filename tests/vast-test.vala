@@ -305,17 +305,15 @@ int main (string[] args) {
             s.set_value ({i}, i);
             v.set_value ({i}, 0);
         }
-        var mi = new Vast.MultiIterator ({s, v, null});
-        int i = 0;
+        var mi = new Vast.MultiIterator ({s, v});
         while(mi.next()) {
             var dataptr = mi.get();
             *(double*) dataptr[1] = *(double*) dataptr[0];
-            message("%d %g %g", i, *(double*) dataptr[0], *(double*) dataptr[1]);
-            i ++;
         }
 
-        message("s = %s", s.to_string());
-        message("v = %s", v.to_string());
+        for(var i = 0; i < 10; i ++) {
+            assert(s.get_value({i}) == 1.0 * i);
+        }
     });
     return Test.run ();
 }
