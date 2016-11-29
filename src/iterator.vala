@@ -48,19 +48,19 @@ public class Vast.FlatIterator : Object
     public Value
     get_value ()
     {
-        return array.pointer_to_value(get());
+        return memory_to_value(get(), array.scalar_type, array.scalar_size);
     }
 
     public void
-    set (void* val)
+    set (void* memory)
     {
-        Memory.copy ((uint8*) array.data.get_data () + _offset, val, array.scalar_size);
+        Memory.copy (get(), memory, array.scalar_size);
     }
 
     void
     set_value (Value val)
     {
-        array.value_to_pointer(get(), val);
+        value_to_memory(val, get(), array.scalar_type, array.scalar_size);
     }
 
 

@@ -1,4 +1,5 @@
 vast_sources = [
+    'value.vala',
     'array.vala',
     'iterator.vala',
     'function.vala',

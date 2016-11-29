@@ -97,109 +97,22 @@ public class Vast.Array : Object
         return (uint8*) _data.get_data () + _offset_from_index (index);
     }
 
-    internal Value
-    pointer_to_value(void * pointer)
-    {
-        var _value = Value (scalar_type);
-
-        if (scalar_type == typeof (string)) {
-            _value.set_string ((string) pointer);
-        }
-
-        else if (_value.fits_pointer ()) {
-            Memory.copy (_value.peek_pointer (), pointer, scalar_size);
-        }
-
-        else if (scalar_type == Type.BOXED) {
-            _value.set_boxed (pointer);
-        }
-
-        else if (scalar_type == typeof (char)) {
-            _value.set_char (*(char*) pointer);
-        }
-
-        else if (scalar_type == typeof (uint8)) {
-            _value.set_uchar (*(uchar*) pointer);
-        }
-
-        else if (scalar_type == typeof (int64)) {
-            _value.set_int64 (*(int64*) pointer);
-        }
-
-        else if (scalar_type == typeof (double)) {
-            _value.set_double (*((double*) pointer));
-        }
-
-        else {
-            assert_not_reached ();
-        }
-
-        return _value;
-
-    }
     public Value
     get_value ([CCode (array_length = false)] ssize_t[] index)
     {
-        return pointer_to_value(get_pointer(index));
+        return memory_to_value(get_pointer(index), scalar_type, scalar_size);
     }
 
     public void
-    set_from_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
+    copy_from_memory ([CCode (array_length = false)] ssize_t[] index, void* memory)
     {
-        Memory.copy (get_pointer(index), val, scalar_size);
+        Memory.copy (get_pointer(index), memory, scalar_size);
     }
 
-    internal void
-    value_to_pointer (void* pointer, Value val)
-    {
-        var dest_value = Value (scalar_type);
-        if (val.transform (ref dest_value)) {
-            if (scalar_type == typeof (string)) {
-                Memory.copy (pointer, val.get_string (), scalar_size);
-            }
-
-            else if (dest_value.fits_pointer ()) {
-                Memory.copy (pointer, dest_value.peek_pointer (), scalar_size);
-            }
-
-            else if (scalar_type == Type.BOXED) {
-                Memory.copy (pointer, dest_value.get_boxed (), scalar_size);
-            }
-
-            else if (scalar_type == typeof (char)) {
-                var _ = dest_value.get_char ();
-                Memory.copy (pointer, (&_), scalar_size);
-            }
-
-            else if (scalar_type == typeof (uint8)) {
-                var _ = dest_value.get_uchar ();
-                Memory.copy (pointer, (&_), scalar_size);
-            }
-
-            else if (scalar_type == typeof (int64)) {
-                var _ = dest_value.get_int64 ();
-                Memory.copy (pointer, (&_), scalar_size);
-            }
-
-            else if (scalar_type == typeof (double)) {
-                var _ = dest_value.get_double ();
-                Memory.copy (pointer, &_, scalar_size);
-            }
-
-            else {
-                assert_not_reached ();
-            }
-        } else {
-            error ("Could not transform '%s' into '%s'.", val.type ().name (),
-                                                          dest_value.type ().name ());
-        }
-
-    }
     public void
     set_value ([CCode (array_length = false)] ssize_t[] index, Value val)
     {
-        var pointer = get_pointer(index);
-        value_to_pointer(pointer, val);
+        value_to_memory(val, get_pointer(index), scalar_type, scalar_size);
     }
 
     public FlatIterator
