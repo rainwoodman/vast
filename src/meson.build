@@ -3,7 +3,8 @@ vast_sources = [
     'iterator.vala',
     'function.vala',
     'formatter.vala',
-    'string-formatter.vala'
+    'string-formatter.vala',
+    'multi-iterator.vala'
      ]
 
 vast_lib = library('vast-1.0', vast_sources,

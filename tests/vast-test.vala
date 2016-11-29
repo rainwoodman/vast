@@ -282,5 +282,40 @@ int main (string[] args) {
         assert ('b' == mapped_file.get_contents ()[0]);
     });
 
+    Test.add_func ("/array/iterator", () => {
+        var s = new Vast.Array (typeof (double), sizeof (double), {10});
+        for (var i = 0; i < 10; i++) {
+            s.set_value ({i}, i);
+        }
+        var si = new Vast.Iterator (s);
+        int i = 0;
+        while(si.next()) {
+            var dataptr = si.get();
+            message("%d %g", i, *(double*) dataptr);
+            i ++;
+        }
+    });
+
+
+    Test.add_func ("/array/multi-iterator", () => {
+        var s = new Vast.Array (typeof (double), sizeof (double), {10});
+        var v = new Vast.Array (typeof (double), sizeof (double), {10});
+
+        for (var i = 0; i < 10; i++) {
+            s.set_value ({i}, i);
+            v.set_value ({i}, 0);
+        }
+        var mi = new Vast.MultiIterator ({s, v, null});
+        int i = 0;
+        while(mi.next()) {
+            var dataptr = mi.get();
+            *(double*) dataptr[1] = *(double*) dataptr[0];
+            message("%d %g %g", i, *(double*) dataptr[0], *(double*) dataptr[1]);
+            i ++;
+        }
+
+        message("s = %s", s.to_string());
+        message("v = %s", v.to_string());
+    });
     return Test.run ();
 }
