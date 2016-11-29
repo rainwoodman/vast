@@ -41,24 +41,17 @@ int main (string[] args) {
             }
         }
 
-        var iter = new Iterator (a);
+        var iter = new FlatIterator (a);
 
         for (var i = 0; i < 5; i++) {
             for (var j = 0; j < 2; j++) {
                 assert (iter.next ());
                 assert (i * j == iter.get_value ().get_double ());
-                message ("%" + size_t.FORMAT, iter.offset);
-                assert ((i * 2 + j) * sizeof (double) == iter.offset);
             }
         }
 
         assert (!iter.next ());
 
-        iter.move ({0, 0});
-        assert (0 == iter.get_value ().get_double ());
-
-        iter.move ({0, 0});
-        assert (0 == iter.get_value ().get_double ());
     });
 
     Test.add_func ("/array/to_string", () => {
@@ -287,7 +280,7 @@ int main (string[] args) {
         for (var i = 0; i < 10; i++) {
             s.set_value ({i}, i);
         }
-        var si = new Vast.Iterator (s);
+        var si = new Vast.FlatIterator (s);
         int i = 0;
         while(si.next()) {
             var dataptr = si.get();
@@ -303,7 +296,7 @@ int main (string[] args) {
             s.set_value ({j, i}, j * 10 + i);
         }
         }
-        var si = new Vast.Iterator (s);
+        var si = new Vast.FlatIterator (s);
         int i = 0;
         while(si.next()) {
             var dataptr = si.get();
@@ -320,7 +313,7 @@ int main (string[] args) {
             s.set_value ({j, i}, j * 10 + i);
         }
         }
-        var si = new Vast.Iterator (s);
+        var si = new Vast.FlatIterator (s);
         int i = 0;
         while(si.next()) {
             var dataptr = si.get();

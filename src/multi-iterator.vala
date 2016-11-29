@@ -3,7 +3,7 @@ using GLib;
 public class Vast.MultiIterator : Object
 {
     private Array[] _arrays;
-    private Iterator[] _iterators;
+    private FlatIterator[] _iterators;
     private void * [] _dataptrs;
 
     public unowned Array** arrays {
@@ -24,10 +24,10 @@ public class Vast.MultiIterator : Object
     }
 
     construct {
-        _iterators = new Iterator [_arrays.length];
+        _iterators = new FlatIterator [_arrays.length];
         _dataptrs = new void * [_arrays.length];
         for(var i = 0; i < _arrays.length; i ++) {
-            _iterators[i] = new Iterator(_arrays[i]);
+            _iterators[i] = new FlatIterator(_arrays[i]);
             _dataptrs[i] = null;
         }
         message("initialized with %d arrays", _arrays.length);

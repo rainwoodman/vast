@@ -97,37 +97,37 @@ public class Vast.Array : Object
         return (uint8*) _data.get_data () + _offset_from_index (index);
     }
 
-    public Value
-    get_value ([CCode (array_length = false)] ssize_t[] index)
+    internal Value
+    pointer_to_value(void * pointer)
     {
         var _value = Value (scalar_type);
 
         if (scalar_type == typeof (string)) {
-            _value.set_string ((string) get_pointer (index));
+            _value.set_string ((string) pointer);
         }
 
         else if (_value.fits_pointer ()) {
-            Memory.copy (_value.peek_pointer (), get_pointer (index), scalar_size);
+            Memory.copy (_value.peek_pointer (), pointer, scalar_size);
         }
 
         else if (scalar_type == Type.BOXED) {
-            _value.set_boxed (get_pointer (index));
+            _value.set_boxed (pointer);
         }
 
         else if (scalar_type == typeof (char)) {
-            _value.set_char (*(char*) get_pointer (index));
+            _value.set_char (*(char*) pointer);
         }
 
         else if (scalar_type == typeof (uint8)) {
-            _value.set_uchar (*(uchar*) get_pointer (index));
+            _value.set_uchar (*(uchar*) pointer);
         }
 
         else if (scalar_type == typeof (int64)) {
-            _value.set_int64 (*(int64*) get_pointer (index));
+            _value.set_int64 (*(int64*) pointer);
         }
 
         else if (scalar_type == typeof (double)) {
-            _value.set_double (*((double*) get_pointer (index)));
+            _value.set_double (*((double*) pointer));
         }
 
         else {
@@ -135,50 +135,55 @@ public class Vast.Array : Object
         }
 
         return _value;
-    }
 
-    public void
-    set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
+    }
+    public Value
+    get_value ([CCode (array_length = false)] ssize_t[] index)
     {
-        Memory.copy ((uint8*) data.get_data () + _offset_from_index (index), val, scalar_size);
+        return pointer_to_value(get_pointer(index));
     }
 
     public void
-    set_value ([CCode (array_length = false)] ssize_t[] index, Value val)
+    set_from_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
+    {
+        Memory.copy (get_pointer(index), val, scalar_size);
+    }
+
+    internal void
+    value_to_pointer (void* pointer, Value val)
     {
         var dest_value = Value (scalar_type);
-
         if (val.transform (ref dest_value)) {
             if (scalar_type == typeof (string)) {
-                set_pointer (index, val.get_string ());
+                Memory.copy (pointer, val.get_string (), scalar_size);
             }
 
             else if (dest_value.fits_pointer ()) {
-                set_pointer (index, dest_value.peek_pointer ());
+                Memory.copy (pointer, dest_value.peek_pointer (), scalar_size);
             }
 
             else if (scalar_type == Type.BOXED) {
-                set_pointer (index, dest_value.get_boxed ());
+                Memory.copy (pointer, dest_value.get_boxed (), scalar_size);
             }
 
             else if (scalar_type == typeof (char)) {
                 var _ = dest_value.get_char ();
-                set_pointer (index, (&_));
+                Memory.copy (pointer, (&_), scalar_size);
             }
 
             else if (scalar_type == typeof (uint8)) {
                 var _ = dest_value.get_uchar ();
-                set_pointer (index, (&_));
+                Memory.copy (pointer, (&_), scalar_size);
             }
 
             else if (scalar_type == typeof (int64)) {
                 var _ = dest_value.get_int64 ();
-                set_pointer (index, (&_));
+                Memory.copy (pointer, (&_), scalar_size);
             }
 
             else if (scalar_type == typeof (double)) {
                 var _ = dest_value.get_double ();
-                set_pointer (index, &_);
+                Memory.copy (pointer, &_, scalar_size);
             }
 
             else {
@@ -188,12 +193,19 @@ public class Vast.Array : Object
             error ("Could not transform '%s' into '%s'.", val.type ().name (),
                                                           dest_value.type ().name ());
         }
+
+    }
+    public void
+    set_value ([CCode (array_length = false)] ssize_t[] index, Value val)
+    {
+        var pointer = get_pointer(index);
+        value_to_pointer(pointer, val);
     }
 
-    public Iterator
+    public FlatIterator
     iterator ()
     {
-        return new Iterator (this);
+        return new FlatIterator (this);
     }
 
     public Array
@@ -323,4 +335,19 @@ public class Vast.Array : Object
         }
         return sb.str + (string) @out.steal_data ();
     }
+
+    /* inspiring another function that find the
+       axes that are trivially iterable */
+    bool
+    is_trivially_iterable() {
+        var i = dimension - 1;
+        size_t expected = scalar_size;
+        while(i >= 0) {
+            if(_strides[i] != expected) return false;
+            expected *= _shape[i];
+            i--;
+        }
+        return true;
+    }
+
 }
