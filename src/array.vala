@@ -91,10 +91,16 @@ public class Vast.Array : Object
         return p;
     }
 
+    private inline void*
+    _pointer_from_offset (size_t offset)
+    {
+        return (uint8*) _data.get_data () + offset;
+    }
+
     public unowned void*
     get_pointer ([CCode (array_length = false)] ssize_t[] index)
     {
-        return (uint8*) _data.get_data () + _offset_from_index (index);
+        return _pointer_from_offset (_offset_from_index (index));
     }
 
     public Value
@@ -140,7 +146,7 @@ public class Vast.Array : Object
     public void
     set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {
-        Memory.copy ((uint8*) data.get_data () + _offset_from_index (index), val, scalar_size);
+        Memory.copy (_pointer_from_offset (_offset_from_index (index)), val, scalar_size);
     }
 
     public void
