@@ -30,7 +30,6 @@ public class Vast.MultiIterator : Object
             _iterators[i] = new FlatIterator(_arrays[i]);
             _dataptrs[i] = null;
         }
-        message("initialized with %d arrays", _arrays.length);
     }
 
     public MultiIterator (
