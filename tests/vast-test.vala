@@ -41,24 +41,17 @@ int main (string[] args) {
             }
         }
 
-        var iter = new Iterator (a);
+        var iter = new FlatIterator (a);
 
         for (var i = 0; i < 5; i++) {
             for (var j = 0; j < 2; j++) {
                 assert (iter.next ());
                 assert (i * j == iter.get_value ().get_double ());
-                message ("%" + size_t.FORMAT, iter.offset);
-                assert ((i * 2 + j) * sizeof (double) == iter.offset);
             }
         }
 
         assert (!iter.next ());
 
-        iter.move ({0, 0});
-        assert (0 == iter.get_value ().get_double ());
-
-        iter.move ({0, 0});
-        assert (0 == iter.get_value ().get_double ());
     });
 
     Test.add_func ("/array/to_string", () => {
@@ -282,5 +275,71 @@ int main (string[] args) {
         assert ('b' == mapped_file.get_contents ()[0]);
     });
 
+    Test.add_func ("/array/iterator/1d", () => {
+        var s = new Vast.Array (typeof (double), sizeof (double), {10});
+        for (var i = 0; i < 10; i++) {
+            s.set_value ({i}, i);
+        }
+        var si = new Vast.FlatIterator (s);
+        int i = 0;
+        while(si.next()) {
+            var dataptr = si.get();
+            assert(i == *(double*) dataptr);
+            i ++;
+        }
+    });
+
+    Test.add_func ("/array/iterator/2d", () => {
+        var s = new Vast.Array (typeof (double), sizeof (double), {10, 10});
+        for (var j = 0; j < 10; j++) {
+        for (var i = 0; i < 10; i++) {
+            s.set_value ({j, i}, j * 10 + i);
+        }
+        }
+        var si = new Vast.FlatIterator (s);
+        int i = 0;
+        while(si.next()) {
+            var dataptr = si.get();
+            assert(i == *(double*) dataptr);
+            i ++;
+        }
+    });
+
+    Test.add_func ("/array/iterator/2dT", () => {
+        var s = new Vast.Array (typeof (double), sizeof (double), {10, 10});
+        s = s.transpose({1, 0});
+        for (var j = 0; j < 10; j++) {
+        for (var i = 0; i < 10; i++) {
+            s.set_value ({j, i}, j * 10 + i);
+        }
+        }
+        var si = new Vast.FlatIterator (s);
+        int i = 0;
+        while(si.next()) {
+            var dataptr = si.get();
+            assert(i == *(double*) dataptr);
+            i ++;
+        }
+    });
+
+
+    Test.add_func ("/array/multi-iterator", () => {
+        var s = new Vast.Array (typeof (double), sizeof (double), {10});
+        var v = new Vast.Array (typeof (double), sizeof (double), {10});
+
+        for (var i = 0; i < 10; i++) {
+            s.set_value ({i}, i);
+            v.set_value ({i}, 0);
+        }
+        var mi = new Vast.MultiIterator ({s, v});
+        while(mi.next()) {
+            var dataptr = mi.get();
+            *(double*) dataptr[1] = *(double*) dataptr[0];
+        }
+
+        for(var i = 0; i < 10; i ++) {
+            assert(s.get_value({i}) == 1.0 * i);
+        }
+    });
     return Test.run ();
 }

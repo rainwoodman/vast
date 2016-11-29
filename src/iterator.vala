@@ -1,25 +1,15 @@
 using GLib;
 
-public class Vast.Iterator : Object
+public class Vast.FlatIterator : Object
 {
     public Array array { get; construct; }
 
     [CCode (array_length = false)]
     private ssize_t[] _cursor = null;
 
-    public ssize_t* cursor {
-        get {
-            return _cursor;
-        }
-    }
-
     private size_t _offset;
 
-    public size_t offset {
-        get { return _offset; }
-    }
-
-    public Iterator (Array array)
+    public FlatIterator (Array array)
     {
         base (array: array);
     }
@@ -58,37 +48,26 @@ public class Vast.Iterator : Object
     public Value
     get_value ()
     {
-        return array.get_value (_cursor);
+        return memory_to_value(get(), array.scalar_type, array.scalar_size);
     }
 
     public void
-    set (void* val)
+    set (void* memory)
     {
-        Memory.copy ((uint8*) array.data.get_data () + _offset, val, array.scalar_size);
+        Memory.copy (get(), memory, array.scalar_size);
     }
 
-    public void
+    void
     set_value (Value val)
     {
-        array.set_value (_cursor, val);
+        value_to_memory(val, get(), array.scalar_type, array.scalar_size);
     }
 
-    public void
+
+    private void
     reset ()
     {
         _cursor = null;
     }
 
-    public void
-    move ([CCode (array_length = false)] ssize_t[] destination)
-    {
-        if (_cursor == null) {
-            _cursor = new ssize_t[array.dimension];
-        }
-        _offset = 0;
-        for (var i = 0; i < array.dimension; i++) {
-            _cursor[i] = destination[i];
-            _offset   += destination[i] * array.strides[i];
-        }
-    }
 }
