@@ -156,7 +156,10 @@ public class Vast.Array : Object
 
         if (val.transform (ref dest_value)) {
             if (scalar_type == typeof (string)) {
-                set_pointer (index, val.get_string ());
+                var ptr  = _pointer_from_offset (_offset_from_index (index));
+                var str  = dest_value.get_string ();
+                var dest = Posix.strncpy ((string) ptr, str, scalar_size - 1);
+                dest.data[scalar_size - 1] = '\0';
             }
 
             else if (dest_value.fits_pointer ()) {

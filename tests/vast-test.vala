@@ -121,14 +121,16 @@ int main (string[] args) {
     });
 
     Test.add_func ("/array/string", () => {
-        var a = new Vast.Array (typeof (string), sizeof (string), {10});
+        var a = new Vast.Array (typeof (string), sizeof (char) * 10, {10});
 
         a.set_value ({0}, "test");
 
-        message (a.to_string ());
-
         assert ("test" == a.get_value ({0}).get_string ());
-        assert (4 == a.get_value ({0}).get_string ().data.length);
+        assert (4 == a.get_value ({0}).get_string ().length);
+
+        // trucation
+        a.set_value ({0}, "testtesttee");
+        assert ("testtestt" == a.get_value ({0}).get_string ());
     });
 
     Test.add_func ("/array/large", () => {
