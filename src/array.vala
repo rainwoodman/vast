@@ -297,7 +297,7 @@ public class Vast.Array : Object
     {
         var shape = new size_t[dimension];
         for (var i = 0; i < dimension; i++) {
-            shape[i] = _shape[i] / steps[i]; // round down
+            shape[i] = _shape[i] / (steps[i] < 0 ? -steps[i] : steps[i]); // round down
         }
         return shape;
     }
@@ -305,11 +305,18 @@ public class Vast.Array : Object
     public Array
     step ([CCode (array_length = false)] ssize_t[] steps)
     {
+        var new_origin = origin;
+        for (var i = 0; i < dimension; i++) {
+            if (steps[i] < 0) {
+                new_origin += _strides[i] * _shape[i] - scalar_size;
+            }
+        }
         return new Array (scalar_type,
                           scalar_size,
                           _shape_from_steps (steps),
                           _strides_from_steps (steps),
-                          data);
+                          data,
+                          new_origin);
     }
 
     private inline size_t

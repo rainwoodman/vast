@@ -224,6 +224,13 @@ int main (string[] args) {
         assert (4 == stepped.get_value ({2}).get_int64 ());
         assert (6 == stepped.get_value ({3}).get_int64 ());
         assert (8 == stepped.get_value ({4}).get_int64 ());
+
+        var b = array.step ({-1});
+        assert (9 == b.get_value ({0}).get_int64 ());
+        assert (8 == b.get_value ({1}).get_int64 ());
+        assert (7 == b.get_value ({2}).get_int64 ());
+        assert (1 == b.get_value ({8}).get_int64 ());
+        assert (0 == b.get_value ({9}).get_int64 ());
     });
 
     Test.add_func ("/array/transpose", () => {
