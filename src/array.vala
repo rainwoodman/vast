@@ -319,19 +319,18 @@ public class Vast.Array : Object
                           new_origin);
     }
 
-    public Array
-    flip (size_t axis)
-        requires (axis < dimension)
-    {
-        var steps = _fill_index (1);
-        steps[axis] = -1;
-        return step (steps);
-    }
-
     private inline size_t
     _axis_from_external_axis (ssize_t axis)
     {
         return axis < 0 ? dimension + axis : axis;
+    }
+
+    public Array
+    flip (ssize_t axis = 0)
+    {
+        var steps = _fill_index (1);
+        steps[_axis_from_external_axis (axis)] = -1;
+        return step (steps);
     }
 
     public Array
