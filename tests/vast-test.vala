@@ -184,6 +184,20 @@ int main (string[] args) {
         assert (400 == c.get_value ({0, 0}).get_int64 ());
         assert (9 == c.shape[0]);
         assert (9 == c.shape[1]);
+
+        assert (29 == a.slice ({0, 0}, {-1, -1}).shape[0]);
+        assert (29 == a.slice ({0, 0}, {-1, -1}).shape[1]);
+
+        // full slice
+        assert (30 == a.slice ({0, 0}, {(ssize_t) a.shape[0], (ssize_t) a.shape[1]}).shape[0]);
+
+        // head slice
+        assert (20 == a.head ({20, 20}).shape[0]);
+        assert (20 == a.head ({-10, -10}).shape[0]);
+
+        // tail slice
+        assert (10 == a.tail ({20, 20}).shape[0]);
+        assert (10 == a.tail ({-10, -10}).shape[0]);
     });
 
     Test.add_func ("/array/step", () => {
