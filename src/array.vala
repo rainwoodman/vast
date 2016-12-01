@@ -222,9 +222,28 @@ public class Vast.Array : Object
     {
         var shape = new size_t[dimension];
         for (var i = 0; i < dimension; i++) {
-            shape[i] = (to[i] < 0 ? _shape[i] + to[i] : to[i]) - (from[i] < 0 ? _shape[i] + from[i] : from[i]);
+            var a = to[i] < 0 ? _shape[i] + to[i] : to[i];
+            var b = from[i] < 0 ? _shape[i] + from[i] : from[i];
+            if (a < b) {
+                shape[i] = b - a;
+            } else {
+                shape[i] = a - b;
+            }
         }
         return shape;
+    }
+
+    private inline ssize_t[]
+    _strides_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to) {
+        var strides = new ssize_t[dimension];
+        for (var i = 0; i < dimension; i++) {
+            if ((from[i] < 0 ? _shape[i] + from[i] : from[i]) > (to[i] < 0 ? _shape[i] + to[i] : to[i])) {
+                strides[i] = -_strides[i];
+            } else {
+                strides[i] = _strides[i];
+            }
+        }
+        return strides;
     }
 
     public Array
@@ -233,7 +252,7 @@ public class Vast.Array : Object
         return new Array (scalar_type,
                           scalar_size,
                           _shape_from_slice (from, to),
-                          _strides,
+                          _strides_from_slice (from, to),
                           data,
                           _offset_from_index (from));
     }

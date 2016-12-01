@@ -188,6 +188,11 @@ int main (string[] args) {
         assert (29 == a.slice ({0, 0}, {-1, -1}).shape[0]);
         assert (29 == a.slice ({0, 0}, {-1, -1}).shape[1]);
 
+        // reverse stride
+        message (a.slice ({10, 10}, {0, 0}).to_string ());
+        assert (10 == a.slice ({10, 10}, {0, 0}).shape[1]);
+        assert (-1 * sizeof (int64) == a.slice ({10, 10}, {0, 0}).strides[1]);
+
         // full slice
         assert (30 == a.slice ({0, 0}, {(ssize_t) a.shape[0], (ssize_t) a.shape[1]}).shape[0]);
 
