@@ -233,6 +233,20 @@ int main (string[] args) {
         assert (0 == b.get_value ({9}).get_int64 ());
     });
 
+    Test.add_func ("/array/flip", () => {
+        var a = new Vast.Array (typeof (int64), sizeof (int64), {10});
+
+        for (var i = 0; i < 10; i++) {
+            a.set_value ({i}, i);
+        }
+
+        var b = a.flip (0);
+
+        for (var i = 0; i < 10; i++) {
+            assert (9 - i == b.get_value ({i}).get_int64 ());
+        }
+    });
+
     Test.add_func ("/array/transpose", () => {
         var array = new Vast.Array (typeof (double), sizeof (double), {2, 2});
 
