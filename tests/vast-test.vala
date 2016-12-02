@@ -7,7 +7,7 @@ int main (string[] args) {
     Test.add_func ("/array", () => {
         message("hello");
         var a = new Vast.Array (typeof (double), sizeof (double), {10});
-        var b = new Vast.Array (typeof (double), sizeof (double), {10}, null, a.data);
+        var b = new Vast.Array (typeof (double), sizeof (double), {10}, {}, a.data);
 
         assert (a.data == b.data);
 
@@ -359,7 +359,7 @@ int main (string[] args) {
 
         var a = new Vast.Array (typeof (char), sizeof (char),
                                       {1},
-                                      null,
+                                      {},
                                       mapped_file.get_bytes ());
 
         assert ('a' == a.get_value ({0}));
