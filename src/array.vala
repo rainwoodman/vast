@@ -53,7 +53,7 @@ public class Vast.Array : Object
     }
 
     private          Bytes   _data;
-    internal unowned uint8[] _cached_data;
+    internal unowned uint8* _cached_data;
 
     public Bytes? data {
         get
@@ -110,7 +110,7 @@ public class Vast.Array : Object
     private inline void*
     _pointer_from_offset (size_t offset)
     {
-        return (uint8*) _cached_data + offset;
+        return _cached_data + offset;
     }
 
     public unowned void*

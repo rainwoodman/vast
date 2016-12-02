@@ -57,7 +57,7 @@ public class Vast.Iterator : Object
     get ()
         requires (_cursor != null)
     {
-        return (uint8*) array._cached_data + _offset;
+        return array._cached_data + _offset;
     }
 
     public Value
@@ -70,7 +70,7 @@ public class Vast.Iterator : Object
     set (void* val)
         requires (_cursor != null)
     {
-        Memory.copy ((uint8*) array._cached_data + _offset, val, array.scalar_size);
+        Memory.copy (array._cached_data + _offset, val, array.scalar_size);
     }
 
     public void
