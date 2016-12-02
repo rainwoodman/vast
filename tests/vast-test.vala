@@ -32,6 +32,23 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/scalar_like", () => {
+        var a = new Vast.Array (typeof (double), sizeof (double), {});
+
+        assert (null == a.shape);
+        assert (null == a.strides);
+        assert (1 == a.size);
+        assert (null != a.data);
+        assert (sizeof (double) == a.data.get_size ());
+
+        a.set_value ({}, 1);
+        assert (1 == a.get_value ({}).get_double ());
+
+        var a_iter = a.iterator ();
+        assert (a_iter.next ());
+        assert (!a_iter.next ());
+    });
+
     Test.add_func ("/array/gobject_construction", () => {
         var a = Object.new (typeof (Vast.Array)) as Vast.Array;
 
@@ -40,13 +57,10 @@ int main (string[] args) {
         assert (sizeof (void) == a.scalar_size);
         assert (null == a.shape);
         assert (null == a.strides);
-        assert (0 == a.size);
+        assert (1 == a.size);
         assert (0 == a.origin);
         assert (null == a.data);
         assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: 0B".printf (sizeof (void)) == a.to_string ());
-
-        var iter_a = a.iterator ();
-        assert (!iter_a.next ());
 
         var b = a.reshape ({2, 2, 2, 4});
         assert (typeof (void) == b.scalar_type);

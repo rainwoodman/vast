@@ -27,13 +27,13 @@ public class Vast.Iterator : Object
     public bool
     next ()
     {
-        if (array.dimension == 0) {
-            return false;
-        }
-
         if (_cursor == null) {
-            _cursor = new ssize_t[array.dimension];
-            Memory.set (_cursor, 0, array.dimension * sizeof (ssize_t));
+            /*
+             * For scalar-like array, we cannot use an empty '_cursor' as it
+             * would be interpreted as 'null', thus we create a phony one.
+             */
+            _cursor = new ssize_t[array.dimension.clamp (1, size_t.MAX)];
+            Memory.set (_cursor, 0, array.dimension.clamp (1, size_t.MAX) * sizeof (ssize_t));
             _offset = 0;
             return true;
         }

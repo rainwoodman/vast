@@ -44,15 +44,11 @@ public class Vast.Array : Object
 
     public size_t size {
         get {
-            if (dimension == 0) {
-                return 0;
-            } else {
-                size_t size = 1;
-                for (var i = 0; i < dimension; i++) {
-                    size *= _shape[i];
-                }
-                return size;
+            size_t size = 1;
+            for (var i = 0; i < dimension; i++) {
+                size *= _shape[i];
             }
+            return size;
         }
     }
 
@@ -76,7 +72,6 @@ public class Vast.Array : Object
                   Bytes?    data    = null,
                   size_t    origin  = 0)
         requires (scalar_size > 0)
-        requires (shape.length > 0)
         requires (_size_from_shape (shape) > 0)
     {
         base (scalar_type: scalar_type,
@@ -214,7 +209,6 @@ public class Vast.Array : Object
 
     public Array
     reshape (size_t[] new_shape)
-        requires (new_shape.length > 0)
         requires (_shape == null || _size_from_shape (_shape[0:dimension]) == _size_from_shape (new_shape))
     {
         return new Array (scalar_type,
