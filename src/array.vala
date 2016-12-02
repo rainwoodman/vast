@@ -209,12 +209,12 @@ public class Vast.Array : Object
 
     public Array
     reshape (size_t[] new_shape)
-        requires (_shape == null || _size_from_shape (_shape[0:dimension]) == _size_from_shape (new_shape))
+        requires (_data == null || _size_from_shape (_shape[0:dimension]) == _size_from_shape (new_shape))
     {
         return new Array (scalar_type,
                           scalar_size,
                           new_shape,
-                          _strides, // TODO: compute proper strides
+                          {},
                           data,
                           origin);
     }
