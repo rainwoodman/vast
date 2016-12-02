@@ -107,16 +107,10 @@ public class Vast.Array : Object
         return p;
     }
 
-    private inline void*
-    _pointer_from_offset (size_t offset)
-    {
-        return _cached_data + offset;
-    }
-
     public unowned void*
     get_pointer ([CCode (array_length = false)] ssize_t[] index)
     {
-        return _pointer_from_offset (_offset_from_index (index));
+        return _cached_data + _offset_from_index (index);
     }
 
     public Value
@@ -162,7 +156,7 @@ public class Vast.Array : Object
     public void
     set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {
-        Memory.copy (_pointer_from_offset (_offset_from_index (index)), val, scalar_size);
+        Memory.copy (_cached_data + _offset_from_index (index), val, scalar_size);
     }
 
     public void
@@ -172,7 +166,7 @@ public class Vast.Array : Object
 
         if (val.transform (ref dest_value)) {
             if (scalar_type == typeof (string)) {
-                var ptr  = _pointer_from_offset (_offset_from_index (index));
+                var ptr  = _cached_data + _offset_from_index (index);
                 var str  = dest_value.get_string ();
                 var dest = Posix.strncpy ((string) ptr, str, scalar_size - 1);
                 dest.data[scalar_size - 1] = '\0';
