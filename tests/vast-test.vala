@@ -45,6 +45,9 @@ int main (string[] args) {
         assert (null == a.data);
         assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: 0B".printf (sizeof (void)) == a.to_string ());
 
+        var iter_a = a.iterator ();
+        assert (!iter_a.next ());
+
         var b = a.reshape ({2, 2, 2, 4});
         assert (typeof (void) == b.scalar_type);
         assert (sizeof (void) == b.scalar_size);

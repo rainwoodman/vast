@@ -27,6 +27,10 @@ public class Vast.Iterator : Object
     public bool
     next ()
     {
+        if (array.dimension == 0) {
+            return false;
+        }
+
         if (_cursor == null) {
             _cursor = new ssize_t[array.dimension];
             Memory.set (_cursor, 0, array.dimension * sizeof (ssize_t));
@@ -51,6 +55,7 @@ public class Vast.Iterator : Object
 
     public unowned void*
     get ()
+        requires (_cursor != null)
     {
         return (uint8*) array.data.get_data () + _offset;
     }
@@ -63,6 +68,7 @@ public class Vast.Iterator : Object
 
     public void
     set (void* val)
+        requires (_cursor != null)
     {
         Memory.copy ((uint8*) array.data.get_data () + _offset, val, array.scalar_size);
     }
