@@ -8,12 +8,13 @@ vast_sources = [
 
 vast_lib = library('vast-1.0', vast_sources,
                     vala_args: ['--vapidir=' + meson.current_source_dir()],
+                    vala_header: 'vast.h',
                     vala_gir: 'Vast-1.0.gir',
                     c_args: ['-g', '-O0', '-Wno-unused'],
                     dependencies: [glib, gobject, gmodule, gio, math, posix],
                     install: true)
 
-install_headers(meson.current_build_dir() + '/vast-1.0.h')
+install_headers(meson.current_build_dir() + '/vast.h', subdir: 'vast-1.0')
 install_data([meson.current_build_dir() + '/vast-1.0.vapi', 'vast-1.0.deps'],
              install_dir: 'share/vala/vapi')
 install_data(meson.current_build_dir() + '/Vast-1.0.gir', install_dir: 'share/gir-1.0')
@@ -36,5 +37,7 @@ pkgconfig = import('pkgconfig')
 pkgconfig.generate(name: 'vast-1.0',
                    description: 'Deep learning with GNOME infrastructure',
                    version: meson.project_version(),
-#                   requires: '',
-                   libraries: vast_lib)
+                   requires: ['glib-2.0', 'gobject-2.0', 'gio-2.0'],
+                   libraries: vast_lib,
+                   libraries_private: ['-L${libdir}', '-lm'],
+                   subdirs: 'vast-1.0')
