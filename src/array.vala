@@ -356,7 +356,7 @@ public class Vast.Array : Object
                 transposed_shape[i]   = _shape[_axis_from_external_axis (axes[i])];
             }
         }
-        return new Array (scalar_type, scalar_size, transposed_shape, transposed_strides, data);
+        return new Array (scalar_type, scalar_size, transposed_shape, transposed_strides, data, origin);
     }
 
     public Array
