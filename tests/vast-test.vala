@@ -32,6 +32,34 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/gobject_construction", () => {
+        var a = Object.new (typeof (Vast.Array)) as Vast.Array;
+
+        assert (0 == a.dimension);
+        assert (typeof (void) == a.scalar_type);
+        assert (sizeof (void) == a.scalar_size);
+        assert (null == a.shape);
+        assert (null == a.strides);
+        assert (0 == a.size);
+        assert (0 == a.origin);
+        assert (null == a.data);
+        assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: 0B".printf (sizeof (void)) == a.to_string ());
+
+        var b = a.reshape ({2, 2, 2, 4});
+        assert (typeof (void) == b.scalar_type);
+        assert (sizeof (void) == b.scalar_size);
+        assert (2 == b.shape[0]);
+        assert (2 == b.shape[1]);
+        assert (2 == b.shape[2]);
+        assert (4 == b.shape[3]);
+        assert (2 * 2 * 4 * sizeof (void) == b.strides[0]);
+        assert (2 * 4 * sizeof (void) == b.strides[1]);
+        assert (4 * sizeof (void) == b.strides[2]);
+        assert (sizeof (void) == b.strides[3]);
+        assert (0 == b.origin);
+        assert (null != b.data);
+    });
+
     Test.add_func ("/array/iterator", () => {
         var a = new Vast.Array (typeof (double), sizeof (double), {5, 2});
 
@@ -100,15 +128,15 @@ int main (string[] args) {
         b.set_value ({0, 0, 0, 0, 0, 5}, 1);
         message("b = %s", b.to_string());
 
-        var c = new Vast.Array (typeof (double), sizeof (double), {});
+        var c = new Vast.Array (typeof (double), sizeof (double), {1});
         message ("c = %s", c.to_string ());
     });
 
     Test.add_func ("/array/reshape", () => {
-        // var a = new Vast.Array<char?> (sizeof (char), {10});
-        // a.reshape ({5, 2});
-        // assert (5 == a.shape[0]);
-        // assert (2 == a.shape[1]);
+        var a = new Vast.Array (typeof (char), sizeof (char), {10});
+        var b = a.reshape ({5, 2});
+        assert (5 == b.shape[0]);
+        assert (2 == b.shape[1]);
     });
 
     Test.add_func ("/array/compact", () => {

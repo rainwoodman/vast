@@ -4,9 +4,9 @@ public class Vast.Array : Object
 {
     public Type scalar_type { get; construct; }
 
-    public size_t scalar_size { get; construct; }
+    public size_t scalar_size { get; construct; default = sizeof (void); }
 
-    public size_t dimension { get; construct; }
+    public size_t dimension { get; construct; default = 0; }
 
     [CCode (array_length = false)]
     private size_t[] _shape;
@@ -44,15 +44,19 @@ public class Vast.Array : Object
 
     public size_t size {
         get {
-            size_t size = 1;
-            for (var i = 0; i < dimension; i++) {
-                size *= _shape[i];
+            if (dimension == 0) {
+                return 0;
+            } else {
+                size_t size = 1;
+                for (var i = 0; i < dimension; i++) {
+                    size *= _shape[i];
+                }
+                return size;
             }
-            return size;
         }
     }
 
-    public Bytes data { get; construct; }
+    public Bytes? data { get; construct; default = null; }
 
     private static inline size_t
     _size_from_shape (size_t[] shape)
@@ -64,20 +68,23 @@ public class Vast.Array : Object
         return size;
     }
 
-    public Array (Type       scalar_type,
-                  size_t     scalar_size,
-                  size_t[]   shape,
-                  [CCode (array_length=false)]
-                  ssize_t[]? strides = null,
-                  Bytes?     data    = null,
-                  size_t     origin  = 0)
+    public Array (Type      scalar_type,
+                  size_t    scalar_size,
+                  size_t[]  shape,
+                  [CCode (array_length = false)]
+                  ssize_t[] strides = {},
+                  Bytes?    data    = null,
+                  size_t    origin  = 0)
+        requires (scalar_size > 0)
+        requires (shape.length > 0)
+        requires (_size_from_shape (shape) > 0)
     {
         base (scalar_type: scalar_type,
               scalar_size: scalar_size,
               dimension:   shape.length,
               shape:       shape,
               strides:     strides,
-              data:        data ?? new Bytes (new uint8[scalar_size * _size_from_shape (shape)]),
+              data:        data ?? new Bytes (new uint8[scalar_size * _size_from_shape(shape)]),
               origin:      origin);
     }
 
@@ -207,7 +214,8 @@ public class Vast.Array : Object
 
     public Array
     reshape (size_t[] new_shape)
-        requires (_shape == null || _size_from_shape (_shape) == _size_from_shape (new_shape))
+        requires (new_shape.length > 0)
+        requires (_shape == null || _size_from_shape (_shape[0:dimension]) == _size_from_shape (new_shape))
     {
         return new Array (scalar_type,
                           scalar_size,
@@ -374,6 +382,7 @@ public class Vast.Array : Object
         StringBuilder sb = new StringBuilder ();
         sb.append_printf ("dtype: %s, ", scalar_type.name ());
         sb.append_printf ("dsize: %" + size_t.FORMAT + ", ", scalar_size);
+        sb.append_printf ("dimension: %" + size_t.FORMAT + ", ", dimension);
         sb.append_printf ("shape: (");
         for (var i = 0; i < dimension; i++) {
             sb.append_printf ("%" + size_t.FORMAT, shape[i]);
@@ -381,9 +390,19 @@ public class Vast.Array : Object
                 sb.append (", ");
             }
         }
-        sb.append_c (')');
-        sb.append_printf (", ");
-        sb.append_printf ("mem: %" + size_t.FORMAT + "B", data.length);
+        sb.append ("), ");
+        sb.append_printf ("strides: (");
+        for (var i = 0; i < dimension; i++) {
+            sb.append_printf ("%" + ssize_t.FORMAT, strides[i]);
+            if (i < dimension - 1) {
+                sb.append (", ");
+            }
+        }
+        sb.append ("), ");
+        sb.append_printf ("mem: %" + size_t.FORMAT + "B", _data == null ? 0 : _data.length);
+        if (dimension == 0) {
+            return sb.str;
+        }
         var @out = new MemoryOutputStream.resizable ();
         try {
             new StringFormatter (this).to_stream (@out);
