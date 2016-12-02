@@ -113,41 +113,7 @@ public class Vast.Array : Object
     public Value
     get_value ([CCode (array_length = false)] ssize_t[] index)
     {
-        var _value = Value (scalar_type);
-
-        if (scalar_type == typeof (string)) {
-            _value.set_string ((string) get_pointer (index));
-        }
-
-        else if (_value.fits_pointer ()) {
-            Memory.copy (_value.peek_pointer (), get_pointer (index), scalar_size);
-        }
-
-        else if (scalar_type == Type.BOXED) {
-            _value.set_boxed (get_pointer (index));
-        }
-
-        else if (scalar_type == typeof (char)) {
-            _value.set_char (*(char*) get_pointer (index));
-        }
-
-        else if (scalar_type == typeof (uint8)) {
-            _value.set_uchar (*(uchar*) get_pointer (index));
-        }
-
-        else if (scalar_type == typeof (int64)) {
-            _value.set_int64 (*(int64*) get_pointer (index));
-        }
-
-        else if (scalar_type == typeof (double)) {
-            _value.set_double (*((double*) get_pointer (index)));
-        }
-
-        else {
-            assert_not_reached ();
-        }
-
-        return _value;
+        return memory_to_value(_pointer_from_offset (_offset_from_index (index)));
     }
 
     public void
@@ -159,51 +125,7 @@ public class Vast.Array : Object
     public void
     set_value ([CCode (array_length = false)] ssize_t[] index, Value val)
     {
-        var dest_value = Value (scalar_type);
-
-        if (val.transform (ref dest_value)) {
-            if (scalar_type == typeof (string)) {
-                var ptr  = _pointer_from_offset (_offset_from_index (index));
-                var str  = dest_value.get_string ();
-                var dest = Posix.strncpy ((string) ptr, str, scalar_size - 1);
-                dest.data[scalar_size - 1] = '\0';
-            }
-
-            else if (dest_value.fits_pointer ()) {
-                set_pointer (index, dest_value.peek_pointer ());
-            }
-
-            else if (scalar_type == Type.BOXED) {
-                set_pointer (index, dest_value.get_boxed ());
-            }
-
-            else if (scalar_type == typeof (char)) {
-                var _ = dest_value.get_char ();
-                set_pointer (index, (&_));
-            }
-
-            else if (scalar_type == typeof (uint8)) {
-                var _ = dest_value.get_uchar ();
-                set_pointer (index, (&_));
-            }
-
-            else if (scalar_type == typeof (int64)) {
-                var _ = dest_value.get_int64 ();
-                set_pointer (index, (&_));
-            }
-
-            else if (scalar_type == typeof (double)) {
-                var _ = dest_value.get_double ();
-                set_pointer (index, &_);
-            }
-
-            else {
-                assert_not_reached ();
-            }
-        } else {
-            error ("Could not transform '%s' into '%s'.", val.type ().name (),
-                                                          dest_value.type ().name ());
-        }
+        value_to_memory(val, _pointer_from_offset(_offset_from_index (index)));
     }
 
     public Iterator
@@ -410,5 +332,94 @@ public class Vast.Array : Object
             error (err.message);
         }
         return sb.str + (string) @out.steal_data ();
+    }
+
+    internal void
+    value_to_memory (Value val, void * memory)
+    {
+        var dest_value = Value (scalar_type);
+        if (val.transform (ref dest_value)) {
+            if (scalar_type == typeof (string)) {
+                var str  = dest_value.get_string ();
+                var dest = Posix.strncpy ((string) memory, str, scalar_size - 1);
+                dest.data[scalar_size - 1] = '\0';
+            }
+
+            else if (dest_value.fits_pointer ()) {
+                Memory.copy (memory, dest_value.peek_pointer(), scalar_size);
+            }
+
+            else if (scalar_type == Type.BOXED) {
+                Memory.copy (memory, dest_value.get_boxed (), scalar_size);
+            }
+
+            else if (scalar_type == typeof (char)) {
+                var _ = dest_value.get_char ();
+                Memory.copy (memory, (&_), scalar_size);
+            }
+
+            else if (scalar_type == typeof (uint8)) {
+                var _ = dest_value.get_uchar ();
+                Memory.copy (memory, (&_), scalar_size);
+            }
+
+            else if (scalar_type == typeof (int64)) {
+                var _ = dest_value.get_int64 ();
+                Memory.copy (memory, (&_), scalar_size);
+            }
+
+            else if (scalar_type == typeof (double)) {
+                var _ = dest_value.get_double ();
+                Memory.copy (memory, &_, scalar_size);
+            }
+
+            else {
+                assert_not_reached ();
+            }
+        } else {
+            error ("Could not transform '%s' into '%s'.", val.type ().name (),
+                                                          dest_value.type ().name ());
+        }
+    }
+
+    internal Value
+    memory_to_value(void * memory)
+    {
+        var _value = Value (scalar_type);
+
+        if (scalar_type == typeof (string)) {
+            _value.set_string ((string) memory);
+        }
+
+        else if (_value.fits_pointer ()) {
+            Memory.copy (_value.peek_pointer (), memory, scalar_size);
+        }
+
+        else if (scalar_type == Type.BOXED) {
+            _value.set_boxed (memory);
+        }
+
+        else if (scalar_type == typeof (char)) {
+            _value.set_char (*(char*) memory);
+        }
+
+        else if (scalar_type == typeof (uint8)) {
+            _value.set_uchar (*(uchar*) memory);
+        }
+
+        else if (scalar_type == typeof (int64)) {
+            _value.set_int64 (*(int64*) memory);
+        }
+
+        else if (scalar_type == typeof (double)) {
+            _value.set_double (*((double*) memory));
+        }
+
+        else {
+            assert_not_reached ();
+        }
+
+        return _value;
+
     }
 }

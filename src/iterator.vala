@@ -63,7 +63,7 @@ public class Vast.Iterator : Object
     public Value
     get_value ()
     {
-        return array.get_value (_cursor);
+        return array.memory_to_value(this.get());
     }
 
     public void
@@ -76,7 +76,7 @@ public class Vast.Iterator : Object
     public void
     set_value (Value val)
     {
-        array.set_value (_cursor, val);
+        array.value_to_memory(val, this.get());
     }
 
     public void
