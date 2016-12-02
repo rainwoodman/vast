@@ -44,19 +44,25 @@ public class Vast.Array : Object
 
     public size_t size {
         get {
-            if (dimension == 0) {
-                return 0;
-            } else {
-                size_t size = 1;
-                for (var i = 0; i < dimension; i++) {
-                    size *= _shape[i];
-                }
-                return size;
+            size_t size = 1;
+            for (var i = 0; i < dimension; i++) {
+                size *= _shape[i];
             }
+            return size;
         }
     }
 
-    public Bytes? data { get; construct; default = null; }
+    /* Internal bytes that stores the array; cannot be null */
+    public Bytes? data { get; construct;}
+    internal uint8 * _baseptr;
+
+    construct {
+        /* provide a default buffer is nothing allocated */
+        if(_data == null) {
+            _data = new Bytes (new uint8[scalar_size * size]);
+        } 
+        _baseptr = _data.get_data();
+    }
 
     private static inline size_t
     _size_from_shape (size_t[] shape)
@@ -77,14 +83,13 @@ public class Vast.Array : Object
                   size_t    origin  = 0)
         requires (scalar_size > 0)
         requires (shape.length > 0)
-        requires (_size_from_shape (shape) > 0)
     {
         base (scalar_type: scalar_type,
               scalar_size: scalar_size,
               dimension:   shape.length,
               shape:       shape,
               strides:     strides,
-              data:        data ?? new Bytes (new uint8[scalar_size * _size_from_shape(shape)]),
+              data:        data,
               origin:      origin);
     }
 
@@ -98,16 +103,10 @@ public class Vast.Array : Object
         return p;
     }
 
-    private inline void*
-    _pointer_from_offset (size_t offset)
-    {
-        return (uint8*) _data.get_data () + offset;
-    }
-
     public unowned void*
     get_pointer ([CCode (array_length = false)] ssize_t[] index)
     {
-        return _pointer_from_offset (_offset_from_index (index));
+        return _baseptr + _offset_from_index (index);
     }
 
     public Value
@@ -153,7 +152,7 @@ public class Vast.Array : Object
     public void
     set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {
-        Memory.copy (_pointer_from_offset (_offset_from_index (index)), val, scalar_size);
+        Memory.copy (_baseptr + _offset_from_index (index), val, scalar_size);
     }
 
     public void
@@ -163,7 +162,7 @@ public class Vast.Array : Object
 
         if (val.transform (ref dest_value)) {
             if (scalar_type == typeof (string)) {
-                var ptr  = _pointer_from_offset (_offset_from_index (index));
+                var ptr  = _baseptr + _offset_from_index (index);
                 var str  = dest_value.get_string ();
                 var dest = Posix.strncpy ((string) ptr, str, scalar_size - 1);
                 dest.data[scalar_size - 1] = '\0';

@@ -27,12 +27,9 @@ public class Vast.Iterator : Object
     public bool
     next ()
     {
-        if (array.dimension == 0) {
-            return false;
-        }
-
         if (_cursor == null) {
-            _cursor = new ssize_t[array.dimension];
+            /* always allcoate something even if dimension is 0 (scalar) */
+            _cursor = new ssize_t[array.dimension + 1];
             Memory.set (_cursor, 0, array.dimension * sizeof (ssize_t));
             _offset = 0;
             return true;

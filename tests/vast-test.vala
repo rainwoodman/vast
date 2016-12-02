@@ -40,13 +40,16 @@ int main (string[] args) {
         assert (sizeof (void) == a.scalar_size);
         assert (null == a.shape);
         assert (null == a.strides);
-        assert (0 == a.size);
+        assert (1 == a.size);
         assert (0 == a.origin);
-        assert (null == a.data);
-        assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: 0B".printf (sizeof (void)) == a.to_string ());
+        assert (null != a.data);
+        assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: %luB".printf (sizeof (void), sizeof (void)) == a.to_string ());
 
         var iter_a = a.iterator ();
+        assert (iter_a.next ());
         assert (!iter_a.next ());
+
+        /* reconsider this: you cannot reshape a scalar to 2, 2, 2, 4. You can broadcast to 2, 2, 2, 4 though */
 
         var b = a.reshape ({2, 2, 2, 4});
         assert (typeof (void) == b.scalar_type);
