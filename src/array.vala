@@ -52,7 +52,21 @@ public class Vast.Array : Object
         }
     }
 
-    public Bytes? data { get; construct; default = null; }
+    private          Bytes   _data;
+    internal unowned uint8[] _cached_data;
+
+    public Bytes? data {
+        get
+        {
+            return _data;
+        }
+        construct {
+            _data        = value;
+            if (value != null) {
+                _cached_data = value.get_data ();
+            }
+        }
+    }
 
     private static inline size_t
     _size_from_shape (size_t[] shape)
@@ -96,7 +110,7 @@ public class Vast.Array : Object
     private inline void*
     _pointer_from_offset (size_t offset)
     {
-        return (uint8*) _data.get_data () + offset;
+        return (uint8*) _cached_data + offset;
     }
 
     public unowned void*
