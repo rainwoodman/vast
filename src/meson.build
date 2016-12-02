@@ -11,7 +11,7 @@ vast_lib = library('vast-1.0', vast_sources,
                     vala_header: 'vast.h',
                     vala_gir: 'Vast-1.0.gir',
                     c_args: ['-g', '-O0', '-Wno-unused'],
-                    dependencies: [glib, gobject, gmodule, gio, math, posix],
+                    dependencies: [glib, gobject, gio, math, posix],
                     install: true)
 
 install_headers(meson.current_build_dir() + '/vast.h', subdir: 'vast-1.0')

@@ -4,7 +4,6 @@ project('vast', 'c', 'vala',
 
 glib = dependency('glib-2.0', version: '>=2.32')
 gobject = dependency('gobject-2.0', version: '>=2.32')
-gmodule = dependency('gmodule-2.0', version: '>=2.32')
 gio = dependency('gio-2.0', version: '>=2.32')
 math = meson.get_compiler('c').find_library('m')
 posix = meson.get_compiler('vala').find_library('posix')
