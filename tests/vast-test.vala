@@ -5,7 +5,6 @@ int main (string[] args) {
     Test.init (ref args);
 
     Test.add_func ("/array", () => {
-        message("hello");
         var a = new Vast.Array (typeof (double), sizeof (double), {10});
         var b = new Vast.Array (typeof (double), sizeof (double), {10}, {}, a.data);
 
@@ -25,10 +24,6 @@ int main (string[] args) {
         for(var i = -1; i > -10; i--) {
             assert (10 + i == a.get_value ({i}).get_double ());
             assert (10 + i == b.get_value ({i}).get_double ());
-        }
-
-        foreach (var val in a) {
-            message ("%f", *(double*) val);
         }
     });
 
@@ -92,7 +87,6 @@ int main (string[] args) {
             for (var j = 0; j < 2; j++) {
                 assert (iter.next ());
                 assert (i * j == iter.get_value ().get_double ());
-                message ("%" + size_t.FORMAT, iter.offset);
                 assert ((i * 2 + j) * sizeof (double) == iter.offset);
             }
         }
@@ -109,7 +103,6 @@ int main (string[] args) {
     Test.add_func ("/array/to_string", () => {
         var s = new Vast.Array (typeof (double), sizeof (double), {1});
         s.set_value ({1}, 1);
-        message("s = %s", s.to_string());
 
         var v = new Vast.Array (typeof (double), sizeof (double), {6});
         v.set_value ({0}, 1);
@@ -118,7 +111,6 @@ int main (string[] args) {
         v.set_value ({3}, 1);
         v.set_value ({4}, 1);
         v.set_value ({5}, 1);
-        message("v = %s", v.to_string());
 
         var m = new Vast.Array (typeof (double), sizeof (double), {5, 6});
         m.set_value ({0, 1}, 1);
@@ -126,7 +118,6 @@ int main (string[] args) {
         m.set_value ({0, 3}, 1);
         m.set_value ({0, 4}, 1);
         m.set_value ({0, 5}, 1);
-        message("m = %s", m.to_string());
 
         var a = new Vast.Array (typeof (double), sizeof (double), {4, 5, 6});
         a.set_value ({0, 0, 1}, 1);
@@ -134,7 +125,6 @@ int main (string[] args) {
         a.set_value ({0, 0, 3}, 1);
         a.set_value ({0, 0, 4}, 1);
         a.set_value ({0, 0, 5}, 1);
-        message("a = %s", a.to_string());
 
         var b = new Vast.Array (typeof (double), sizeof (double), {1, 2, 3, 4, 5, 6});
         assert (6 == b.dimension);
@@ -143,10 +133,8 @@ int main (string[] args) {
         b.set_value ({0, 0, 0, 0, 0, 3}, 1);
         b.set_value ({0, 0, 0, 0, 0, 4}, 1);
         b.set_value ({0, 0, 0, 0, 0, 5}, 1);
-        message("b = %s", b.to_string());
 
         var c = new Vast.Array (typeof (double), sizeof (double), {1});
-        message ("c = %s", c.to_string ());
     });
 
     Test.add_func ("/array/reshape", () => {
@@ -234,7 +222,6 @@ int main (string[] args) {
         assert (29 == a.slice ({0, 0}, {-1, -1}).shape[1]);
 
         // reverse stride
-        message (a.slice ({10, 10}, {0, 0}).to_string ());
         assert (10 == a.slice ({10, 10}, {0, 0}).shape[1]);
         assert (-1 * sizeof (int64) == a.slice ({10, 10}, {0, 0}).strides[1]);
 
