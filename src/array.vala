@@ -336,47 +336,22 @@ public class Vast.Array : Object
         return sb.str + (string) @out.steal_data ();
     }
 
+    private extern static unowned void* _value_get_data (ref Value val);
+
     internal inline void
     _value_to_memory (Value val, void * memory)
     {
         var dest_value = Value (scalar_type);
         if (val.transform (ref dest_value)) {
-            if (scalar_type == typeof (string)) {
-                var str  = dest_value.get_string ();
-                var dest = Posix.strncpy ((string) memory, str, scalar_size - 1);
-                dest.data[scalar_size - 1] = '\0';
-            }
-
-            else if (dest_value.fits_pointer ()) {
-                Memory.copy (memory, dest_value.peek_pointer(), scalar_size);
-            }
-
-            else if (scalar_type == Type.BOXED) {
-                Memory.copy (memory, dest_value.get_boxed (), scalar_size);
-            }
-
-            else if (scalar_type == typeof (char)) {
-                var _ = dest_value.get_char ();
-                Memory.copy (memory, (&_), scalar_size);
-            }
-
-            else if (scalar_type == typeof (uint8)) {
-                var _ = dest_value.get_uchar ();
-                Memory.copy (memory, (&_), scalar_size);
-            }
-
-            else if (scalar_type == typeof (int64)) {
-                var _ = dest_value.get_int64 ();
-                Memory.copy (memory, (&_), scalar_size);
-            }
-
-            else if (scalar_type == typeof (double)) {
-                var _ = dest_value.get_double ();
-                Memory.copy (memory, &_, scalar_size);
-            }
-
-            else {
-                assert_not_reached ();
+            if (dest_value.fits_pointer ()) {
+                if (scalar_type == typeof (string)) {
+                    var dest = Posix.strncpy ((string) memory, dest_value.get_string (), scalar_size - 1);
+                    dest.data[scalar_size - 1] = '\0';
+                } else {
+                    Memory.copy (memory, dest_value.peek_pointer (), scalar_size);
+                }
+            } else {
+                Memory.copy (memory, _value_get_data (ref dest_value), scalar_size);
             }
         } else {
             error ("Could not transform '%s' into '%s'.", val.type ().name (),
@@ -389,36 +364,14 @@ public class Vast.Array : Object
     {
         var _value = Value (scalar_type);
 
-        if (scalar_type == typeof (string)) {
-            _value.set_string ((string) memory);
-        }
-
-        else if (_value.fits_pointer ()) {
-            Memory.copy (_value.peek_pointer (), memory, scalar_size);
-        }
-
-        else if (scalar_type == Type.BOXED) {
-            _value.set_boxed (memory);
-        }
-
-        else if (scalar_type == typeof (char)) {
-            _value.set_char (*(char*) memory);
-        }
-
-        else if (scalar_type == typeof (uint8)) {
-            _value.set_uchar (*(uchar*) memory);
-        }
-
-        else if (scalar_type == typeof (int64)) {
-            _value.set_int64 (*(int64*) memory);
-        }
-
-        else if (scalar_type == typeof (double)) {
-            _value.set_double (*((double*) memory));
-        }
-
-        else {
-            assert_not_reached ();
+        if (_value.fits_pointer ()) {
+            if (scalar_type == typeof (string)) {
+                _value.set_string ((string) memory);
+            } else {
+                Memory.copy (_value.peek_pointer (), memory, scalar_size);
+            }
+        } else {
+            Memory.copy (_value_get_data (ref _value), memory, scalar_size);
         }
 
         return _value;
