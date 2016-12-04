@@ -157,7 +157,7 @@ public class Vast.Array : Object
     fill (void* ptr)
     {
         foreach (var dest_ptr in this) {
-            Memory.copy (dest_ptr, ptr, scalar_size);
+            Memory.copy (dest_ptr, ptr, _scalar_size);
         }
     }
 
