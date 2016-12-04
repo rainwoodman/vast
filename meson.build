@@ -11,4 +11,5 @@ posix = meson.get_compiler('vala').find_library('posix')
 g_ir_compiler = find_program('g-ir-compiler', required: false)
 
 subdir('src')
+subdir('benchmarks')
 subdir('tests')
