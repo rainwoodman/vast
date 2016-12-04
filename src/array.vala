@@ -42,10 +42,10 @@ public class Vast.Array : Object
     /* if 'null', it will be allocated internally */
     public Bytes? data {get; construct; default = null;}
 
-    /* pointer to the memory location of 0th element */
+    /* pointer to the memory location of buffer */
     private uint8* _baseptr;
 
-    /* offset to the memory location of 0th element */
+    /* offset to the memory location of 0th element in bytes relative to _baseptr */
     public size_t origin {get; construct; default = 0;}
 
 
