@@ -546,12 +546,6 @@ public class Vast.Array : Object
             return this;
         }
 
-        public Builder
-        reset_dimension(size_t dimension)
-        {
-            return new Builder(array, dimension);
-        }
-
         /* use original_axis for new axis, a new shape[d] == 1 axis if NEW_AXIS*/
         public Builder
         axis(ssize_t axis, ssize_t original_axis=NEW_AXIS)
