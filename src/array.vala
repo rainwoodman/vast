@@ -53,8 +53,14 @@ public class Vast.Array : Object
         /* initializes the read-only attributes of the Array Object */
         assert (_dimension <= 32);
 
-        /* We will copy the in-values from g_object_new */
-        Memory.copy (_shape, _shape_in, _dimension * sizeof (size_t));
+        if (_shape_in == null) {
+            assert (_dimension == 0);
+        } else {
+            /* We will copy the in-values from g_object_new */
+            Memory.copy (_shape, _shape_in, _dimension * sizeof (size_t));
+            /* the input pointers from gobject is no longer useful, void them.*/
+            _shape_in = null;
+        }
 
         if (_strides_in == null) {
             /* assume C contiguous strides */
@@ -65,6 +71,8 @@ public class Vast.Array : Object
             for (var i = 0; i < _dimension; i ++) {
                 _strides[i] = _strides_in[i];
             }
+            /* the input pointers from gobject is no longer useful, void them.*/
+            _strides_in = null;
         }
 
         /* calculate size, since it is immutable, we do it once here */
@@ -78,10 +86,6 @@ public class Vast.Array : Object
         assert (_origin < _data.length);
 
         _baseptr = (uint8*) _data.get_data () + _origin;
-
-        /* the input pointers from gobject is no longer useful, void them.*/
-        _shape_in = null;
-        _strides_in = null;
     }
 
     private static inline size_t
