@@ -481,66 +481,28 @@ public class Vast.Array : Object
         public Builder
         slice(ssize_t axis, ssize_t from, ssize_t to, ssize_t step=1)
         {
-            axis = wrap_by_dimension(axis);
-
-            to = to < 0 ? (ssize_t) shape[axis] + to   : to;
-            from = from < 0 ? (ssize_t) shape[axis] + from : from;
-            return _slice(axis, from, to, step);
+            return qslice(axis, (ssize_t[]) &from, (ssize_t[]) &to, step);
         }
 
         /* :to:step */
         public Builder
         head(ssize_t axis, ssize_t to, ssize_t step=1)
         {
-            axis = wrap_by_dimension(axis);
-
-            to = to < 0 ? (ssize_t) shape[axis] + to   : to;
-            ssize_t from;
-
-            if (step > 0)
-                from = 0;
-            else
-                from = (ssize_t) shape[axis] - 1;
-
-            return _slice(axis, from, to, step);
-
+            return qslice(axis, null, (ssize_t[]) &to, step);
         }
 
         /* from::step */
         public Builder
         tail(ssize_t axis, ssize_t from, ssize_t step=1)
         {
-            axis = wrap_by_dimension(axis);
-
-            ssize_t to;
-            if (step > 0)
-                to = (ssize_t) shape[axis];
-            else
-                to = -1;
-
-            from = from < 0 ? (ssize_t) shape[axis] + from : from;
-            return _slice(axis, from, to, step);
+            return qslice(axis, (ssize_t[]) &from, null, step);
         }
 
         /* ::step */
         public Builder
         step(ssize_t axis, ssize_t step=1)
         {
-            axis = wrap_by_dimension(axis);
-
-            ssize_t from;
-            if (step > 0)
-                from = 0;
-            else
-                from = (ssize_t) shape[axis] - 1;
-
-            ssize_t to;
-            if (step > 0)
-                to = (ssize_t) shape[axis];
-            else
-                to = -1;
-
-            return _slice(axis, from, to, step);
+            return qslice(axis, null, null, step);
         }
 
         public Builder
@@ -573,13 +535,6 @@ public class Vast.Array : Object
                 to = qto[0];
                 to = to < 0 ? (ssize_t) shape[axis] + to   : to;
             }
-
-            return _slice(axis, from, to, step);
-        }
-
-        private Builder
-        _slice(ssize_t axis, ssize_t from, ssize_t to, ssize_t step)
-        {
 
             origin += from * strides[axis];
 
