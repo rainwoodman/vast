@@ -251,22 +251,22 @@ int main (string[] args) {
         }
 
         var b = a.build()
-                 .slice(0, 5, Vast.Array.THRU, -1)
+                 .head(0, 5, -1)
                  .end();
 
-        assert (b.get_value({0, 1}).get_double() == 6 * 1);
-        assert (b.get_value({1, 1}).get_double() == 5 * 1);
+        assert (b.get_value({0, 1}).get_double() == 10 * 1);
+        assert (b.get_value({1, 1}).get_double() == 9 * 1);
 
         var b1 = a.build()
-                 .slice(1, 5, Vast.Array.THRU)
+                 .tail(1, 5)
                  .end();
 
         assert (b1.get_value({1, 1}).get_double() == 2 * 6);
         assert (b1.get_value({1, 2}).get_double() == 2 * 7);
 
         var c = a.build()
-                 .slice(0, 5, Vast.Array.THRU, -1)
-                 .slice(1, 2, Vast.Array.THRU, 3)
+                 .tail(0, 5, -1)
+                 .tail(1, 2, 3)
                  .end();
 
         assert (c.get_value({0, 0}).get_double() == 6 * 2);

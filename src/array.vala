@@ -292,7 +292,7 @@ public class Vast.Array : Object
     {
         var sb = this.build();
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, THRU, to[i]);
+            sb.head(i, to[i]);
         }
         return sb.end();
     }
@@ -302,7 +302,7 @@ public class Vast.Array : Object
     {
         var sb = this.build();
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, from[i]);
+            sb.tail(i, from[i]);
         }
         return sb.end();
     }
@@ -313,7 +313,7 @@ public class Vast.Array : Object
         var sb = this.build();
 
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, THRU, THRU, steps[i]);
+            sb.step(i, steps[i]);
         }
         return sb.end();
     }
@@ -322,7 +322,7 @@ public class Vast.Array : Object
     flip (ssize_t axis = 0)
     {
         var sb = this.build();
-        sb.slice(axis, THRU, THRU, -1);
+        sb.step(axis, -1);
         return sb.end();
     }
 
@@ -477,36 +477,76 @@ public class Vast.Array : Object
             this.dimension = dimension;
         }
 
+        /* from:to:step */
         public Builder
-        slice(ssize_t axis, ssize_t from=THRU, ssize_t to=THRU, ssize_t step=1)
+        slice(ssize_t axis, ssize_t from, ssize_t to, ssize_t step=1)
         {
             axis = wrap_by_dimension(axis);
 
-            var a = to;
-            if(to == THRU) {
-                /* default value handling corresponds to omitted*/
-                if (step > 0)
-                    a = (ssize_t) shape[axis];
-                else
-                    a = -1;
-            } else {
-                a = to < 0 ? (ssize_t) shape[axis] + to   : to;
-            }
+            to = to < 0 ? (ssize_t) shape[axis] + to   : to;
+            from = from < 0 ? (ssize_t) shape[axis] + from : from;
+            return _slice(axis, from, to, step);
+        }
 
-            var b = from;
-            if(from == THRU) {
-                if (step > 0)
-                    b = 0;
-                else
-                    b = (ssize_t) shape[axis] - 1;
-            } else {
-                b = from < 0 ? (ssize_t) shape[axis] + from : from;
-            }
+        /* :to:step */
+        public Builder
+        head(ssize_t axis, ssize_t to, ssize_t step=1)
+        {
+            axis = wrap_by_dimension(axis);
 
-            origin += b * strides[axis];
+            to = to < 0 ? (ssize_t) shape[axis] + to   : to;
+            ssize_t from;
+
+            if (step > 0)
+                from = 0;
+            else
+                from = (ssize_t) shape[axis] - 1;
+
+            return _slice(axis, from, to, step);
+
+        }
+
+        /* from::step */
+        public Builder
+        tail(ssize_t axis, ssize_t from, ssize_t step=1)
+        {
+            ssize_t to;
+            if (step > 0)
+                to = (ssize_t) shape[axis];
+            else
+                to = -1;
+
+            from = from < 0 ? (ssize_t) shape[axis] + from : from;
+            return _slice(axis, from, to, step);
+        }
+
+        /* ::step */
+        public Builder
+        step(ssize_t axis, ssize_t step=1)
+        {
+            ssize_t from;
+            if (step > 0)
+                from = 0;
+            else
+                from = (ssize_t) shape[axis] - 1;
+
+            ssize_t to;
+            if (step > 0)
+                to = (ssize_t) shape[axis];
+            else
+                to = -1;
+
+            return _slice(axis, from, to, step);
+        }
+
+        private Builder
+        _slice(ssize_t axis, ssize_t from, ssize_t to, ssize_t step)
+        {
+
+            origin += from * strides[axis];
 
             /* XXX: hopefully this rounds down even for negative steps */
-            shape[axis] = (a - b) / step;
+            shape[axis] = (to - from) / step;
 
             strides[axis] *= step;
 
