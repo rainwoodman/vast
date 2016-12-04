@@ -326,7 +326,7 @@ public class Vast.Array : Object
         var sb = new ViewBuilder(this);
 
         for (var i = 0; i < _dimension; i ++) {
-            sb.reset_dimension(i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
+            sb.axis(i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
         }
         return sb.finish();
     }
@@ -336,8 +336,8 @@ public class Vast.Array : Object
     {
         var sb = new ViewBuilder(this);
 
-        sb.reset_dimension(from_axis, to_axis);
-        sb.reset_dimension(to_axis, from_axis);
+        sb.axis(from_axis, to_axis);
+        sb.axis(to_axis, from_axis);
 
         return sb.finish();
     }
@@ -474,7 +474,7 @@ public class Vast.Array : Object
         }
 
         public ViewBuilder
-        reset_dimension(ssize_t axis, ssize_t original_axis) {
+        axis(ssize_t axis, ssize_t original_axis) {
             axis = wrap_by_dimension(axis);
             original_axis = wrap_by_dimension(original_axis);
             shape[axis] = array.shape[original_axis];

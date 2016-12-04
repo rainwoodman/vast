@@ -246,23 +246,31 @@ int main (string[] args) {
 
         for(var i = 0; i < 10; i ++) {
             for (var j = 0; j < 20; j++) {
-                a.set_value ({i, j}, (double) i * j);
+                a.set_value ({i, j}, (double) (i + 1 ) * j);
             }
         }
 
         var b = a.view().slice(0, -1, 5, ssize_t.MAX).finish();
 
-        assert (b.get_value({0, 1}).get_double() == 5 * 1);
-        assert (b.get_value({1, 1}).get_double() == 4 * 1);
+        assert (b.get_value({0, 1}).get_double() == 6 * 1);
+        assert (b.get_value({1, 1}).get_double() == 5 * 1);
 
         var c = a.view()
                  .slice(0, -1, 5, ssize_t.MAX)
                  .slice(1, 3, 2, ssize_t.MAX)
                  .finish();
 
-        assert (c.get_value({0, 0}).get_double() == 5 * 2);
-        assert (c.get_value({0, 1}).get_double() == 5 * (2 + 3));
-        assert (c.get_value({1, 2}).get_double() == 4 * (2 + 6));
+        assert (c.get_value({0, 0}).get_double() == 6 * 2);
+        assert (c.get_value({0, 1}).get_double() == 6 * (2 + 3));
+        assert (c.get_value({1, 2}).get_double() == 5 * (2 + 6));
+
+        var d = a.view()
+                 .axis(0, 1)
+                 .axis(1, 0)
+                 .finish();
+
+        assert (d.get_value({3, 7}).get_double() == 8 * 3);
+        assert (d.get_value({7, 3}).get_double() == 4 * 7);
 
     });
 
