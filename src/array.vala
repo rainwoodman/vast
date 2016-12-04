@@ -510,6 +510,8 @@ public class Vast.Array : Object
         public Builder
         tail(ssize_t axis, ssize_t from, ssize_t step=1)
         {
+            axis = wrap_by_dimension(axis);
+
             ssize_t to;
             if (step > 0)
                 to = (ssize_t) shape[axis];
@@ -524,6 +526,8 @@ public class Vast.Array : Object
         public Builder
         step(ssize_t axis, ssize_t step=1)
         {
+            axis = wrap_by_dimension(axis);
+
             ssize_t from;
             if (step > 0)
                 from = 0;
@@ -535,6 +539,40 @@ public class Vast.Array : Object
                 to = (ssize_t) shape[axis];
             else
                 to = -1;
+
+            return _slice(axis, from, to, step);
+        }
+
+        public Builder
+        qslice(ssize_t axis,
+            [CCode (array_length = false)]
+            ssize_t []? qfrom = null,
+            [CCode (array_length = false)]
+            ssize_t []? qto = null,
+            ssize_t step = 1)
+        {
+            axis = wrap_by_dimension(axis);
+
+            ssize_t from, to;
+            if(qfrom == null)
+                if (step > 0)
+                    from = 0;
+                else
+                    from = (ssize_t) shape[axis] - 1;
+            else {
+                from = qfrom[0];
+                from = from < 0 ? (ssize_t) shape[axis] + from : from;
+            }
+
+            if(qto == null)
+                if (step > 0)
+                    to = (ssize_t) shape[axis];
+                else
+                    to = -1;
+            else {
+                to = qto[0];
+                to = to < 0 ? (ssize_t) shape[axis] + to   : to;
+            }
 
             return _slice(axis, from, to, step);
         }

@@ -258,11 +258,26 @@ int main (string[] args) {
         assert (b.get_value({1, 1}).get_double() == 9 * 1);
 
         var b1 = a.build()
+                 .qslice(0, null, {5}, -1)
+                 .end();
+
+        assert (b1.get_value({0, 1}).get_double() == 10 * 1);
+        assert (b1.get_value({1, 1}).get_double() == 9 * 1);
+
+        var f = a.build()
                  .tail(1, 5)
                  .end();
 
-        assert (b1.get_value({1, 1}).get_double() == 2 * 6);
-        assert (b1.get_value({1, 2}).get_double() == 2 * 7);
+        assert (f.get_value({1, 1}).get_double() == 2 * 6);
+        assert (f.get_value({1, 2}).get_double() == 2 * 7);
+
+        var f1 = a.build()
+                 .qslice(1, {5}, null)
+                 .end();
+
+        assert (f1.get_value({1, 1}).get_double() == 2 * 6);
+        assert (f1.get_value({1, 2}).get_double() == 2 * 7);
+
 
         var c = a.build()
                  .tail(0, 5, -1)
@@ -272,6 +287,15 @@ int main (string[] args) {
         assert (c.get_value({0, 0}).get_double() == 6 * 2);
         assert (c.get_value({0, 1}).get_double() == 6 * (2 + 3));
         assert (c.get_value({1, 2}).get_double() == 5 * (2 + 6));
+
+        var c1 = a.build()
+                 .qslice(0, {5}, null, -1)
+                 .qslice(1, {2}, null, 3)
+                 .end();
+
+        assert (c1.get_value({0, 0}).get_double() == 6 * 2);
+        assert (c1.get_value({0, 1}).get_double() == 6 * (2 + 3));
+        assert (c1.get_value({1, 2}).get_double() == 5 * (2 + 6));
 
         var d = a.build()
                  .axis(0, 1)
