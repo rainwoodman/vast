@@ -50,6 +50,7 @@ public class Vast.Array : Object
 
     construct {
         /* initializes the read-only attributes of the Array Object */
+        assert (_dimension <= 32);
 
         /* We will copy the in-values from g_object_new */
         for (var i = 0; i < _dimension; i ++) {
@@ -98,6 +99,7 @@ public class Vast.Array : Object
                   ssize_t[] strides = {},
                   Bytes?    data    = null,
                   size_t    origin  = 0)
+        requires (shape.length <= 32)
         requires (scalar_size > 0)
         requires (_size_from_shape (shape) > 0)
     {
