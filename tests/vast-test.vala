@@ -222,7 +222,13 @@ int main (string[] args) {
         assert (1 == a.index ({0}).dimension);
         assert (0 == a.index ({0}).get_value ({0}).get_int64 ());
         assert (100 == a.index ({10}).get_value ({10}).get_int64 ());
+        assert (0 == a.index ({10, 10}).dimension);
         assert (100 == a.index ({10, 10}).get_value ({}).get_int64 ());
+
+        for (var i = 0; i < 30; i++) {
+            assert (2 * i == a.index ({2}).get_value ({i}).get_int64 ());              // first line vector
+            assert (2 * i == a.transpose ().index ({2}).get_value ({i}).get_int64 ()); // first column vector
+        }
     });
 
     Test.add_func ("/array/slice", () => {
