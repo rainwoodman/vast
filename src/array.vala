@@ -237,6 +237,18 @@ public class Vast.Array : Object
     }
 
     public Array
+    redim (size_t new_dimension)
+        requires (new_dimension >= dimension)
+    {
+        var new_shape = new size_t[new_dimension];
+        Memory.copy (new_shape, shape, dimension * sizeof (size_t));
+        for (var i = dimension; i < new_dimension; i++) {
+            new_shape[i] = 1;
+        }
+        return reshape (new_shape);
+    }
+
+    public Array
     index (ssize_t[] idx)
         requires (idx.length <= dimension)
     {

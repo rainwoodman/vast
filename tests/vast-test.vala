@@ -159,6 +159,16 @@ int main (string[] args) {
         assert (2 == b.shape[1]);
     });
 
+    Test.add_func ("/array/redim", () => {
+        var a = new Vast.Array (typeof (char), sizeof (char), {10});
+        var b = a.redim (5);
+        assert (10 == b.shape[0]);
+        assert (1 == b.shape[1]);
+        assert (1 == b.shape[2]);
+        assert (1 == b.shape[3]);
+        assert (1 == b.shape[4]);
+    });
+
     Test.add_func ("/array/compact", () => {
         var a = new Vast.Array (typeof (uint8), sizeof (uint8), {200});
 
