@@ -2,18 +2,30 @@ using GLib;
 
 public class Vast.Array : Object
 {
-    /* GType of the scalar elements, immutable */
+    /**
+     * GType of the scalar elements, immutable.
+     */
     public Type scalar_type { get; construct; /* implicitly typeof (void) */ }
 
-    /* size of a scalar element in bytes, immutable */
+    /**
+     * Size of a scalar element in bytes, immutable.
+     */
     public size_t scalar_size { get; construct; default = sizeof (void); }
 
-    /* number of dimensions, immutable. 0 indicates a scalar array. */
+    /**
+     * Number of independant axes, immutable. 0 indicates a scalar array.
+     */
     public size_t dimension { get; construct; default = 0; }
 
-    /* length of each dimensions, immutable. Initialized from constructor value later */
-    private size_t _shape[32];
+    private size_t  _shape[32];
+    /* placeholder which will be copied in '_shape' later */
     private size_t* _shape_in;
+
+    /**
+     * Length of each axis in bytes, immutable.
+     *
+     * The size is given by the 'dimension' property.
+     */
     public size_t* shape {
         get {
             return _shape;
@@ -23,9 +35,15 @@ public class Vast.Array : Object
         }
     }
 
-    /* bytes to skip for each dimensions, immutable. Initialized from constructor value later */
-    private ssize_t _strides[32];
-    private ssize_t * _strides_in;
+    private ssize_t  _strides[32];
+    /* placeholder which will be copied in '_strides' later */
+    private ssize_t* _strides_in;
+
+    /**
+     * Number of bytes to skip for traversing each axis, immutable.
+     *
+     * The size is given by the 'dimension' property.
+     */
     public ssize_t* strides {
         get {
             return _strides;
@@ -35,19 +53,33 @@ public class Vast.Array : Object
         }
     }
 
-    /* total number of scalar elements in the array, immutable */
-    public size_t size {get; private set;}
+    /**
+     * Number of scalar elements in the array, immutable.
+     */
+    public size_t size { get; private set; }
 
-    /* GObject that owns the memory buffer for storage of scalar elements */
-    /* if 'null', it will be allocated internally */
-    public Bytes? data {get; construct; default = null;}
+    /**
+     * GObject that owns the memory buffer for storage of scalar elements.
+     *
+     * If 'null', it will be allocated internally.
+     *
+     * It is mutable although {@link GLib.Bytes} specifies that it is an
+     * immutable array of bytes.
+     *
+     * Note that views of this array will share this {@link GLib.Bytes}
+     * instance.
+     */
+    public Bytes? data { get; construct; default = null; }
 
     /* pointer to the memory location of buffer */
     private uint8* _baseptr;
 
-    /* offset to the memory location of 0th element in bytes relative to _baseptr */
-    public size_t origin {get; construct; default = 0;}
-
+    /**
+     * Offset to the memory location of the first element in bytes.
+     *
+     * Internally, a base pointer is computed from the 'data' property.
+     */
+    public size_t origin { get; construct; default = 0; }
 
     construct {
         /* initializes the read-only attributes of the Array Object */
