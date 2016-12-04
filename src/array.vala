@@ -2,12 +2,16 @@ using GLib;
 
 public class Vast.Array : Object
 {
+    /* GType of the scalar elements, immutable */
     public Type scalar_type { get; construct; }
 
+    /* size of a scalar element in bytes, immutable */
     public size_t scalar_size { get; construct; default = sizeof (void); }
 
+    /* number of dimensions, immutable. 0 indicates a scalar array. */
     public size_t dimension { get; construct; default = 0; }
 
+    /* length of each dimensions, immutable. Initialized from constructor value later */
     private size_t _shape[32];
     private size_t* _shape_in;
     public size_t* shape {
@@ -19,9 +23,9 @@ public class Vast.Array : Object
         }
     }
 
+    /* bytes to skip for each dimensions, immutable. Initialized from constructor value later */
     private ssize_t _strides[32];
     private ssize_t * _strides_in;
-
     public ssize_t* strides {
         get {
             return _strides;
@@ -31,23 +35,29 @@ public class Vast.Array : Object
         }
     }
 
-    public size_t origin { get; construct; default = 0; }
-
+    /* total number of scalar elements in the array, immutable */
     public size_t size {get; private set;}
 
+    /* GObject that owns the memory buffer for storage of scalar elements */
+    public Bytes? data {get; construct; }
+
+    /* global shift from the _cached_data; _cached_data + origin is the memory location of 0-th element */
+    public size_t origin { get; construct; default = 0; }
+
+    /* pointer to the begining memory buffer, */
     internal unowned uint8* _cached_data;
 
-    public Bytes? data {get; construct; }
 
     construct {
         /* initializes the read-only attributes of the Array Object */
 
-        /* We will copy the in-values from g_object_newv */
+        /* We will copy the in-values from g_object_new */
         for (var i = 0; i < _dimension; i ++) {
             _shape[i] = _shape_in[i];
         }
 
         if (_strides_in == null) {
+            /* assume C contiguous strides */
             for (var i = _dimension; i > 0; i--) {
                 _strides[i - 1] = (i == _dimension) ? (ssize_t) scalar_size : _strides[i] * (ssize_t) _shape[i];
             }
@@ -57,6 +67,7 @@ public class Vast.Array : Object
             }
         }
 
+        /* calculate size, since it is immutable, we do it once here */
         _size = 1;
         for (var i = 0; i < _dimension; i ++) {
             _size *= _shape[i];
@@ -65,6 +76,7 @@ public class Vast.Array : Object
         _data = _data ?? new Bytes (new uint8[scalar_size * _size]);
         _cached_data = _data.get_data ();
 
+        /* the input pointers from gobject is no longer useful, void them.*/
         _shape_in = null;
         _strides_in = null;
     }
