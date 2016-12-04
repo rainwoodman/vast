@@ -428,6 +428,33 @@ public class Vast.Array : Object
 
     public class ViewBuilder
     {
+        /* The ViewBuilder gives a syntax to create a new Array viewing
+         * the current array. 
+         * 
+         * for each dimension we can use
+         *
+         *  this.slice(axis, step, from, to)
+         *
+         * it shall be idential to numpy's slice(from, to, step) indexing syntax.
+         * THRU corresponds to omitted values in Python.
+         * if there is a difference, consider it a bug.
+         * (easier to test once with have GIR working)
+         *
+         * we can also reroute the axis's shape and strides to any axis in the original
+         * array, or set it to a new axis (NEW_AXIS). (implement transpose, e.g.)
+         *
+         *  this.axis(axis, originalaxis)
+         *
+         * if an axis has shape[axis] == 1 or strides[axis] == 0,
+         * then we can change the shape (broadcastable)
+         *
+         *  this.broadcast(axis, newshape)
+         *
+         * the final view array is built after this.end() is called.
+         *
+         * methods can be chained or called in a loop.
+         *
+         */
         private size_t shape[32];
         private ssize_t strides[32];
         private size_t origin;
@@ -513,7 +540,7 @@ public class Vast.Array : Object
         broadcast(ssize_t axis, ssize_t newshape)
         {
             axis = wrap_by_dimension(axis);
-            assert (shape[axis] == 1);
+            assert (shape[axis] == 1 || strides[axis] == 0);
             strides[axis] = 0;
             shape[axis] = newshape;
             return this;
