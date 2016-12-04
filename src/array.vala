@@ -2,6 +2,8 @@ using GLib;
 
 public class Vast.Array : Object
 {
+    public static const ssize_t THRU = ssize_t.MAX;
+
     /**
      * GType of the scalar elements, immutable.
      */
@@ -264,9 +266,9 @@ public class Vast.Array : Object
                           data);
     }
 
-    public ViewBuilder view(size_t dimension = ssize_t.MAX)
+    public ViewBuilder view(size_t dimension = THRU)
     {
-        if ( dimension == ssize_t.MAX ) dimension = this._dimension;
+        if (dimension == THRU) dimension = this._dimension;
         return new ViewBuilder(this, dimension);
     }
 
@@ -287,7 +289,7 @@ public class Vast.Array : Object
     {
         var sb = this.view();
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, 1, ssize_t.MAX, to[i]);
+            sb.slice(i, 1, THRU, to[i]);
         }
         return sb.end();
     }
@@ -297,7 +299,7 @@ public class Vast.Array : Object
     {
         var sb = this.view();
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, 1, from[i], ssize_t.MAX);
+            sb.slice(i, 1, from[i], THRU);
         }
         return sb.end();
     }
@@ -308,7 +310,7 @@ public class Vast.Array : Object
         var sb = this.view();
 
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, steps[i], ssize_t.MAX, ssize_t.MAX);
+            sb.slice(i, steps[i], THRU, THRU);
         }
         return sb.end();
     }
@@ -317,7 +319,7 @@ public class Vast.Array : Object
     flip (ssize_t axis = 0)
     {
         var sb = this.view();
-        sb.slice(axis, -1, ssize_t.MAX, ssize_t.MAX);
+        sb.slice(axis, -1, THRU, THRU);
         return sb.end();
     }
 
@@ -442,19 +444,19 @@ public class Vast.Array : Object
             }
             origin = array.origin;
             this.array = array;
-            if (dimension == ssize_t.MAX) {
+            if (dimension == THRU) {
                 dimension = array._dimension;
             }
             this.dimension = dimension;
         }
 
         public ViewBuilder
-        slice(ssize_t axis, ssize_t step, ssize_t from=ssize_t.MAX, ssize_t to=ssize_t.MAX)
+        slice(ssize_t axis, ssize_t step, ssize_t from=THRU, ssize_t to=THRU)
         {
             axis = wrap_by_dimension(axis);
 
             var a = to;
-            if(to == ssize_t.MAX) {
+            if(to == THRU) {
                 /* default value handling corresponds to omitted*/
                 if (step > 0)
                     a = (ssize_t) shape[axis];
@@ -465,7 +467,7 @@ public class Vast.Array : Object
             }
 
             var b = from;
-            if(from == ssize_t.MAX) {
+            if(from == THRU) {
                 if (step > 0)
                     b = 0;
                 else
@@ -491,12 +493,12 @@ public class Vast.Array : Object
             return new ViewBuilder(array, dimension);
         }
 
-        /* use original_axis for new axis, a new shape[d] == 1 axis if ssize_t.MAX */
+        /* use original_axis for new axis, a new shape[d] == 1 axis if THRU */
         public ViewBuilder
-        axis(ssize_t axis, ssize_t original_axis=ssize_t.MAX)
+        axis(ssize_t axis, ssize_t original_axis=THRU)
         {
             axis = wrap_by_dimension(axis);
-            if (original_axis != ssize_t.MAX) {
+            if (original_axis != THRU) {
                 original_axis = wrap_by_dimension(original_axis);
                 shape[axis] = array.shape[original_axis];
                 strides[axis] = array.strides[original_axis];
