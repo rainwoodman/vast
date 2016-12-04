@@ -5,5 +5,7 @@ test('test', executable('vast-test', 'vast-test.vala',
      args: '')
 
 if g_ir_compiler.found()
-    test('gi', find_program('gi-test.py'), env: ['GI_TYPELIB_PATH=' + meson.current_build_dir() + '/../src'])
+    test('gi', find_program('gi-test.py'),
+         env: ['GI_TYPELIB_PATH=' + meson.current_build_dir() + '/../src',
+           'PYTHONPATH=' + meson.current_source_dir()])
 endif

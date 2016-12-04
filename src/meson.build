@@ -32,6 +32,11 @@ if g_ir_compiler.found()
                   depends: vast_lib,
                   install: true,
                   install_dir: '@0@/girepository-1.0'.format(get_option('libdir')))
+
+    python_api_version = '3.5'
+    install_data('gi/overrides/Vast.py',
+                 install_dir: '@0@/python@1@/site-packages/gi/overrides'.format(get_option('libdir'), python_api_version))
+
 endif
 
 pkgconfig = import('pkgconfig')
