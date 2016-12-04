@@ -2,7 +2,6 @@ using GLib;
 
 public class Vast.Array : Object
 {
-    public const ssize_t THRU = ssize_t.MAX;
     public const ssize_t NEW_AXIS = ssize_t.MAX;
     public const size_t DEFAULT_DIMENSION = size_t.MAX;
 
