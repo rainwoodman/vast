@@ -272,6 +272,13 @@ int main (string[] args) {
         assert (d.get_value({3, 7}).get_double() == 8 * 3);
         assert (d.get_value({7, 3}).get_double() == 4 * 7);
 
+        var e = d.view(3)
+                 .broadcast(-1, 30)
+                 .finish();
+
+        assert (e.get_value({3, 7, 29}).get_double() == 8 * 3);
+        assert (e.get_value({7, 3, 29}).get_double() == 4 * 7);
+
     });
 
     Test.add_func ("/array/slice", () => {

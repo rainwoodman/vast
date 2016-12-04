@@ -264,9 +264,10 @@ public class Vast.Array : Object
                           data);
     }
 
-    public ViewBuilder view()
+    public ViewBuilder view(size_t dimension = ssize_t.MAX)
     {
-        return new ViewBuilder(this);
+        if ( dimension == ssize_t.MAX ) dimension = this._dimension;
+        return new ViewBuilder(this, dimension);
     }
 
     /* method that is supposed to be compatible with for Vala slicing.
@@ -274,7 +275,7 @@ public class Vast.Array : Object
     public Array
     slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
-        var sb = new ViewBuilder(this);
+        var sb = this.view();
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, 1, from[i], to[i]);
         }
@@ -284,7 +285,7 @@ public class Vast.Array : Object
     public Array
     head ([CCode (array_length = false)] ssize_t[] to)
     {
-        var sb = new ViewBuilder(this);
+        var sb = this.view();
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, 1, ssize_t.MAX, to[i]);
         }
@@ -294,7 +295,7 @@ public class Vast.Array : Object
     public Array
     tail ([CCode (array_length = false)] ssize_t[] from)
     {
-        var sb = new ViewBuilder(this);
+        var sb = this.view();
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, 1, from[i], ssize_t.MAX);
         }
@@ -304,7 +305,7 @@ public class Vast.Array : Object
     public Array
     step ([CCode (array_length = false)] ssize_t[] steps)
     {
-        var sb = new ViewBuilder(this);
+        var sb = this.view();
 
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, steps[i], ssize_t.MAX, ssize_t.MAX);
@@ -315,7 +316,7 @@ public class Vast.Array : Object
     public Array
     flip (ssize_t axis = 0)
     {
-        var sb = new ViewBuilder(this);
+        var sb = this.view();
         sb.slice(axis, -1, ssize_t.MAX, ssize_t.MAX);
         return sb.finish();
     }
@@ -323,7 +324,7 @@ public class Vast.Array : Object
     public Array
     transpose ([CCode (array_length = false)] ssize_t[]? axes = null)
     {
-        var sb = new ViewBuilder(this);
+        var sb = this.view();
 
         for (var i = 0; i < _dimension; i ++) {
             sb.axis(i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
@@ -334,7 +335,7 @@ public class Vast.Array : Object
     public Array
     swap (ssize_t from_axis = 0, ssize_t to_axis = 1)
     {
-        var sb = new ViewBuilder(this);
+        var sb = this.view();
 
         sb.axis(from_axis, to_axis);
         sb.axis(to_axis, from_axis);
@@ -426,14 +427,25 @@ public class Vast.Array : Object
         private ssize_t strides[32];
         private size_t origin;
         private Array array;
+        private size_t dimension;
 
-        public ViewBuilder(Array array) {
+        public ViewBuilder(Array array, size_t dimension)
+        {
+            assert (dimension >= array._dimension);
             for (var i = 0; i < array._dimension; i ++) {
                 shape[i] = array._shape[i];
                 strides[i] = array._strides[i];
             }
+            for (var i = array._dimension; i < dimension; i ++) {
+                shape[i] = 1;
+                strides[i] = 0;
+            }
             origin = array.origin;
             this.array = array;
+            if (dimension == ssize_t.MAX) {
+                dimension = array._dimension;
+            }
+            this.dimension = dimension;
         }
 
         public ViewBuilder
@@ -474,11 +486,34 @@ public class Vast.Array : Object
         }
 
         public ViewBuilder
-        axis(ssize_t axis, ssize_t original_axis) {
+        reset_dimension(size_t dimension)
+        {
+            return new ViewBuilder(array, dimension);
+        }
+
+        /* use original_axis for new axis, a new shape[d] == 1 axis if ssize_t.MAX */
+        public ViewBuilder
+        axis(ssize_t axis, ssize_t original_axis=ssize_t.MAX)
+        {
             axis = wrap_by_dimension(axis);
-            original_axis = wrap_by_dimension(original_axis);
-            shape[axis] = array.shape[original_axis];
-            strides[axis] = array.strides[original_axis];
+            if (original_axis != ssize_t.MAX) {
+                original_axis = wrap_by_dimension(original_axis);
+                shape[axis] = array.shape[original_axis];
+                strides[axis] = array.strides[original_axis];
+            } else {
+                shape[axis] = 1;
+                strides[axis] = 0;
+            }
+            return this;
+        }
+
+        public ViewBuilder
+        broadcast(ssize_t axis, ssize_t newshape)
+        {
+            axis = wrap_by_dimension(axis);
+            assert (shape[axis] == 1);
+            strides[axis] = 0;
+            shape[axis] = newshape;
             return this;
         }
 
@@ -487,15 +522,15 @@ public class Vast.Array : Object
         {
             return new Array (array.scalar_type,
                               array.scalar_size,
-                              shape[0:array._dimension],
-                              strides[0:array._dimension],
+                              shape[0:dimension],
+                              strides[0:dimension],
                               origin,
                               array.data);
         }
 
         private ssize_t wrap_by_dimension(ssize_t axis)
         {
-            return (axis < 0) ? ((ssize_t) array._dimension + axis) : axis;
+            return (axis < 0) ? ((ssize_t) dimension + axis) : axis;
         }
     }
 
