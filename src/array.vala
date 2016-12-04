@@ -42,7 +42,10 @@ public class Vast.Array : Object
     public Bytes? data {get; construct; }
 
     /* pointer to the memory location of 0th element */
-    public uint8 * origin {get; construct; default = null;}
+    private uint8* _baseptr;
+
+    /* offset to the memory location of 0th element */
+    public size_t origin {get; construct; default = 0;}
 
 
     construct {
@@ -73,7 +76,9 @@ public class Vast.Array : Object
 
         _data = _data ?? new Bytes (new uint8[scalar_size * _size]);
 
-        _origin = _origin ?? _data.get_data ();
+        assert (_origin < _data.length);
+
+        _baseptr = (uint8*) _data.get_data () + _origin;
 
         /* the input pointers from gobject is no longer useful, void them.*/
         _shape_in = null;
@@ -96,7 +101,7 @@ public class Vast.Array : Object
                   [CCode (array_length = false)]
                   ssize_t[] strides = {},
                   Bytes?    data    = null,
-                  uint8*    origin = null)
+                  size_t    origin  = 0)
         requires (shape.length <= 32)
         requires (scalar_size > 0)
         requires (_size_from_shape (shape) > 0)
@@ -107,7 +112,7 @@ public class Vast.Array : Object
               shape:       shape,
               strides:     strides,
               data:        data,
-              origin:   origin);
+              origin:      origin);
     }
 
     private inline size_t
@@ -123,25 +128,25 @@ public class Vast.Array : Object
     public unowned void*
     get_pointer ([CCode (array_length = false)] ssize_t[] index)
     {
-        return _origin + _offset_from_index (index);
+        return _baseptr + _offset_from_index (index);
     }
 
     public Value
     get_value ([CCode (array_length = false)] ssize_t[] index)
     {
-        return _memory_to_value (_origin + _offset_from_index (index));
+        return _memory_to_value (_baseptr + _offset_from_index (index));
     }
 
     public void
     set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {
-        Memory.copy (_origin + _offset_from_index (index), val, scalar_size);
+        Memory.copy (_baseptr + _offset_from_index (index), val, scalar_size);
     }
 
     public void
     set_value ([CCode (array_length = false)] ssize_t[] index, Value val)
     {
-        _value_to_memory (val, _origin + _offset_from_index (index));
+        _value_to_memory (val, _baseptr + _offset_from_index (index));
     }
 
     public void

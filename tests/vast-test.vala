@@ -59,7 +59,7 @@ int main (string[] args) {
         assert (typeof (void) == a.scalar_type);
         assert (sizeof (void) == a.scalar_size);
         assert (1 == a.size);
-        assert (null != a.origin);
+        assert (0 == a.origin);
         assert (null != a.data);
         //assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: 0B".printf (sizeof (void)) == a.to_string ());
 
@@ -75,7 +75,7 @@ int main (string[] args) {
         assert (2 * 4 * sizeof (void) == b.strides[1]);
         assert (4 * sizeof (void) == b.strides[2]);
         assert (sizeof (void) == b.strides[3]);
-        assert (null != b.origin);
+        assert (0 == b.origin);
         assert (null != b.data);
     });
 
