@@ -264,21 +264,6 @@ int main (string[] args) {
         assert (b1.get_value({0, 1}).get_double() == 10 * 1);
         assert (b1.get_value({1, 1}).get_double() == 9 * 1);
 
-        var f = a.build()
-                 .tail(1, 5)
-                 .end();
-
-        assert (f.get_value({1, 1}).get_double() == 2 * 6);
-        assert (f.get_value({1, 2}).get_double() == 2 * 7);
-
-        var f1 = a.build()
-                 .qslice(1, {5}, null)
-                 .end();
-
-        assert (f1.get_value({1, 1}).get_double() == 2 * 6);
-        assert (f1.get_value({1, 2}).get_double() == 2 * 7);
-
-
         var c = a.build()
                  .tail(0, 5, -1)
                  .tail(1, 2, 3)
@@ -312,6 +297,28 @@ int main (string[] args) {
 
         assert (e.get_value({3, 7, 29}).get_double() == 8 * 3);
         assert (e.get_value({7, 3, 29}).get_double() == 4 * 7);
+
+        var f = a.build()
+                 .tail(1, 5)
+                 .end();
+
+        assert (f.get_value({1, 1}).get_double() == 2 * 6);
+        assert (f.get_value({1, 2}).get_double() == 2 * 7);
+
+        var f1 = a.build()
+                 .qslice(1, {5}, null)
+                 .end();
+
+        assert (f1.get_value({1, 1}).get_double() == 2 * 6);
+        assert (f1.get_value({1, 2}).get_double() == 2 * 7);
+
+        var g = a.build()
+                 .index(1, 5)
+                 .end();
+
+        assert (g.dimension == 1);
+        assert (g.get_value({1}).get_double() == 2 * 5);
+        assert (g.get_value({2}).get_double() == 3 * 5);
 
     });
 

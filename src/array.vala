@@ -460,6 +460,7 @@ public class Vast.Array : Object
         private Array array;
         private size_t dimension;
         private ssize_t original_axis[32];
+        private bool removal[32];
 
         internal Builder(Array array, size_t dimension)
         {
@@ -468,11 +469,13 @@ public class Vast.Array : Object
                 shape[i] = array._shape[i];
                 strides[i] = array._strides[i];
                 original_axis[i] = i;
+                removal[i] = false;
             }
             for (var i = array._dimension; i < dimension; i ++) {
                 shape[i] = 1;
                 strides[i] = 0;
                 original_axis[i] = NEW_AXIS;
+                removal[i] = false;
             }
             origin = array.origin;
             this.array = array;
@@ -507,6 +510,14 @@ public class Vast.Array : Object
             return qslice(axis, null, null, step);
         }
 
+        /* [i]; the axis is marked for removeal */
+        public Builder
+        index(ssize_t axis, ssize_t where)
+        {
+            qslice(axis, (ssize_t[]) &where, (ssize_t[]) &where, 0);
+            return this;
+        }
+
         public Builder
         qslice(ssize_t axis,
             [CCode (array_length = false)]
@@ -515,24 +526,28 @@ public class Vast.Array : Object
             ssize_t []? qto = null,
             ssize_t step = 1)
         {
+            /* if step is 0, mark the axis for removal */
             axis = wrap_by_dimension(axis);
 
             ssize_t from, to;
-            if(qfrom == null)
+            if(qfrom == null) {
+                assert (step != 0);
                 if (step > 0)
                     from = 0;
                 else
                     from = (ssize_t) shape[axis] - 1;
-            else {
+            } else {
                 from = qfrom[0];
                 from = from < 0 ? (ssize_t) shape[axis] + from : from;
             }
 
-            if(qto == null)
+            if(qto == null) {
+                assert (step != 0);
                 if (step > 0)
                     to = (ssize_t) shape[axis];
-                else
+                else 
                     to = -1;
+            }
             else {
                 to = qto[0];
                 to = to < 0 ? (ssize_t) shape[axis] + to   : to;
@@ -541,11 +556,14 @@ public class Vast.Array : Object
             origin += from * strides[axis];
 
             /* XXX: hopefully this rounds down even for negative steps */
-            shape[axis] = (to - from) / step;
-
-            strides[axis] *= step;
-
-            assert (shape[axis] >= 0);
+            if (step == 0) {
+                assert (to == from);
+                removal[axis] = true;
+            } else {
+                shape[axis] = (to - from) / step;
+                strides[axis] *= step;
+                assert (shape[axis] >= 0);
+            }
 
             return this;
         }
@@ -598,6 +616,16 @@ public class Vast.Array : Object
                 assert (n[i] <= 1);
                 /* XXX: raised error shall be informative */
             }
+
+            /* remove axes that are marked for removal due to indexing */
+            ssize_t j = 0;
+            for(var i = 0; i < dimension; i ++) {
+                if(removal[i]) continue;
+                shape[j] = shape[i];
+                strides[j] = strides[i];
+                j ++;
+            }
+            dimension = j;
 
             /* the axes are reasonable - create the array. */
             return new Array (array.scalar_type,
