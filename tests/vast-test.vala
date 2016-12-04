@@ -250,21 +250,21 @@ int main (string[] args) {
             }
         }
 
-        var b = a.view()
+        var b = a.build()
                  .slice(0, 5, Vast.Array.THRU, -1)
                  .end();
 
         assert (b.get_value({0, 1}).get_double() == 6 * 1);
         assert (b.get_value({1, 1}).get_double() == 5 * 1);
 
-        var b1 = a.view()
+        var b1 = a.build()
                  .slice(1, 5, Vast.Array.THRU)
                  .end();
 
         assert (b1.get_value({1, 1}).get_double() == 2 * 6);
         assert (b1.get_value({1, 2}).get_double() == 2 * 7);
 
-        var c = a.view()
+        var c = a.build()
                  .slice(0, 5, Vast.Array.THRU, -1)
                  .slice(1, 2, Vast.Array.THRU, 3)
                  .end();
@@ -273,7 +273,7 @@ int main (string[] args) {
         assert (c.get_value({0, 1}).get_double() == 6 * (2 + 3));
         assert (c.get_value({1, 2}).get_double() == 5 * (2 + 6));
 
-        var d = a.view()
+        var d = a.build()
                  .axis(0, 1)
                  .axis(1, 0)
                  .end();
@@ -282,7 +282,7 @@ int main (string[] args) {
         assert (d.get_value({7, 3}).get_double() == 4 * 7);
 
         /* new axes will have shape[d] == 1 and strides[d] == 0, so we can broadcast them */
-        var e = d.view(3)
+        var e = d.build(3)
                  .broadcast(-1, 30)
                  .end();
 

@@ -268,7 +268,7 @@ public class Vast.Array : Object
                           data);
     }
 
-    public Builder view(size_t dimension = DEFAULT_DIMENSION)
+    public Builder build(size_t dimension = DEFAULT_DIMENSION)
     {
         if (dimension == DEFAULT_DIMENSION)
             dimension = this._dimension;
@@ -280,7 +280,7 @@ public class Vast.Array : Object
     public Array
     slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
-        var sb = this.view();
+        var sb = this.build();
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, from[i], to[i]);
         }
@@ -290,7 +290,7 @@ public class Vast.Array : Object
     public Array
     head ([CCode (array_length = false)] ssize_t[] to)
     {
-        var sb = this.view();
+        var sb = this.build();
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, THRU, to[i]);
         }
@@ -300,7 +300,7 @@ public class Vast.Array : Object
     public Array
     tail ([CCode (array_length = false)] ssize_t[] from)
     {
-        var sb = this.view();
+        var sb = this.build();
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, from[i]);
         }
@@ -310,7 +310,7 @@ public class Vast.Array : Object
     public Array
     step ([CCode (array_length = false)] ssize_t[] steps)
     {
-        var sb = this.view();
+        var sb = this.build();
 
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, THRU, THRU, steps[i]);
@@ -321,7 +321,7 @@ public class Vast.Array : Object
     public Array
     flip (ssize_t axis = 0)
     {
-        var sb = this.view();
+        var sb = this.build();
         sb.slice(axis, THRU, THRU, -1);
         return sb.end();
     }
@@ -329,7 +329,7 @@ public class Vast.Array : Object
     public Array
     transpose ([CCode (array_length = false)] ssize_t[]? axes = null)
     {
-        var sb = this.view();
+        var sb = this.build();
 
         for (var i = 0; i < _dimension; i ++) {
             sb.axis(i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
@@ -340,7 +340,7 @@ public class Vast.Array : Object
     public Array
     swap (ssize_t from_axis = 0, ssize_t to_axis = 1)
     {
-        var sb = this.view();
+        var sb = this.build();
 
         sb.axis(from_axis, to_axis);
         sb.axis(to_axis, from_axis);
@@ -450,7 +450,7 @@ public class Vast.Array : Object
          *
          *  this.broadcast(axis, newshape)
          *
-         * the final view array is built after this.end() is called.
+         * the final build array is built after this.end() is called.
          *
          * methods can be chained or called in a loop.
          *
