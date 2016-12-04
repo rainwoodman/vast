@@ -236,6 +236,22 @@ public class Vast.Array : Object
                           data);
     }
 
+    public Array
+    index (ssize_t[] idx)
+        requires (idx.length <= dimension)
+    {
+        var new_origin = origin;
+        for (var i = 0; i < idx.length; i++) {
+            new_origin += idx[i] * strides[i];
+        }
+        return new Array (scalar_type,
+                          scalar_size,
+                          _shape[idx.length:dimension],
+                          _strides[idx.length:dimension],
+                          new_origin,
+                          data);
+    }
+
     private inline size_t[]
     _shape_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {

@@ -209,6 +209,22 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/index", () => {
+        var a = new Vast.Array (typeof (int64), sizeof (int64), {30, 30});
+
+        for (var i = 0; i < 30; i++) {
+            for (var j = 0; j < 30; j++) {
+                a.set_value ({i, j}, i * j);
+            }
+        }
+
+        assert (2 == a.index ({}).dimension);
+        assert (1 == a.index ({0}).dimension);
+        assert (0 == a.index ({0}).get_value ({0}).get_int64 ());
+        assert (100 == a.index ({10}).get_value ({10}).get_int64 ());
+        assert (100 == a.index ({10, 10}).get_value ({}).get_int64 ());
+    });
+
     Test.add_func ("/array/slice", () => {
         var a = new Vast.Array (typeof (int64), sizeof (int64), {30, 30});
 
