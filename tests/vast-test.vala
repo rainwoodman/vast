@@ -250,7 +250,7 @@ int main (string[] args) {
             }
         }
 
-        var b = a.view().slice(0, -1, 5, ssize_t.MAX).finish();
+        var b = a.view().slice(0, -1, 5, ssize_t.MAX).end();
 
         assert (b.get_value({0, 1}).get_double() == 6 * 1);
         assert (b.get_value({1, 1}).get_double() == 5 * 1);
@@ -258,7 +258,7 @@ int main (string[] args) {
         var c = a.view()
                  .slice(0, -1, 5, ssize_t.MAX)
                  .slice(1, 3, 2, ssize_t.MAX)
-                 .finish();
+                 .end();
 
         assert (c.get_value({0, 0}).get_double() == 6 * 2);
         assert (c.get_value({0, 1}).get_double() == 6 * (2 + 3));
@@ -267,14 +267,15 @@ int main (string[] args) {
         var d = a.view()
                  .axis(0, 1)
                  .axis(1, 0)
-                 .finish();
+                 .end();
 
         assert (d.get_value({3, 7}).get_double() == 8 * 3);
         assert (d.get_value({7, 3}).get_double() == 4 * 7);
 
+        /* new axes will have shape[d] == 1 and strides[d] == 0, so we can broadcast them */
         var e = d.view(3)
                  .broadcast(-1, 30)
-                 .finish();
+                 .end();
 
         assert (e.get_value({3, 7, 29}).get_double() == 8 * 3);
         assert (e.get_value({7, 3, 29}).get_double() == 4 * 7);

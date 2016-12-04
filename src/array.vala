@@ -279,7 +279,7 @@ public class Vast.Array : Object
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, 1, from[i], to[i]);
         }
-        return sb.finish();
+        return sb.end();
     }
 
     public Array
@@ -289,7 +289,7 @@ public class Vast.Array : Object
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, 1, ssize_t.MAX, to[i]);
         }
-        return sb.finish();
+        return sb.end();
     }
 
     public Array
@@ -299,7 +299,7 @@ public class Vast.Array : Object
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, 1, from[i], ssize_t.MAX);
         }
-        return sb.finish();
+        return sb.end();
     }
 
     public Array
@@ -310,7 +310,7 @@ public class Vast.Array : Object
         for (var i = 0; i < _dimension; i ++) {
             sb.slice(i, steps[i], ssize_t.MAX, ssize_t.MAX);
         }
-        return sb.finish();
+        return sb.end();
     }
 
     public Array
@@ -318,7 +318,7 @@ public class Vast.Array : Object
     {
         var sb = this.view();
         sb.slice(axis, -1, ssize_t.MAX, ssize_t.MAX);
-        return sb.finish();
+        return sb.end();
     }
 
     public Array
@@ -329,7 +329,7 @@ public class Vast.Array : Object
         for (var i = 0; i < _dimension; i ++) {
             sb.axis(i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
         }
-        return sb.finish();
+        return sb.end();
     }
 
     public Array
@@ -340,7 +340,7 @@ public class Vast.Array : Object
         sb.axis(from_axis, to_axis);
         sb.axis(to_axis, from_axis);
 
-        return sb.finish();
+        return sb.end();
     }
 
     public string
@@ -518,7 +518,7 @@ public class Vast.Array : Object
         }
 
         public Array
-        finish()
+        end()
         {
             return new Array (array.scalar_type,
                               array.scalar_size,
