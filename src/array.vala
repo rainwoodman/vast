@@ -264,155 +264,82 @@ public class Vast.Array : Object
                           data);
     }
 
-    private inline size_t[]
-    _shape_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
+    public ViewBuilder view()
     {
-        var ret = new size_t[dimension];
-        for (var i = 0; i < dimension; i++) {
-            var a = to[i] < 0 ? shape[i] + to[i] : to[i];
-            var b = from[i] < 0 ? shape[i] + from[i] : from[i];
-            if (a < b) {
-                ret[i] = b - a;
-            } else {
-                ret[i] = a - b;
-            }
-        }
-        return ret;
+        return new ViewBuilder(this);
     }
 
-    private inline ssize_t[]
-    _strides_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to) {
-        var ret = new ssize_t[dimension];
-        for (var i = 0; i < dimension; i++) {
-            if ((from[i] < 0 ? shape[i] + from[i] : from[i]) > (to[i] < 0 ? shape[i] + to[i] : to[i])) {
-                ret[i] = -strides[i];
-            } else {
-                ret[i] = strides[i];
-            }
-        }
-        return ret;
-    }
-
+    /* method that is supposed to be compatible with for Vala slicing.
+     * require from <= to */
     public Array
     slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
-        return new Array (scalar_type,
-                          scalar_size,
-                          _shape_from_slice (from, to),
-                          _strides_from_slice (from, to),
-                          origin + _offset_from_index (from),
-                          data);
-    }
-
-    private inline ssize_t[]
-    _fill_index (ssize_t val)
-    {
-        var index = new ssize_t[dimension];
-        for (var i = 0; i < dimension; i++) {
-            index[i] = val;
+        var sb = new ViewBuilder(this);
+        for (var i = 0; i < _dimension; i ++) {
+            sb.slice(i, 1, from[i], to[i]);
         }
-        return index;
+        return sb.finish();
     }
 
     public Array
     head ([CCode (array_length = false)] ssize_t[] to)
     {
-        return slice (_fill_index (0), to);
+        var sb = new ViewBuilder(this);
+        for (var i = 0; i < _dimension; i ++) {
+            sb.slice(i, 1, ssize_t.MAX, to[i]);
+        }
+        return sb.finish();
     }
 
     public Array
     tail ([CCode (array_length = false)] ssize_t[] from)
     {
-        var to = new ssize_t[dimension];
-        for (var i = 0; i < dimension; i++) {
-            to[i] = (ssize_t) shape[i];
+        var sb = new ViewBuilder(this);
+        for (var i = 0; i < _dimension; i ++) {
+            sb.slice(i, 1, from[i], ssize_t.MAX);
         }
-        return slice (from, to);
-    }
-
-    private inline ssize_t[] _strides_from_steps (ssize_t[] steps)
-    {
-        var ret = new ssize_t[dimension];
-        for (var i = 0; i < dimension; i++) {
-            ret[i] = strides[i] * steps[i];
-        }
-        return ret;
-    }
-
-    private inline size_t[]
-    _shape_from_steps (ssize_t[] steps)
-    {
-        var ret = new size_t[dimension];
-        for (var i = 0; i < dimension; i++) {
-            ret[i] = shape[i] / (steps[i] < 0 ? -steps[i] : steps[i]); // round down
-        }
-        return ret;
+        return sb.finish();
     }
 
     public Array
     step ([CCode (array_length = false)] ssize_t[] steps)
     {
-        var new_origin = origin;
-        for (var i = 0; i < dimension; i++) {
-            if (steps[i] < 0) {
-                new_origin += strides[i] * shape[i] - scalar_size;
-            }
-        }
-        return new Array (scalar_type,
-                          scalar_size,
-                          _shape_from_steps (steps),
-                          _strides_from_steps (steps),
-                          new_origin,
-                          data);
-    }
+        var sb = new ViewBuilder(this);
 
-    private inline size_t
-    _axis_from_external_axis (ssize_t axis)
-    {
-        return axis < 0 ? dimension + axis : axis;
+        for (var i = 0; i < _dimension; i ++) {
+            sb.slice(i, steps[i], ssize_t.MAX, ssize_t.MAX);
+        }
+        return sb.finish();
     }
 
     public Array
     flip (ssize_t axis = 0)
     {
-        var steps = _fill_index (1);
-        steps[_axis_from_external_axis (axis)] = -1;
-        return step (steps);
+        var sb = new ViewBuilder(this);
+        sb.slice(axis, -1, ssize_t.MAX, ssize_t.MAX);
+        return sb.finish();
     }
 
     public Array
     transpose ([CCode (array_length = false)] ssize_t[]? axes = null)
     {
-        var transposed_strides = new ssize_t[dimension];
-        var transposed_shape   = new size_t[dimension];
-        for (var i = 0; i < dimension; i++)
-        {
-            if (axes == null) {
-                transposed_strides[i] = strides[(i + 1) % dimension];
-                transposed_shape[i]   = shape[(i + 1) % dimension];
-            } else {
-                transposed_strides[i] = strides[_axis_from_external_axis (axes[i])];
-                transposed_shape[i]   = shape[_axis_from_external_axis (axes[i])];
-            }
+        var sb = new ViewBuilder(this);
+
+        for (var i = 0; i < _dimension; i ++) {
+            sb.reset_dimension(i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
         }
-        return new Array (scalar_type, scalar_size, transposed_shape, transposed_strides, origin, data);
+        return sb.finish();
     }
 
     public Array
     swap (ssize_t from_axis = 0, ssize_t to_axis = 1)
-        requires (_axis_from_external_axis (from_axis) < dimension)
-        requires (_axis_from_external_axis (to_axis)   < dimension)
     {
-        var axes = new ssize_t[dimension];
-        for (var i = 0; i < dimension; i++) {
-            axes[i] = i; // identity
-        }
+        var sb = new ViewBuilder(this);
 
-        // swap dimensions
-        axes[_axis_from_external_axis (from_axis)] = to_axis;
-        axes[_axis_from_external_axis (to_axis)]   = from_axis;
+        sb.reset_dimension(from_axis, to_axis);
+        sb.reset_dimension(to_axis, from_axis);
 
-        return transpose (axes);
+        return sb.finish();
     }
 
     public string
@@ -492,4 +419,84 @@ public class Vast.Array : Object
 
         return val;
     }
+
+    public class ViewBuilder
+    {
+        private size_t shape[32];
+        private ssize_t strides[32];
+        private size_t origin;
+        private Array array;
+
+        public ViewBuilder(Array array) {
+            for (var i = 0; i < array._dimension; i ++) {
+                shape[i] = array._shape[i];
+                strides[i] = array._strides[i];
+            }
+            origin = array.origin;
+            this.array = array;
+        }
+
+        public ViewBuilder
+        slice(ssize_t axis, ssize_t step, ssize_t from=ssize_t.MAX, ssize_t to=ssize_t.MAX)
+        {
+            axis = wrap_by_dimension(axis);
+
+            var a = to;
+            if(to == ssize_t.MAX) {
+                /* default value handling corresponds to omitted*/
+                if (step > 0)
+                    a = (ssize_t) shape[axis];
+                else
+                    a = -1;
+            } else {
+                a = to < 0 ? (ssize_t) shape[axis] + to   : to;
+            }
+
+            var b = from;
+            if(from == ssize_t.MAX) {
+                if (step > 0)
+                    b = 0;
+                else
+                    b = (ssize_t) shape[axis] - 1;
+            } else {
+                b = from < 0 ? (ssize_t) shape[axis] + from : from;
+            }
+
+            origin += b * strides[axis];
+
+            /* XXX: hopefully this rounds down even for negative steps */
+            shape[axis] = (a - b) / step;
+
+            strides[axis] *= step;
+
+            assert (shape[axis] >= 0);
+            return this;
+        }
+
+        public ViewBuilder
+        reset_dimension(ssize_t axis, ssize_t original_axis) {
+            axis = wrap_by_dimension(axis);
+            original_axis = wrap_by_dimension(original_axis);
+            shape[axis] = array.shape[original_axis];
+            strides[axis] = array.strides[original_axis];
+            return this;
+        }
+
+        public Array
+        finish()
+        {
+            return new Array (array.scalar_type,
+                              array.scalar_size,
+                              shape[0:array._dimension],
+                              strides[0:array._dimension],
+                              origin,
+                              array.data);
+        }
+
+        private ssize_t wrap_by_dimension(ssize_t axis)
+        {
+            return (axis < 0) ? ((ssize_t) array._dimension + axis) : axis;
+        }
+    }
+
 }
