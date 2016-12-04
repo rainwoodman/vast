@@ -81,6 +81,7 @@ public class Vast.Array : Object
             _size *= _shape[i];
         }
 
+        /* provide a default bytes object for the buffer */
         _data = _data ?? new Bytes (new uint8[scalar_size * _size]);
 
         assert (_origin < _data.length);
