@@ -3,7 +3,7 @@ using GLib;
 public class Vast.Array : Object
 {
     /* GType of the scalar elements, immutable */
-    public Type scalar_type { get; construct; }
+    public Type scalar_type { get; construct; /* implicitly typeof (void) */ }
 
     /* size of a scalar element in bytes, immutable */
     public size_t scalar_size { get; construct; default = sizeof (void); }
@@ -39,7 +39,8 @@ public class Vast.Array : Object
     public size_t size {get; private set;}
 
     /* GObject that owns the memory buffer for storage of scalar elements */
-    public Bytes? data {get; construct; }
+    /* if 'null', it will be allocated internally */
+    public Bytes? data {get; construct; default = null;}
 
     /* pointer to the memory location of 0th element */
     private uint8* _baseptr;
