@@ -53,9 +53,7 @@ public class Vast.Array : Object
         assert (_dimension <= 32);
 
         /* We will copy the in-values from g_object_new */
-        for (var i = 0; i < _dimension; i ++) {
-            _shape[i] = _shape_in[i];
-        }
+        Memory.copy (_shape, _shape_in, _dimension * sizeof (size_t));
 
         if (_strides_in == null) {
             /* assume C contiguous strides */
