@@ -131,6 +131,22 @@ public class Vast.Array : Object
         _value_to_memory (val, _cached_data + _offset_from_index (index));
     }
 
+    public void
+    fill (void* ptr)
+    {
+        foreach (var dest_ptr in this) {
+            Memory.copy (dest_ptr, ptr, scalar_size);
+        }
+    }
+
+    public void
+    fill_value (Value val)
+    {
+        var ptr = new uint8[scalar_size]; // FIXME: allocate this on the stack
+        _value_to_memory (val, ptr);
+        fill (ptr);
+    }
+
     public Iterator
     iterator ()
     {
