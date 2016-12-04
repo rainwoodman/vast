@@ -282,7 +282,7 @@ public class Vast.Array : Object
     {
         var sb = this.view();
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, 1, from[i], to[i]);
+            sb.slice(i, from[i], to[i]);
         }
         return sb.end();
     }
@@ -292,7 +292,7 @@ public class Vast.Array : Object
     {
         var sb = this.view();
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, 1, THRU, to[i]);
+            sb.slice(i, THRU, to[i]);
         }
         return sb.end();
     }
@@ -302,7 +302,7 @@ public class Vast.Array : Object
     {
         var sb = this.view();
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, 1, from[i], THRU);
+            sb.slice(i, from[i]);
         }
         return sb.end();
     }
@@ -313,7 +313,7 @@ public class Vast.Array : Object
         var sb = this.view();
 
         for (var i = 0; i < _dimension; i ++) {
-            sb.slice(i, steps[i], THRU, THRU);
+            sb.slice(i, THRU, THRU, steps[i]);
         }
         return sb.end();
     }
@@ -322,7 +322,7 @@ public class Vast.Array : Object
     flip (ssize_t axis = 0)
     {
         var sb = this.view();
-        sb.slice(axis, -1, THRU, THRU);
+        sb.slice(axis, THRU, THRU, -1);
         return sb.end();
     }
 
@@ -478,7 +478,7 @@ public class Vast.Array : Object
         }
 
         public ViewBuilder
-        slice(ssize_t axis, ssize_t step, ssize_t from=THRU, ssize_t to=THRU)
+        slice(ssize_t axis, ssize_t from=THRU, ssize_t to=THRU, ssize_t step=1)
         {
             axis = wrap_by_dimension(axis);
 
