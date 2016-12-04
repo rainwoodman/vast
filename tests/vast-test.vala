@@ -6,7 +6,7 @@ int main (string[] args) {
 
     Test.add_func ("/array", () => {
         var a = new Vast.Array (typeof (double), sizeof (double), {10});
-        var b = new Vast.Array (typeof (double), sizeof (double), {10}, {}, a.data);
+        var b = new Vast.Array (typeof (double), sizeof (double), {10}, {}, 0, a.data);
 
         assert (a.data == b.data);
 
@@ -24,6 +24,14 @@ int main (string[] args) {
         for(var i = -1; i > -10; i--) {
             assert (10 + i == a.get_value ({i}).get_double ());
             assert (10 + i == b.get_value ({i}).get_double ());
+        }
+    });
+
+    Test.add_func ("/array/zeroed", () => {
+        var arr = new Vast.Array (typeof (int), sizeof (int), {10});
+
+        for (var i = 0; i < 10; i++) {
+            assert (0 == arr.get_value ({i}).get_int ());
         }
     });
 
@@ -354,6 +362,7 @@ int main (string[] args) {
         var a = new Vast.Array (typeof (char), sizeof (char),
                                       {1},
                                       {},
+                                      0,
                                       mapped_file.get_bytes ());
 
         assert ('a' == a.get_value ({0}));

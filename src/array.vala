@@ -136,8 +136,8 @@ public class Vast.Array : Object
                   size_t[]  shape,
                   [CCode (array_length = false)]
                   ssize_t[] strides = {},
-                  Bytes?    data    = null,
-                  size_t    origin  = 0)
+                  size_t    origin  = 0,
+                  Bytes?    data    = null)
         requires (shape.length <= 32)
         requires (scalar_size > 0)
         requires (_size_from_shape (shape) > 0)
@@ -149,6 +149,23 @@ public class Vast.Array : Object
               strides:     strides,
               data:        data,
               origin:      origin);
+    }
+
+    public Array.zeroed (Type      scalar_type,
+                         size_t    scalar_size,
+                         size_t[]  shape,
+                         [CCode (array_length = false)]
+                         ssize_t[] strides = {},
+                         size_t    origin  = 0)
+    {
+        var mem    = (uint8[]) malloc0 (_size_from_shape (shape) * scalar_size);
+        mem.length = (int) (_size_from_shape (shape) * scalar_size);
+        this (scalar_type,
+              scalar_size,
+              shape,
+              strides,
+              origin,
+              new Bytes.take (mem));
     }
 
     private inline size_t
@@ -215,8 +232,8 @@ public class Vast.Array : Object
                           scalar_size,
                           new_shape,
                           {},
-                          data,
-                          origin);
+                          origin,
+                          data);
     }
 
     private inline size_t[]
@@ -255,8 +272,8 @@ public class Vast.Array : Object
                           scalar_size,
                           _shape_from_slice (from, to),
                           _strides_from_slice (from, to),
-                          data,
-                          origin + _offset_from_index (from));
+                          origin + _offset_from_index (from),
+                          data);
     }
 
     private inline ssize_t[]
@@ -317,8 +334,8 @@ public class Vast.Array : Object
                           scalar_size,
                           _shape_from_steps (steps),
                           _strides_from_steps (steps),
-                          data,
-                          new_origin);
+                          new_origin,
+                          data);
     }
 
     private inline size_t
@@ -350,7 +367,7 @@ public class Vast.Array : Object
                 transposed_shape[i]   = shape[_axis_from_external_axis (axes[i])];
             }
         }
-        return new Array (scalar_type, scalar_size, transposed_shape, transposed_strides, data, origin);
+        return new Array (scalar_type, scalar_size, transposed_shape, transposed_strides, origin, data);
     }
 
     public Array
