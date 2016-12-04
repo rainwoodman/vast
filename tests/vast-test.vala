@@ -40,8 +40,6 @@ int main (string[] args) {
     Test.add_func ("/array/scalar_like", () => {
         var a = new Vast.Array (typeof (double), sizeof (double), {});
 
-        assert (null == a.shape);
-        assert (null == a.strides);
         assert (1 == a.size);
         assert (null != a.data);
         assert (sizeof (double) == a.data.get_size ());
@@ -60,14 +58,13 @@ int main (string[] args) {
         assert (0 == a.dimension);
         assert (typeof (void) == a.scalar_type);
         assert (sizeof (void) == a.scalar_size);
-        assert (null == a.shape);
-        assert (null == a.strides);
         assert (1 == a.size);
         assert (0 == a.origin);
-        assert (null == a.data);
-        assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: 0B".printf (sizeof (void)) == a.to_string ());
+        assert (null != a.data);
+        assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: 1B".printf (sizeof (void)) == a.to_string ());
 
-        var b = a.reshape ({2, 2, 2, 4});
+        size_t [] shape = {2, 2, 2, 4};
+        var b = Object.new (typeof (Vast.Array), "dimension", shape.length, "shape", shape) as Vast.Array;
         assert (typeof (void) == b.scalar_type);
         assert (sizeof (void) == b.scalar_size);
         assert (2 == b.shape[0]);

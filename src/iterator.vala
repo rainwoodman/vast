@@ -19,6 +19,12 @@ public class Vast.Iterator : Object
         get { return _offset; }
     }
 
+    private uint8* _baseptr;
+
+    construct {
+        _baseptr = (uint8*) array.data.get_data () - array.origin;
+    }
+
     public Iterator (Array array)
     {
         base (array: array);
@@ -57,26 +63,26 @@ public class Vast.Iterator : Object
     get ()
         requires (_cursor != null)
     {
-        return array._cached_data + _offset;
+        return _baseptr + _offset;
     }
 
     public Value
     get_value ()
     {
-        return array._memory_to_value (array._cached_data + _offset);
+        return array._memory_to_value (_baseptr + _offset);
     }
 
     public void
     set (void* val)
         requires (_cursor != null)
     {
-        Memory.copy (array._cached_data + _offset, val, array.scalar_size);
+        Memory.copy (_baseptr + _offset, val, array.scalar_size);
     }
 
     public void
     set_value (Value val)
     {
-        array._value_to_memory (val, array._cached_data + _offset);
+        array._value_to_memory (val, _baseptr + _offset);
     }
 
     public void
