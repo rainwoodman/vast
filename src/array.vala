@@ -51,42 +51,42 @@ public class Vast.Array : Object
 
     construct {
         /* initializes the read-only attributes of the Array Object */
-        assert (_dimension <= 32);
+        assert (dimension <= 32);
 
         if (_shape_in == null) {
-            assert (_dimension == 0);
+            assert (dimension == 0);
         } else {
             /* We will copy the in-values from g_object_new */
-            Memory.copy (_shape, _shape_in, _dimension * sizeof (size_t));
+            Memory.copy (_shape, _shape_in, dimension * sizeof (size_t));
             /* the input pointers from gobject is no longer useful, void them.*/
             _shape_in = null;
         }
 
         if (_strides_in == null) {
             /* assume C contiguous strides */
-            for (var i = _dimension; i > 0; i--) {
-                _strides[i - 1] = (i == _dimension) ? (ssize_t) scalar_size : _strides[i] * (ssize_t) _shape[i];
+            for (var i = dimension; i > 0; i--) {
+                strides[i - 1] = (i == dimension) ? (ssize_t) scalar_size : strides[i] * (ssize_t) shape[i];
             }
         } else {
-            for (var i = 0; i < _dimension; i ++) {
-                _strides[i] = _strides_in[i];
+            for (var i = 0; i < dimension; i ++) {
+                strides[i] = _strides_in[i];
             }
             /* the input pointers from gobject is no longer useful, void them.*/
             _strides_in = null;
         }
 
         /* calculate size, since it is immutable, we do it once here */
-        _size = 1;
-        for (var i = 0; i < _dimension; i ++) {
-            _size *= _shape[i];
+        size = 1;
+        for (var i = 0; i < dimension; i ++) {
+            size *= shape[i];
         }
 
         /* provide a default bytes object for the buffer */
-        _data = _data ?? new Bytes (new uint8[scalar_size * _size]);
+        data = data ?? new Bytes (new uint8[scalar_size * size]);
 
-        assert (_origin < _data.length);
+        assert (origin < data.length);
 
-        _baseptr = (uint8*) _data.get_data () + _origin;
+        _baseptr = (uint8*) data.get_data () + origin;
     }
 
     private static inline size_t
@@ -123,7 +123,7 @@ public class Vast.Array : Object
     _offset_from_index ([CCode (array_length = false)] ssize_t[] index)
     {
         size_t p = 0;
-        for (var i = 0; i < dimension; i++) {
+        for (var i = 0; i < _dimension; i++) {
             p += (size_t) (index[i] < 0 ? _shape[i] + index[i] : index[i]) * _strides[i];
         }
         return p;
@@ -190,30 +190,30 @@ public class Vast.Array : Object
     private inline size_t[]
     _shape_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
-        var shape = new size_t[dimension];
+        var ret = new size_t[dimension];
         for (var i = 0; i < dimension; i++) {
-            var a = to[i] < 0 ? _shape[i] + to[i] : to[i];
-            var b = from[i] < 0 ? _shape[i] + from[i] : from[i];
+            var a = to[i] < 0 ? shape[i] + to[i] : to[i];
+            var b = from[i] < 0 ? shape[i] + from[i] : from[i];
             if (a < b) {
-                shape[i] = b - a;
+                ret[i] = b - a;
             } else {
-                shape[i] = a - b;
+                ret[i] = a - b;
             }
         }
-        return shape;
+        return ret;
     }
 
     private inline ssize_t[]
     _strides_from_slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to) {
-        var strides = new ssize_t[dimension];
+        var ret = new ssize_t[dimension];
         for (var i = 0; i < dimension; i++) {
-            if ((from[i] < 0 ? _shape[i] + from[i] : from[i]) > (to[i] < 0 ? _shape[i] + to[i] : to[i])) {
-                strides[i] = -_strides[i];
+            if ((from[i] < 0 ? shape[i] + from[i] : from[i]) > (to[i] < 0 ? shape[i] + to[i] : to[i])) {
+                ret[i] = -strides[i];
             } else {
-                strides[i] = _strides[i];
+                ret[i] = strides[i];
             }
         }
-        return strides;
+        return ret;
     }
 
     public Array
@@ -224,7 +224,7 @@ public class Vast.Array : Object
                           _shape_from_slice (from, to),
                           _strides_from_slice (from, to),
                           data,
-                          _origin + _offset_from_index (from));
+                          origin + _offset_from_index (from));
     }
 
     private inline ssize_t[]
@@ -248,28 +248,28 @@ public class Vast.Array : Object
     {
         var to = new ssize_t[dimension];
         for (var i = 0; i < dimension; i++) {
-            to[i] = (ssize_t) _shape[i];
+            to[i] = (ssize_t) shape[i];
         }
         return slice (from, to);
     }
 
     private inline ssize_t[] _strides_from_steps (ssize_t[] steps)
     {
-        var strides = new ssize_t[dimension];
+        var ret = new ssize_t[dimension];
         for (var i = 0; i < dimension; i++) {
-            strides[i] = _strides[i] * steps[i];
+            ret[i] = strides[i] * steps[i];
         }
-        return strides;
+        return ret;
     }
 
     private inline size_t[]
     _shape_from_steps (ssize_t[] steps)
     {
-        var shape = new size_t[dimension];
+        var ret = new size_t[dimension];
         for (var i = 0; i < dimension; i++) {
-            shape[i] = _shape[i] / (steps[i] < 0 ? -steps[i] : steps[i]); // round down
+            ret[i] = shape[i] / (steps[i] < 0 ? -steps[i] : steps[i]); // round down
         }
-        return shape;
+        return ret;
     }
 
     public Array
@@ -278,7 +278,7 @@ public class Vast.Array : Object
         var new_origin = origin;
         for (var i = 0; i < dimension; i++) {
             if (steps[i] < 0) {
-                new_origin += _strides[i] * _shape[i] - scalar_size;
+                new_origin += strides[i] * shape[i] - scalar_size;
             }
         }
         return new Array (scalar_type,
@@ -311,11 +311,11 @@ public class Vast.Array : Object
         for (var i = 0; i < dimension; i++)
         {
             if (axes == null) {
-                transposed_strides[i] = _strides[(i + 1) % dimension];
-                transposed_shape[i]   = _shape[(i + 1) % dimension];
+                transposed_strides[i] = strides[(i + 1) % dimension];
+                transposed_shape[i]   = shape[(i + 1) % dimension];
             } else {
-                transposed_strides[i] = _strides[_axis_from_external_axis (axes[i])];
-                transposed_shape[i]   = _shape[_axis_from_external_axis (axes[i])];
+                transposed_strides[i] = strides[_axis_from_external_axis (axes[i])];
+                transposed_shape[i]   = shape[_axis_from_external_axis (axes[i])];
             }
         }
         return new Array (scalar_type, scalar_size, transposed_shape, transposed_strides, data, origin);
@@ -361,7 +361,7 @@ public class Vast.Array : Object
             }
         }
         sb.append ("), ");
-        sb.append_printf ("mem: %" + size_t.FORMAT + "B", _data == null ? 0 : _data.length);
+        sb.append_printf ("mem: %" + size_t.FORMAT + "B", data == null ? 0 : data.length);
         if (dimension == 0) {
             return sb.str;
         }
@@ -400,18 +400,18 @@ public class Vast.Array : Object
     internal inline Value
     _memory_to_value (void * memory)
     {
-        var _value = Value (scalar_type);
+        var val = Value (scalar_type);
 
-        if (_value.fits_pointer ()) {
+        if (val.fits_pointer ()) {
             if (scalar_type == typeof (string)) {
-                _value.set_string ((string) memory);
+                val.set_string ((string) memory);
             } else {
-                Memory.copy (_value.peek_pointer (), memory, scalar_size);
+                Memory.copy (val.peek_pointer (), memory, scalar_size);
             }
         } else {
-            Memory.copy (_value_get_data (ref _value), memory, scalar_size);
+            Memory.copy (_value_get_data (ref val), memory, scalar_size);
         }
 
-        return _value;
+        return val;
     }
 }
