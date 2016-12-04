@@ -2,7 +2,9 @@ using GLib;
 
 public class Vast.Array : Object
 {
-    public static const ssize_t THRU = ssize_t.MAX;
+    public const ssize_t THRU = ssize_t.MAX;
+    public const ssize_t NEW_AXIS = ssize_t.MAX;
+    public const size_t DEFAULT_DIMENSION = size_t.MAX;
 
     /**
      * GType of the scalar elements, immutable.
@@ -266,9 +268,10 @@ public class Vast.Array : Object
                           data);
     }
 
-    public ViewBuilder view(size_t dimension = THRU)
+    public ViewBuilder view(size_t dimension = DEFAULT_DIMENSION)
     {
-        if (dimension == THRU) dimension = this._dimension;
+        if (dimension == DEFAULT_DIMENSION)
+            dimension = this._dimension;
         return new ViewBuilder(this, dimension);
     }
 
@@ -431,7 +434,7 @@ public class Vast.Array : Object
         private Array array;
         private size_t dimension;
 
-        public ViewBuilder(Array array, size_t dimension)
+        internal ViewBuilder(Array array, size_t dimension)
         {
             assert (dimension >= array._dimension);
             for (var i = 0; i < array._dimension; i ++) {
@@ -444,9 +447,6 @@ public class Vast.Array : Object
             }
             origin = array.origin;
             this.array = array;
-            if (dimension == THRU) {
-                dimension = array._dimension;
-            }
             this.dimension = dimension;
         }
 
@@ -493,12 +493,12 @@ public class Vast.Array : Object
             return new ViewBuilder(array, dimension);
         }
 
-        /* use original_axis for new axis, a new shape[d] == 1 axis if THRU */
+        /* use original_axis for new axis, a new shape[d] == 1 axis if NEW_AXIS*/
         public ViewBuilder
-        axis(ssize_t axis, ssize_t original_axis=THRU)
+        axis(ssize_t axis, ssize_t original_axis=NEW_AXIS)
         {
             axis = wrap_by_dimension(axis);
-            if (original_axis != THRU) {
+            if (original_axis != NEW_AXIS) {
                 original_axis = wrap_by_dimension(original_axis);
                 shape[axis] = array.shape[original_axis];
                 strides[axis] = array.strides[original_axis];
