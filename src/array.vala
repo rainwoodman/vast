@@ -268,11 +268,11 @@ public class Vast.Array : Object
                           data);
     }
 
-    public ViewBuilder view(size_t dimension = DEFAULT_DIMENSION)
+    public Builder view(size_t dimension = DEFAULT_DIMENSION)
     {
         if (dimension == DEFAULT_DIMENSION)
             dimension = this._dimension;
-        return new ViewBuilder(this, dimension);
+        return new Builder(this, dimension);
     }
 
     /* method that is supposed to be compatible with for Vala slicing.
@@ -426,9 +426,9 @@ public class Vast.Array : Object
         return val;
     }
 
-    public class ViewBuilder
+    public class Builder
     {
-        /* The ViewBuilder gives a syntax to create a new Array viewing
+        /* The Builder gives a syntax to create a new Array viewing
          * the current array. 
          * 
          * for each dimension we can use
@@ -461,7 +461,7 @@ public class Vast.Array : Object
         private Array array;
         private size_t dimension;
 
-        internal ViewBuilder(Array array, size_t dimension)
+        internal Builder(Array array, size_t dimension)
         {
             assert (dimension >= array._dimension);
             for (var i = 0; i < array._dimension; i ++) {
@@ -477,7 +477,7 @@ public class Vast.Array : Object
             this.dimension = dimension;
         }
 
-        public ViewBuilder
+        public Builder
         slice(ssize_t axis, ssize_t from=THRU, ssize_t to=THRU, ssize_t step=1)
         {
             axis = wrap_by_dimension(axis);
@@ -514,14 +514,14 @@ public class Vast.Array : Object
             return this;
         }
 
-        public ViewBuilder
+        public Builder
         reset_dimension(size_t dimension)
         {
-            return new ViewBuilder(array, dimension);
+            return new Builder(array, dimension);
         }
 
         /* use original_axis for new axis, a new shape[d] == 1 axis if NEW_AXIS*/
-        public ViewBuilder
+        public Builder
         axis(ssize_t axis, ssize_t original_axis=NEW_AXIS)
         {
             axis = wrap_by_dimension(axis);
@@ -536,7 +536,7 @@ public class Vast.Array : Object
             return this;
         }
 
-        public ViewBuilder
+        public Builder
         broadcast(ssize_t axis, ssize_t newshape)
         {
             axis = wrap_by_dimension(axis);
