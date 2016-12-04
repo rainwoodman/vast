@@ -250,10 +250,19 @@ int main (string[] args) {
             }
         }
 
-        var b = a.view().slice(0, -1, 5, ssize_t.MAX).end();
+        var b = a.view()
+                 .slice(0, -1, 5, ssize_t.MAX)
+                 .end();
 
         assert (b.get_value({0, 1}).get_double() == 6 * 1);
         assert (b.get_value({1, 1}).get_double() == 5 * 1);
+
+        var b1 = a.view()
+                 .slice(1, 1, 5, a.THRU)
+                 .end();
+
+        assert (b1.get_value({1, 1}).get_double() == 2 * 6);
+        assert (b1.get_value({1, 2}).get_double() == 2 * 7);
 
         var c = a.view()
                  .slice(0, -1, 5, ssize_t.MAX)
