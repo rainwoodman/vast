@@ -459,6 +459,7 @@ public class Vast.Array : Object
         private size_t origin;
         private Array array;
         private size_t dimension;
+        private ssize_t original_axis[32];
 
         internal Builder(Array array, size_t dimension)
         {
@@ -466,10 +467,12 @@ public class Vast.Array : Object
             for (var i = 0; i < array._dimension; i ++) {
                 shape[i] = array._shape[i];
                 strides[i] = array._strides[i];
+                original_axis[i] = i;
             }
             for (var i = array._dimension; i < dimension; i ++) {
                 shape[i] = 1;
                 strides[i] = 0;
+                original_axis[i] = NEW_AXIS;
             }
             origin = array.origin;
             this.array = array;
@@ -543,22 +546,24 @@ public class Vast.Array : Object
             strides[axis] *= step;
 
             assert (shape[axis] >= 0);
+
             return this;
         }
 
         /* use original_axis for new axis, a new shape[d] == 1 axis if NEW_AXIS*/
         public Builder
-        axis(ssize_t axis, ssize_t original_axis=NEW_AXIS)
+        axis(ssize_t axis, ssize_t original=NEW_AXIS)
         {
             axis = wrap_by_dimension(axis);
-            if (original_axis != NEW_AXIS) {
-                original_axis = wrap_by_dimension(original_axis);
-                shape[axis] = array.shape[original_axis];
-                strides[axis] = array.strides[original_axis];
+            if (original != NEW_AXIS) {
+                original = wrap_by_dimension(original);
+                shape[axis] = array.shape[original];
+                strides[axis] = array.strides[original];
             } else {
                 shape[axis] = 1;
                 strides[axis] = 0;
             }
+            original_axis[axis] = original;
             return this;
         }
 
@@ -575,6 +580,26 @@ public class Vast.Array : Object
         public Array
         end()
         {
+            /* ensure each original_axes is used only once */
+            int n[32];
+
+            /* XXX: this is dumb. how to zero initialize a vala array? */
+            for(var i = 0; i < array._dimension; i ++) {
+                n[i] = 0;
+            }
+
+            for(var i = 0; i < dimension; i ++) {
+                var o = original_axis[i];
+                if (o == NEW_AXIS) continue;
+                n[o] ++;
+            }
+            for(var i = 0; i < array._dimension; i ++) {
+                /* each original axis shall be used at most once */
+                assert (n[i] <= 1);
+                /* XXX: raised error shall be informative */
+            }
+
+            /* the axes are reasonable - create the array. */
             return new Array (array.scalar_type,
                               array.scalar_size,
                               shape[0:dimension],
