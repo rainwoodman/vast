@@ -393,6 +393,7 @@ public class Vast.Array : Object
             }
         }
         sb.append ("), ");
+        sb.append_printf ("size: %" + size_t.FORMAT + ", ", size);
         sb.append_printf ("mem: %" + size_t.FORMAT + "B", data == null ? 0 : data.length);
         if (dimension == 0) {
             return sb.str;

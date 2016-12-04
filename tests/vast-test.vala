@@ -61,7 +61,7 @@ int main (string[] args) {
         assert (1 == a.size);
         assert (0 == a.origin);
         assert (null != a.data);
-        assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), mem: 1B".printf (sizeof (void)) == a.to_string ());
+        assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), size: 1, mem: 1B".printf (sizeof (void)) == a.to_string ());
 
         size_t [] shape = {2, 2, 2, 4};
         var b = Object.new (typeof (Vast.Array), "dimension", shape.length, "shape", shape) as Vast.Array;
