@@ -241,6 +241,31 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/viewbuilder", () => {
+        var a = new Vast.Array (typeof (double), sizeof (double), {10, 20});
+
+        for(var i = 0; i < 10; i ++) {
+            for (var j = 0; j < 20; j++) {
+                a.set_value ({i, j}, (double) i * j);
+            }
+        }
+
+        var b = a.view().slice(0, -1, 5, ssize_t.MAX).finish();
+
+        assert (b.get_value({0, 1}).get_double() == 5 * 1);
+        assert (b.get_value({1, 1}).get_double() == 4 * 1);
+
+        var c = a.view()
+                 .slice(0, -1, 5, ssize_t.MAX)
+                 .slice(1, 3, 2, ssize_t.MAX)
+                 .finish();
+
+        assert (c.get_value({0, 0}).get_double() == 5 * 2);
+        assert (c.get_value({0, 1}).get_double() == 5 * (2 + 3));
+        assert (c.get_value({1, 2}).get_double() == 4 * (2 + 6));
+
+    });
+
     Test.add_func ("/array/slice", () => {
         var a = new Vast.Array (typeof (int64), sizeof (int64), {30, 30});
 
