@@ -8,64 +8,65 @@ public class Vast.Array : Object
 
     public size_t dimension { get; construct; default = 0; }
 
-    [CCode (array_length = false)]
-    private size_t[] _shape;
-
+    private size_t _shape[32];
+    private size_t* _shape_in;
     public size_t* shape {
         get {
             return _shape;
         }
         construct {
-            _shape = new size_t[dimension];
-            Memory.copy (_shape, value, dimension * sizeof (size_t));
+            _shape_in = value;
         }
     }
 
-    [CCode (array_length = false)]
-    ssize_t[] _strides;
+    private ssize_t _strides[32];
+    private ssize_t * _strides_in;
 
     public ssize_t* strides {
         get {
             return _strides;
         }
         construct {
-            _strides = new ssize_t[dimension];
-            if (value == null) {
-                for (var i = dimension; i > 0; i--) {
-                    _strides[i - 1] = (i == dimension) ? (ssize_t) scalar_size : _strides[i] * (ssize_t) _shape[i];
-                }
-            } else {
-                Memory.copy (_strides, value, dimension * sizeof (ssize_t));
-            }
+            _strides_in = value;
         }
     }
 
     public size_t origin { get; construct; default = 0; }
 
-    public size_t size {
-        get {
-            size_t size = 1;
-            for (var i = 0; i < dimension; i++) {
-                size *= _shape[i];
-            }
-            return size;
-        }
-    }
+    public size_t size {get; private set;}
 
-    private          Bytes   _data;
     internal unowned uint8* _cached_data;
 
-    public Bytes? data {
-        get
-        {
-            return _data;
+    public Bytes? data {get; construct; }
+
+    construct {
+        /* initializes the read-only attributes of the Array Object */
+
+        /* We will copy the in-values from g_object_newv */
+        for (var i = 0; i < _dimension; i ++) {
+            _shape[i] = _shape_in[i];
         }
-        construct {
-            _data        = value;
-            if (value != null) {
-                _cached_data = value.get_data ();
+
+        if (_strides_in == null) {
+            for (var i = _dimension; i > 0; i--) {
+                _strides[i - 1] = (i == _dimension) ? (ssize_t) scalar_size : _strides[i] * (ssize_t) _shape[i];
+            }
+        } else {
+            for (var i = 0; i < _dimension; i ++) {
+                _strides[i] = _strides_in[i];
             }
         }
+
+        _size = 1;
+        for (var i = 0; i < _dimension; i ++) {
+            _size *= _shape[i];
+        }
+
+        _data = _data ?? new Bytes (new uint8[scalar_size * _size]);
+        _cached_data = _data.get_data ();
+
+        _shape_in = null;
+        _strides_in = null;
     }
 
     private static inline size_t
@@ -93,7 +94,7 @@ public class Vast.Array : Object
               dimension:   shape.length,
               shape:       shape,
               strides:     strides,
-              data:        data ?? new Bytes (new uint8[scalar_size * _size_from_shape(shape)]),
+              data:        data,
               origin:      origin);
     }
 
