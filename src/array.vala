@@ -41,11 +41,8 @@ public class Vast.Array : Object
     /* GObject that owns the memory buffer for storage of scalar elements */
     public Bytes? data {get; construct; }
 
-    /* global shift from the _cached_data; _cached_data + origin is the memory location of 0-th element */
-    public size_t origin { get; construct; default = 0; }
-
-    /* pointer to the begining memory buffer, */
-    internal unowned uint8* _cached_data;
+    /* pointer to the memory location of 0th element */
+    public uint8 * origin {get; construct; default = null;}
 
 
     construct {
@@ -75,7 +72,8 @@ public class Vast.Array : Object
         }
 
         _data = _data ?? new Bytes (new uint8[scalar_size * _size]);
-        _cached_data = _data.get_data ();
+
+        _origin = _origin ?? _data.get_data ();
 
         /* the input pointers from gobject is no longer useful, void them.*/
         _shape_in = null;
@@ -98,7 +96,7 @@ public class Vast.Array : Object
                   [CCode (array_length = false)]
                   ssize_t[] strides = {},
                   Bytes?    data    = null,
-                  size_t    origin  = 0)
+                  uint8*    origin = null)
         requires (shape.length <= 32)
         requires (scalar_size > 0)
         requires (_size_from_shape (shape) > 0)
@@ -109,13 +107,13 @@ public class Vast.Array : Object
               shape:       shape,
               strides:     strides,
               data:        data,
-              origin:      origin);
+              origin:   origin);
     }
 
     private inline size_t
     _offset_from_index ([CCode (array_length = false)] ssize_t[] index)
     {
-        size_t p = origin;
+        size_t p = 0;
         for (var i = 0; i < dimension; i++) {
             p += (size_t) (index[i] < 0 ? _shape[i] + index[i] : index[i]) * _strides[i];
         }
@@ -125,25 +123,25 @@ public class Vast.Array : Object
     public unowned void*
     get_pointer ([CCode (array_length = false)] ssize_t[] index)
     {
-        return _cached_data + _offset_from_index (index);
+        return _origin + _offset_from_index (index);
     }
 
     public Value
     get_value ([CCode (array_length = false)] ssize_t[] index)
     {
-        return _memory_to_value (_cached_data + _offset_from_index (index));
+        return _memory_to_value (_origin + _offset_from_index (index));
     }
 
     public void
     set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {
-        Memory.copy (_cached_data + _offset_from_index (index), val, scalar_size);
+        Memory.copy (_origin + _offset_from_index (index), val, scalar_size);
     }
 
     public void
     set_value ([CCode (array_length = false)] ssize_t[] index, Value val)
     {
-        _value_to_memory (val, _cached_data + _offset_from_index (index));
+        _value_to_memory (val, _origin + _offset_from_index (index));
     }
 
     public void
@@ -217,7 +215,7 @@ public class Vast.Array : Object
                           _shape_from_slice (from, to),
                           _strides_from_slice (from, to),
                           data,
-                          _offset_from_index (from));
+                          _origin + _offset_from_index (from));
     }
 
     private inline ssize_t[]
