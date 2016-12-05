@@ -187,6 +187,13 @@ public class Vast.Array : Object
         return _baseptr + _offset_from_index (index);
     }
 
+    public unowned string
+    get_string ([CCode (array_length = false)] ssize_t[] index)
+        requires (scalar_type == typeof (string))
+    {
+        return (string) (_baseptr + _offset_from_index (index));
+    }
+
     public Value
     get_value ([CCode (array_length = false)] ssize_t[] index)
     {
@@ -194,13 +201,21 @@ public class Vast.Array : Object
     }
 
     public void
-    set_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
+    set_from_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {
         Memory.copy (_baseptr + _offset_from_index (index), val, scalar_size);
     }
 
     public void
-    set_value ([CCode (array_length = false)] ssize_t[] index, Value val)
+    set_from_string ([CCode (array_length = false)] ssize_t[] index, string val)
+        requires (scalar_type == typeof (string))
+    {
+        Posix.strncpy ((string) (_baseptr + _offset_from_index (index)), val, scalar_size - 1);
+        *(_baseptr + _offset_from_index (index) + scalar_size) = '\0';
+    }
+
+    public void
+    set_from_value ([CCode (array_length = false)] ssize_t[] index, Value val)
     {
         _value_to_memory (val, _baseptr + _offset_from_index (index));
     }

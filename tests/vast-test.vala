@@ -11,7 +11,7 @@ int main (string[] args) {
         assert (a.data == b.data);
 
         for(var i = 0; i < 10; i ++) {
-            a.set_value ({i}, (double) i);
+            a.set_from_value ({i}, (double) i);
             assert (i == a.get_value ({i}).get_double ());
         }
 
@@ -52,7 +52,7 @@ int main (string[] args) {
         assert (null != a.data);
         assert (sizeof (double) == a.data.get_size ());
 
-        a.set_value ({}, 1);
+        a.set_from_value ({}, 1);
         assert (1 == a.get_value ({}).get_double ());
 
         var a_iter = a.iterator ();
@@ -92,7 +92,7 @@ int main (string[] args) {
 
         for (var i = 0; i < 5; i++) {
             for (var j = 0; j < 2; j++) {
-                a.set_value ({i, j}, i * j);
+                a.set_from_value ({i, j}, i * j);
             }
         }
 
@@ -117,37 +117,37 @@ int main (string[] args) {
 
     Test.add_func ("/array/to_string", () => {
         var s = new Vast.Array (typeof (double), sizeof (double), {1});
-        s.set_value ({1}, 1);
+        s.set_from_value ({1}, 1);
 
         var v = new Vast.Array (typeof (double), sizeof (double), {6});
-        v.set_value ({0}, 1);
-        v.set_value ({1}, 1);
-        v.set_value ({2}, 1);
-        v.set_value ({3}, 1);
-        v.set_value ({4}, 1);
-        v.set_value ({5}, 1);
+        v.set_from_value ({0}, 1);
+        v.set_from_value ({1}, 1);
+        v.set_from_value ({2}, 1);
+        v.set_from_value ({3}, 1);
+        v.set_from_value ({4}, 1);
+        v.set_from_value ({5}, 1);
 
         var m = new Vast.Array (typeof (double), sizeof (double), {5, 6});
-        m.set_value ({0, 1}, 1);
-        m.set_value ({0, 2}, 1);
-        m.set_value ({0, 3}, 1);
-        m.set_value ({0, 4}, 1);
-        m.set_value ({0, 5}, 1);
+        m.set_from_value ({0, 1}, 1);
+        m.set_from_value ({0, 2}, 1);
+        m.set_from_value ({0, 3}, 1);
+        m.set_from_value ({0, 4}, 1);
+        m.set_from_value ({0, 5}, 1);
 
         var a = new Vast.Array (typeof (double), sizeof (double), {4, 5, 6});
-        a.set_value ({0, 0, 1}, 1);
-        a.set_value ({0, 0, 2}, 1);
-        a.set_value ({0, 0, 3}, 1);
-        a.set_value ({0, 0, 4}, 1);
-        a.set_value ({0, 0, 5}, 1);
+        a.set_from_value ({0, 0, 1}, 1);
+        a.set_from_value ({0, 0, 2}, 1);
+        a.set_from_value ({0, 0, 3}, 1);
+        a.set_from_value ({0, 0, 4}, 1);
+        a.set_from_value ({0, 0, 5}, 1);
 
         var b = new Vast.Array (typeof (double), sizeof (double), {1, 2, 3, 4, 5, 6});
         assert (6 == b.dimension);
-        b.set_value ({0, 0, 0, 0, 0, 1}, 1);
-        b.set_value ({0, 0, 0, 0, 0, 2}, 1);
-        b.set_value ({0, 0, 0, 0, 0, 3}, 1);
-        b.set_value ({0, 0, 0, 0, 0, 4}, 1);
-        b.set_value ({0, 0, 0, 0, 0, 5}, 1);
+        b.set_from_value ({0, 0, 0, 0, 0, 1}, 1);
+        b.set_from_value ({0, 0, 0, 0, 0, 2}, 1);
+        b.set_from_value ({0, 0, 0, 0, 0, 3}, 1);
+        b.set_from_value ({0, 0, 0, 0, 0, 4}, 1);
+        b.set_from_value ({0, 0, 0, 0, 0, 5}, 1);
 
         var c = new Vast.Array (typeof (double), sizeof (double), {1});
     });
@@ -174,21 +174,24 @@ int main (string[] args) {
 
         assert (sizeof (uint8) * 200 == a.size);
 
-        a.set_value ({0}, 10);
+        a.set_from_value ({0}, 10);
         assert (10 == a.get_value ({0}).get_uchar ());
     });
 
     Test.add_func ("/array/string", () => {
         var a = new Vast.Array (typeof (string), sizeof (char) * 10, {10});
 
-        a.set_value ({0}, "test");
+        a.set_from_value  ({0}, "test");
 
         assert ("test" == a.get_value ({0}).get_string ());
         assert (4 == a.get_value ({0}).get_string ().length);
 
         // trucation
-        a.set_value ({0}, "testtesttee");
+        a.set_from_value ({0}, "testtesttee");
         assert ("testtestt" == a.get_value ({0}).get_string ());
+
+        a.set_from_string ({1}, "abcd");
+        assert ("abcd" == a.get_string ({1}));
     });
 
     Test.add_func ("/array/large", () => {
@@ -200,7 +203,7 @@ int main (string[] args) {
 
         for(var i = 0; i < 10; i ++) {
             for (var j = 0; j < 20; j++) {
-                a.set_value ({i, j}, (double) i * j);
+                a.set_from_value ({i, j}, (double) i * j);
             }
         }
 
@@ -224,7 +227,7 @@ int main (string[] args) {
 
         for (var i = 0; i < 30; i++) {
             for (var j = 0; j < 30; j++) {
-                a.set_value ({i, j}, i * j);
+                a.set_from_value ({i, j}, i * j);
             }
         }
 
@@ -246,7 +249,7 @@ int main (string[] args) {
 
         for(var i = 0; i < 10; i ++) {
             for (var j = 0; j < 20; j++) {
-                a.set_value ({i, j}, (double) (i + 1 ) * j);
+                a.set_from_value ({i, j}, (double) (i + 1 ) * j);
             }
         }
 
@@ -327,7 +330,7 @@ int main (string[] args) {
 
         for (var i = 0; i < 30; i++) {
             for (var j = 0; j < 30; j++) {
-                a.set_value ({i, j}, i * j);
+                a.set_from_value ({i, j}, i * j);
             }
         }
 
@@ -337,7 +340,7 @@ int main (string[] args) {
         assert (10 == b.shape[1]);
 
         assert (100 == a.get_value ({10, 10}).get_int64 ());
-        b.set_value ({0, 0}, 0);
+        b.set_from_value ({0, 0}, 0);
         assert (0 == a.get_value ({10, 10}).get_int64 ());
 
         // negative indexing
@@ -370,7 +373,7 @@ int main (string[] args) {
         var array = new Vast.Array (typeof (int64), sizeof (int64), {10});
 
         for (var i = 0; i < 10; i++) {
-            array.set_value ({i}, i);
+            array.set_from_value ({i}, i);
         }
 
         assert (5 == array.step ({2}).shape[0]);
@@ -398,7 +401,7 @@ int main (string[] args) {
         var a = new Vast.Array (typeof (int64), sizeof (int64), {10});
 
         for (var i = 0; i < 10; i++) {
-            a.set_value ({i}, i);
+            a.set_from_value ({i}, i);
         }
 
         var b = a.flip (0);
@@ -411,10 +414,10 @@ int main (string[] args) {
     Test.add_func ("/array/transpose", () => {
         var array = new Vast.Array (typeof (double), sizeof (double), {2, 2});
 
-        array.set_value ({0, 0}, 1);
-        array.set_value ({0, 1}, 2);
-        array.set_value ({1, 0}, 3);
-        array.set_value ({1, 1}, 4);
+        array.set_from_value ({0, 0}, 1);
+        array.set_from_value ({0, 1}, 2);
+        array.set_from_value ({1, 0}, 3);
+        array.set_from_value ({1, 1}, 4);
 
         var transposed = array.transpose (); // implicit dim 0 and 1
 
@@ -434,10 +437,10 @@ int main (string[] args) {
     Test.add_func ("/array/transpose/negative_indexing", () => {
         var array = new Vast.Array (typeof (double), sizeof (double), {2, 2});
 
-        array.set_value ({0, 0}, 1);
-        array.set_value ({0, 1}, 2);
-        array.set_value ({1, 0}, 3);
-        array.set_value ({1, 1}, 4);
+        array.set_from_value ({0, 0}, 1);
+        array.set_from_value ({0, 1}, 2);
+        array.set_from_value ({1, 0}, 3);
+        array.set_from_value ({1, 1}, 4);
 
         var transposed = array.transpose ({-1, -2}); // two last dims
 
@@ -450,10 +453,10 @@ int main (string[] args) {
     Test.add_func ("/array/swap", () => {
         var array = new Vast.Array (typeof (double), sizeof (double), {2, 2});
 
-        array.set_value ({0, 0}, 1);
-        array.set_value ({0, 1}, 2);
-        array.set_value ({1, 0}, 3);
-        array.set_value ({1, 1}, 4);
+        array.set_from_value ({0, 0}, 1);
+        array.set_from_value ({0, 1}, 2);
+        array.set_from_value ({1, 0}, 3);
+        array.set_from_value ({1, 1}, 4);
 
         var swapped = array.swap (0, 1);
 
@@ -481,7 +484,7 @@ int main (string[] args) {
 
         assert ('a' == a.get_value ({0}));
 
-        a.set_value ({0}, 'b');
+        a.set_from_value ({0}, 'b');
 
         assert ('b' == mapped_file.get_contents ()[0]);
     });

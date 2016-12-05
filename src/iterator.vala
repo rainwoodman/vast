@@ -66,21 +66,30 @@ public class Vast.Iterator : Object
         return _baseptr + _offset;
     }
 
+    public unowned void*
+    get_pointer ()
+        requires (_cursor != null)
+    {
+        return _baseptr + _offset;
+    }
+
     public Value
     get_value ()
+        requires (_cursor != null)
     {
         return array._memory_to_value (_baseptr + _offset);
     }
 
     public void
-    set (void* val)
+    set_from_pointer (void* val)
         requires (_cursor != null)
     {
         Memory.copy (_baseptr + _offset, val, array.scalar_size);
     }
 
     public void
-    set_value (Value val)
+    set_from_value (Value val)
+        requires (_cursor != null)
     {
         array._value_to_memory (val, _baseptr + _offset);
     }
