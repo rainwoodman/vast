@@ -241,6 +241,87 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/viewbuilder", () => {
+        var a = new Vast.Array (typeof (double), sizeof (double), {10, 20});
+
+        for(var i = 0; i < 10; i ++) {
+            for (var j = 0; j < 20; j++) {
+                a.set_value ({i, j}, (double) (i + 1 ) * j);
+            }
+        }
+
+        var b = a.build()
+                 .head(0, 5, -1)
+                 .end();
+
+        assert (b.get_value({0, 1}).get_double() == 10 * 1);
+        assert (b.get_value({1, 1}).get_double() == 9 * 1);
+
+        var b1 = a.build()
+                 .qslice(0, null, 5, -1)
+                 .end();
+
+        assert (b1.get_value({0, 1}).get_double() == 10 * 1);
+        assert (b1.get_value({1, 1}).get_double() == 9 * 1);
+
+        var c = a.build()
+                 .tail(0, 5, -1)
+                 .tail(1, 2, 3)
+                 .end();
+
+        assert (c.get_value({0, 0}).get_double() == 6 * 2);
+        assert (c.get_value({0, 1}).get_double() == 6 * (2 + 3));
+        assert (c.get_value({1, 2}).get_double() == 5 * (2 + 6));
+
+        var c1 = a.build()
+                 .qslice(0, 5, null, -1)
+                 .qslice(1, 2, null, 3)
+                 .end();
+
+        assert (c1.get_value({0, 0}).get_double() == 6 * 2);
+        assert (c1.get_value({0, 1}).get_double() == 6 * (2 + 3));
+        assert (c1.get_value({1, 2}).get_double() == 5 * (2 + 6));
+
+        var d = a.build()
+                 .axis(0, 1)
+                 .axis(1, 0)
+                 .end();
+
+        assert (d.get_value({3, 7}).get_double() == 8 * 3);
+        assert (d.get_value({7, 3}).get_double() == 4 * 7);
+
+        /* new axes will have shape[d] == 1 and strides[d] == 0, so we can broadcast them */
+        var e = d.build(3)
+                 .broadcast(-1, 30)
+                 .end();
+
+        assert (e.get_value({3, 7, 29}).get_double() == 8 * 3);
+        assert (e.get_value({7, 3, 29}).get_double() == 4 * 7);
+
+        var f = a.build()
+                 .tail(1, 5)
+                 .end();
+
+        assert (f.get_value({1, 1}).get_double() == 2 * 6);
+        assert (f.get_value({1, 2}).get_double() == 2 * 7);
+
+        var f1 = a.build()
+                 .qslice(1, 5, null)
+                 .end();
+
+        assert (f1.get_value({1, 1}).get_double() == 2 * 6);
+        assert (f1.get_value({1, 2}).get_double() == 2 * 7);
+
+        var g = a.build()
+                 .index(1, 5)
+                 .end();
+
+        assert (g.dimension == 1);
+        assert (g.get_value({1}).get_double() == 2 * 5);
+        assert (g.get_value({2}).get_double() == 3 * 5);
+
+    });
+
     Test.add_func ("/array/slice", () => {
         var a = new Vast.Array (typeof (int64), sizeof (int64), {30, 30});
 
@@ -269,8 +350,9 @@ int main (string[] args) {
         assert (29 == a.slice ({0, 0}, {-1, -1}).shape[1]);
 
         // reverse stride
-        assert (10 == a.slice ({10, 10}, {0, 0}).shape[1]);
-        assert (-1 * sizeof (int64) == a.slice ({10, 10}, {0, 0}).strides[1]);
+        // this shall die, slice cannot handle this because it assumes step == 1
+        // assert (10 == a.slice ({10, 10}, {0, 0}).shape[1]);
+        // assert (-1 * sizeof (int64) == a.slice ({10, 10}, {0, 0}).strides[1]);
 
         // full slice
         assert (30 == a.slice ({0, 0}, {(ssize_t) a.shape[0], (ssize_t) a.shape[1]}).shape[0]);
