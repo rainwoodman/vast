@@ -91,7 +91,8 @@ public class Vast.Iterator : Object
     set_from_value (Value val)
         requires (_cursor != null)
     {
-        array._value_to_memory (val, _baseptr + _offset);
+        var val_copy = val;
+        array._value_to_memory (ref val_copy, _baseptr + _offset);
     }
 
     public void

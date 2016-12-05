@@ -217,7 +217,8 @@ public class Vast.Array : Object
     public void
     set_from_value ([CCode (array_length = false)] ssize_t[] index, Value val)
     {
-        _value_to_memory (val, _baseptr + _offset_from_index (index));
+        var val_copy = val;
+        _value_to_memory (ref val_copy, _baseptr + _offset_from_index (index));
     }
 
     public void
@@ -231,8 +232,9 @@ public class Vast.Array : Object
     public void
     fill_value (Value val)
     {
-        var ptr = new uint8[scalar_size]; // FIXME: allocate this on the stack
-        _value_to_memory (val, ptr);
+        var ptr      = new uint8[scalar_size]; // FIXME: allocate this on the stack
+        var val_copy = val;
+        _value_to_memory (ref val_copy, ptr);
         fill (ptr);
     }
 
@@ -402,7 +404,7 @@ public class Vast.Array : Object
     private extern static unowned void* _value_get_data (ref Value val);
 
     internal inline void
-    _value_to_memory (Value val, void * memory)
+    _value_to_memory (ref Value val, void * memory)
     {
         var dest_value = Value (scalar_type);
         if (val.transform (ref dest_value)) {
