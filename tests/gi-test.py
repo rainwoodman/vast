@@ -1,22 +1,15 @@
 #!/usr/bin/env python3
 
 from gi.repository import Vast
+import unittest
 
-a = Vast.Array(scalar_type=float, scalar_size=8)
+class ArrayTestCase(unittest.TestCase):
+    def test_gobject_construction(self):
+        a = Vast.Array(scalar_type=float, scalar_size=8)
+        self.assertEqual(8, a.get_scalar_size())
+        self.assertEqual(0, a.get_dimension())
+        self.assertEqual(0, a.get_origin())
+        self.assertIsNotNone(a.get_data())
 
-assert(0 == a.get_dimension())
-assert(0 == a.get_origin())
-
-assert(a.get_data() is not None)
-
-b = a.reshape([2, 2, 2])
-
-assert(3 == b.get_dimension())
-assert(b.get_data() is not None)
-assert(64 == b.get_data().get_size())
-
-b.set_value([0, 0, 0], 1)
-assert (1 == b.get_value([0, 0, 0]))
-
-b[0, 0, 0] = 2
-assert (2 == arr[0, 0, 0])
+if __name__ == '__main__':
+    unittest.main()
