@@ -301,6 +301,14 @@ int main (string[] args) {
         assert (e.get_value({3, 7, 29}).get_double() == 8 * 3);
         assert (e.get_value({7, 3, 29}).get_double() == 4 * 7);
 
+        /* here we broadcast, but the shape remain unchanged */
+        var e2 = d.build(2)
+                 .broadcast(1, 10)
+                 .end();
+
+        assert (20 == e2.shape[0]);
+        assert (10 == e2.shape[1]);
+
         var f = a.build()
                  .tail(1, 5)
                  .end();

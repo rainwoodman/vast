@@ -610,7 +610,7 @@ public class Vast.Array : Object
         broadcast(ssize_t axis, size_t newshape)
         {
             axis = wrap_by_dimension(axis);
-            assert (shape[axis] == 1 || strides[axis] == 0);
+            assert (shape[axis] == 1 || strides[axis] == 0 || shape[axis] == newshape);
             strides[axis] = 0;
             shape[axis] = newshape;
             return this;
