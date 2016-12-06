@@ -11,5 +11,13 @@ class ArrayTestCase(unittest.TestCase):
         self.assertEqual(0, a.get_origin())
         self.assertIsNotNone(a.get_data())
 
+    def test_builder(self):
+        a = Vast.Array(scalar_type=float, scalar_size=8)
+        b = a.build(0).broadcast(0, 5).end()
+
+        builder = Vast.ArrayBuilder(array=a, dimension=0)
+        self.assertEqual(0, builder.get_dimension())
+        self.assertIs(a, builder.get_array())
+
 if __name__ == '__main__':
     unittest.main()

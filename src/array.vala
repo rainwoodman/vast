@@ -442,11 +442,11 @@ public class Vast.Array : Object
         return val;
     }
 
-    public class Builder
+    public class Builder : Object
     {
         /* The Builder gives a syntax to create a new Array viewing
-         * the current array. 
-         * 
+         * the current array.
+         *
          * for each dimension we can use
          *
          *  this.slice(axis, step, from, to)
@@ -471,8 +471,9 @@ public class Vast.Array : Object
          * methods can be chained or called in a loop.
          *
          */
-        private Array   array;
-        private size_t  dimension;
+        public Array  array     { get; construct; }
+        public size_t dimension { get; construct; }
+
         private size_t  shape[32];
         private ssize_t strides[32];
         private size_t  origin;
@@ -484,8 +485,11 @@ public class Vast.Array : Object
         internal Builder(Array array, size_t dimension)
             requires (dimension >= array.dimension)
         {
-            this.array = array;
-            this.dimension = dimension;
+            base (array: array, dimension: dimension);
+        }
+
+        construct
+        {
             for (var i = 0; i < array._dimension; i ++) {
                 shape[i]         = array.shape[i];
                 strides[i]       = array.strides[i];
@@ -562,7 +566,7 @@ public class Vast.Array : Object
                 assert (step != 0);
                 if (step > 0)
                     to = (ssize_t) shape[axis];
-                else 
+                else
                     to = -1;
             }
             else {
@@ -642,12 +646,11 @@ public class Vast.Array : Object
                 strides[j] = strides[i];
                 j ++;
             }
-            dimension = j;
 
             /* the axes are reasonable - create the array. */
             return new Array (array.scalar_type,
                               array.scalar_size,
-                              shape[0:dimension],
+                              shape[0:j],
                               strides,
                               origin,
                               array.data);
