@@ -471,32 +471,34 @@ public class Vast.Array : Object
          * methods can be chained or called in a loop.
          *
          */
-        private size_t shape[32];
+        private Array   array;
+        private size_t  dimension;
+        private size_t  shape[32];
         private ssize_t strides[32];
-        private size_t origin;
-        private Array array;
-        private size_t dimension;
+        private size_t  origin;
+
+        /* bookkeeping */
         private ssize_t original_axis[32];
-        private bool removal[32];
+        private bool    removal[32];
 
         internal Builder(Array array, size_t dimension)
+            requires (dimension >= array.dimension)
         {
-            assert (dimension >= array._dimension);
-            for (var i = 0; i < array._dimension; i ++) {
-                shape[i] = array._shape[i];
-                strides[i] = array._strides[i];
-                original_axis[i] = i;
-                removal[i] = false;
-            }
-            for (var i = array._dimension; i < dimension; i ++) {
-                shape[i] = 1;
-                strides[i] = 0;
-                original_axis[i] = NEW_AXIS;
-                removal[i] = false;
-            }
-            origin = array.origin;
             this.array = array;
             this.dimension = dimension;
+            for (var i = 0; i < array._dimension; i ++) {
+                shape[i]         = array.shape[i];
+                strides[i]       = array.strides[i];
+                original_axis[i] = i;
+                removal[i]       = false;
+            }
+            for (var i = array.dimension; i < dimension; i ++) {
+                shape[i]         = 1;
+                strides[i]       = 0;
+                original_axis[i] = NEW_AXIS;
+                removal[i]       = false;
+            }
+            origin = array.origin;
         }
 
         /* from:to:step */
@@ -601,7 +603,7 @@ public class Vast.Array : Object
         }
 
         public Builder
-        broadcast(ssize_t axis, ssize_t newshape)
+        broadcast(ssize_t axis, size_t newshape)
         {
             axis = wrap_by_dimension(axis);
             assert (shape[axis] == 1 || strides[axis] == 0);
@@ -646,7 +648,7 @@ public class Vast.Array : Object
             return new Array (array.scalar_type,
                               array.scalar_size,
                               shape[0:dimension],
-                              strides[0:dimension],
+                              strides,
                               origin,
                               array.data);
         }
