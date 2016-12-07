@@ -361,9 +361,7 @@ public class Vast.Array : Object
     public Array
     flip (ssize_t axis = 0)
     {
-        var sb = this.build();
-        sb.step(axis, -1);
-        return sb.end();
+        return build ().step (axis, -1).end ();
     }
 
     public Array
@@ -380,12 +378,7 @@ public class Vast.Array : Object
     public Array
     swap (ssize_t from_axis = 0, ssize_t to_axis = 1)
     {
-        var sb = this.build();
-
-        sb.axis(from_axis, to_axis);
-        sb.axis(to_axis, from_axis);
-
-        return sb.end();
+        return build ().axis (from_axis, to_axis).axis (to_axis, from_axis).end ();
     }
 
     public string
