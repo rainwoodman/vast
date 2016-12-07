@@ -425,13 +425,17 @@ public class Vast.Array : Object
     }
 
     internal inline Value
-    _memory_to_value (void * memory)
+    _memory_to_value (void* memory)
     {
         var val = Value (scalar_type);
 
         if (val.fits_pointer ()) {
             if (scalar_type == typeof (string)) {
                 val.set_string ((string) memory);
+            } else if (scalar_type.is_a (Type.BOXED)) {
+                var tmp_val = Value (scalar_type);
+                tmp_val.set_boxed (memory);
+                tmp_val.copy (ref val);
             } else {
                 Memory.copy (val.peek_pointer (), memory, scalar_size);
             }

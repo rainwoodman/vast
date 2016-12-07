@@ -198,6 +198,19 @@ int main (string[] args) {
         var a = new Vast.Array (typeof (char), sizeof (char), {100, 100, 100, 100});
     });
 
+    Test.add_func ("/array/boxed_type", () => {
+        var a = new Vast.Array (typeof (DateTime), 128 /* wild guess... */, {10});
+        var b = new DateTime.now_utc ();
+        a.set_from_value ({0}, b);
+
+        unowned DateTime c = (DateTime) a.get_pointer ({0});
+        assert (b.to_string () == c.to_string ());
+
+        var d = a.get_value ({0});
+        var e = (DateTime) d.get_boxed ();
+        assert (b.to_string () == e.to_string ());
+    });
+
     Test.add_func ("/array/negative_indexing", () => {
         var a = new Vast.Array (typeof (double), sizeof (double), {10, 20});
 
