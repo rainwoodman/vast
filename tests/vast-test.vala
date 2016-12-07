@@ -524,5 +524,23 @@ int main (string[] args) {
         assert ('b' == mapped_file.get_contents ()[0]);
     });
 
+    Test.add_func ("/vast/routines/math/sin", () => {
+        var a = new Vast.Array (typeof (double),
+                                sizeof (double),
+                                {100});
+
+        a.fill_value (GLib.Math.PI / 2);
+
+        var b = new Vast.Array (typeof (double),
+                                sizeof (double),
+                                {100});
+
+        Vast.Math.sin (a, ref b);
+
+        for (var i = 0; i < 100; i++) {
+            assert (1 == b.get_value ({i}).get_double ());
+        }
+    });
+
     return Test.run ();
 }
