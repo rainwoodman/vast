@@ -259,6 +259,18 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/view_as", () => {
+        var a = new Vast.Array (typeof (double), sizeof (double), {10, 20});
+
+        assert (a.shape[0] * 2 == a.view_as (typeof (float), sizeof (float)).shape[0]);
+        assert (a.shape[1] * 2 == a.view_as (typeof (float), sizeof (float)).shape[1]);
+        assert (a.strides[0] / 2 == a.view_as (typeof (float), sizeof (float)).strides[0]);
+        assert (a.strides[1] / 2 == a.view_as (typeof (float), sizeof (float)).strides[1]);
+
+        assert (a.shape[0] == a.view_as (typeof (double), sizeof (double)).shape[0]);
+        assert (a.shape[1] == a.view_as (typeof (double), sizeof (double)).shape[1]);
+    });
+
     Test.add_func ("/array/viewbuilder", () => {
         var a = new Vast.Array (typeof (double), sizeof (double), {10, 20});
 

@@ -296,6 +296,18 @@ public class Vast.Array : Object
                           data);
     }
 
+    public Array
+    view_as (Type new_scalar_type, size_t new_scalar_size)
+    {
+        var new_shape   = new size_t[dimension];
+        var new_strides = new ssize_t[dimension];
+        for (var i = 0; i < dimension; i++) {
+            new_shape[i]   = (shape[i] * scalar_size) / new_scalar_size;
+            new_strides[i] = (strides[i] / (ssize_t) scalar_size) * (ssize_t) new_scalar_size;
+        }
+        return new Array (new_scalar_type, new_scalar_size, new_shape, new_strides, origin, data);
+    }
+
     public Builder build(size_t dimension = DEFAULT_DIMENSION)
     {
         if (dimension == DEFAULT_DIMENSION)
