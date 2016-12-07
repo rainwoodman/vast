@@ -25,6 +25,8 @@ int main (string[] args) {
             assert (10 + i == a.get_value ({i}).get_double ());
             assert (10 + i == b.get_value ({i}).get_double ());
         }
+
+        assert (5.0f == a.get_value_as ({5}, typeof (float)));
     });
 
     Test.add_func ("/array/zeroed", () => {

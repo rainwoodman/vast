@@ -200,6 +200,18 @@ public class Vast.Array : Object
         return _memory_to_value (_baseptr + _offset_from_index (index));
     }
 
+    public Value
+    get_value_as ([CCode (array_length = false)] ssize_t[] index, Type dest_type)
+    {
+        var dest_value = Value (dest_type);
+        if (get_value (index).transform (ref dest_value)) {
+            return dest_value;
+        } else {
+            error ("Could not transform '%s' into '%s'.", scalar_type.name (),
+                                                          dest_type.name ());
+        }
+    }
+
     public void
     set_from_pointer ([CCode (array_length = false)] ssize_t[] index, void* val)
     {

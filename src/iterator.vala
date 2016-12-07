@@ -80,6 +80,18 @@ public class Vast.Iterator : Object
         return array._memory_to_value (_baseptr + _offset);
     }
 
+    public Value
+    get_value_as (Type dest_type)
+    {
+        var dest_value = Value (dest_type);
+        if (get_value ().transform (ref dest_value)) {
+            return dest_value;
+        } else {
+            error ("Could not transform '%s' into '%s'.", array.scalar_type.name (),
+                                                          dest_type.name ());
+        }
+    }
+
     public void
     set_from_pointer (void* val)
         requires (_cursor != null)
