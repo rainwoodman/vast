@@ -234,7 +234,7 @@ public class Vast.Array : Object
     }
 
     public void
-    fill (void* ptr)
+    fill_from_pointer (void* ptr)
     {
         foreach (var dest_ptr in this) {
             Memory.copy (dest_ptr, ptr, _scalar_size);
@@ -242,12 +242,12 @@ public class Vast.Array : Object
     }
 
     public void
-    fill_value (Value val)
+    fill_from_value (Value val)
     {
         var ptr      = new uint8[scalar_size]; // FIXME: allocate this on the stack
         var val_copy = val;
         _value_to_memory (ref val_copy, ptr);
-        fill (ptr);
+        fill_from_pointer (ptr);
     }
 
     public Iterator

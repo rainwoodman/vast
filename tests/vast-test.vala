@@ -37,10 +37,10 @@ int main (string[] args) {
         }
     });
 
-    Test.add_func ("/array/fill", () => {
+    Test.add_func ("/array/fill_from_pointer", () => {
         var arr = new Vast.Array (typeof (int), sizeof (int), {10});
 
-        arr.fill_value (1);
+        arr.fill_from_value (1);
 
         for (var i = 0; i < 10; i++) {
             assert (1 == arr.get_value ({i}).get_int ());
@@ -529,7 +529,7 @@ int main (string[] args) {
                                 sizeof (double),
                                 {100});
 
-        a.fill_value (GLib.Math.PI / 2);
+        a.fill_from_value (GLib.Math.PI / 2);
 
         var b = new Vast.Array (typeof (double),
                                 sizeof (double),
