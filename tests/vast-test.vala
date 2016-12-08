@@ -558,6 +558,10 @@ int main (string[] args) {
         assert ("math_cos" == gradient.get_function_info ().get_name ());
 
         gradient.invoke ({a, b, null});
+
+        for (var i = 0; i < 100; i++) {
+            assert (0 == b.get_value ({i}).get_double ());
+        }
     });
 
     Test.add_func ("/vast/routines/math/sin", () => {

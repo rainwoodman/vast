@@ -31,7 +31,7 @@ namespace Vast.Math
         var z_iter = z.iterator ();
         if (x.scalar_type == typeof (double) && z.scalar_type == typeof (double)) {
             while (x_iter.next () && z_iter.next ()) {
-                *(double*) z_iter.get_pointer () = GLib.Math.sin (*(double*) x_iter.get_pointer ());
+                *(double*) z_iter.get_pointer () = GLib.Math.cos (*(double*) x_iter.get_pointer ());
             }
         } else if (x.scalar_type == typeof (float) && z.scalar_type == typeof (float)) {
             while (x_iter.next () && z_iter.next ()) {
