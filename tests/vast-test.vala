@@ -555,7 +555,7 @@ int main (string[] args) {
         }
 
         var gradient = function.gradient ();
-        assert ("math_cos" == gradient.get_function_info ().get_name ());
+        assert ("math_cos" == gradient.function_info.name);
 
         gradient.invoke ({a, b, null});
 
