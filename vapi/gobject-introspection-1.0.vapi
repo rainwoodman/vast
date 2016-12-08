@@ -243,7 +243,7 @@ namespace GI {
 		public Typelib.new_from_memory (uint8[] memory) throws GLib.Error;
 		public Typelib.new_from_mapped_file (GLib.MappedFile mfile) throws GLib.Error;
 		public unowned string get_namespace ();
-		public bool symbol (string symbol_name, void* symbol);
+		public bool symbol (string symbol_name, out void* symbol);
 	}
 	[CCode (cheader_filename = "girepository.h", has_type_id = false)]
 	public class UnionInfo : GI.BaseInfo {

@@ -531,7 +531,11 @@ int main (string[] args) {
         assert (sin != null);
         assert (GI.InfoType.FUNCTION == sin.get_type ());
 
-        var function = new Vast.Function ((GI.FunctionInfo) sin, (void*) Vast.Math.sin);
+        void* sin_symbol;
+        assert (tl.symbol ("vast_math_sin", out sin_symbol));
+        assert (null != sin_symbol);
+
+        var function = new Vast.Function ((GI.FunctionInfo) sin, sin_symbol);
 
         var a = new Vast.Array (typeof (double),
                                 sizeof (double),
