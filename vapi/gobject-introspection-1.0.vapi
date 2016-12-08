@@ -24,7 +24,7 @@ namespace GI {
 	[CCode (cheader_filename = "girepository.h", ref_function = "g_base_info_ref", unref_function = "g_base_info_unref", type_id = "GI_TYPE_BASE_INFO")]
 	public class BaseInfo {
 		public bool equal (GI.BaseInfo info2);
-		public unowned string get_attribute (string name);
+		public unowned string? get_attribute (string name);
 		public unowned GI.BaseInfo get_container ();
 		public unowned string get_name ();
 		public unowned string get_namespace ();
@@ -178,7 +178,7 @@ namespace GI {
 		[Version (since = "1.29.17")]
 		public GI.EnumInfo find_by_error_domain (GLib.Quark domain);
 		public GI.BaseInfo find_by_gtype (GLib.Type gtype);
-		public GI.BaseInfo find_by_name (string namespace_, string name);
+		public GI.BaseInfo? find_by_name (string namespace_, string name);
 		public unowned string get_c_prefix (string namespace_);
 		public static unowned GI.Repository get_default ();
 		[CCode (array_length = false, array_null_terminated = true)]
@@ -198,7 +198,7 @@ namespace GI {
 		public unowned string load_typelib (GI.Typelib typelib, GI.RepositoryLoadFlags flags) throws GI.RepositoryError;
 		public static void prepend_library_path (string directory);
 		public static void prepend_search_path (string directory);
-		public unowned GI.Typelib require (string namespace_, string? version, GI.RepositoryLoadFlags flags) throws GI.RepositoryError;
+		public unowned GI.Typelib? require (string namespace_, string? version, GI.RepositoryLoadFlags flags) throws GI.RepositoryError;
 		public unowned GI.Typelib require_private (string typelib_dir, string namespace_, string? version, GI.RepositoryLoadFlags flags) throws GI.RepositoryError;
 	}
 	[CCode (cheader_filename = "girepository.h", has_type_id = false)]

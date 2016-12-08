@@ -530,6 +530,7 @@ int main (string[] args) {
         var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
         assert (sin != null);
         assert (GI.InfoType.FUNCTION == sin.get_type ());
+        assert ("math_cos" == sin.get_attribute ("vast.gradient"));
 
         void* sin_symbol;
         assert (tl.symbol ("vast_math_sin", out sin_symbol));
@@ -552,6 +553,11 @@ int main (string[] args) {
         for (var i = 0; i < 100; i++) {
             assert (1 == b.get_value ({i}).get_double ());
         }
+
+        var gradient = function.gradient ();
+        assert ("math_cos" == gradient.get_function_info ().get_name ());
+
+        gradient.invoke ({a, b, null});
     });
 
     Test.add_func ("/vast/routines/math/sin", () => {
