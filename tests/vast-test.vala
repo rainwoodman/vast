@@ -47,6 +47,23 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/array/fill_from_array", () => {
+        var a = new Vast.Array (typeof (int), sizeof (int), {100});
+        var b = new Vast.Array.zeroed (typeof (int), sizeof (int), {100});
+
+        a.fill_from_value (1);
+
+        for (var i = 0; i < 100; i++) {
+            assert (1 == a.get_value ({i}).get_int ());
+        }
+
+        a.fill_from_array (b);
+
+        for (var i = 0; i < 100; i++) {
+            assert (0 == a.get_value ({i}).get_int ());
+        }
+    });
+
     Test.add_func ("/array/scalar_like", () => {
         var a = new Vast.Array (typeof (double), sizeof (double), {});
 

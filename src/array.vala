@@ -154,6 +154,8 @@ public class Vast.Array : Object
               origin:      origin);
     }
 
+    private static extern Bytes _bytes_new_zeroed (size_t len);
+
     public Array.zeroed (Type      scalar_type,
                          size_t    scalar_size,
                          size_t[]  shape,
@@ -161,14 +163,12 @@ public class Vast.Array : Object
                          ssize_t[] strides = {},
                          size_t    origin  = 0)
     {
-        var mem    = (uint8[]) malloc0 (_size_from_shape (shape) * scalar_size);
-        mem.length = (int) (_size_from_shape (shape) * scalar_size);
         this (scalar_type,
               scalar_size,
               shape,
               strides,
               origin,
-              new Bytes.take (mem));
+              _bytes_new_zeroed (_size_from_shape (shape) * scalar_size));
     }
 
     private inline size_t
@@ -248,6 +248,26 @@ public class Vast.Array : Object
         var val_copy = val;
         _value_to_memory (ref val_copy, ptr);
         fill_from_pointer (ptr);
+    }
+
+    public void
+    fill_from_array (Array arr)
+        requires (size <= arr.size)
+    {
+        var iter     = iterator ();
+        var arr_iter = arr.iterator ();
+        if (Value.type_compatible (arr.scalar_type, scalar_type)) {
+            while (iter.next () && arr_iter.next ()) {
+                iter.set_from_pointer (arr_iter.get_pointer ());
+            }
+        } else if (Value.type_transformable (arr.scalar_type, scalar_type)) {
+            while (iter.next () && arr_iter.next ()) {
+                iter.set_from_value (arr_iter.get_value ());
+            }
+        } else {
+            error ("Could not transform '%s' into '%s'.", arr.scalar_type.name (),
+                                                          scalar_type.name ());
+        }
     }
 
     public Iterator
