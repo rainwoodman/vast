@@ -1,12 +1,12 @@
 public class Vast.Function : Object
 {
     public GI.FunctionInfo function_info { get; construct; }
-    private void*           _callable_symbol;
 
-    public Function (GI.FunctionInfo function_info, void* callable_symbol)
+    public void* symbol { get; construct; }
+
+    public Function (GI.FunctionInfo function_info, void* symbol)
     {
-        _function_info   = function_info;
-        _callable_symbol = callable_symbol;
+        base (function_info: function_info, symbol: symbol);
     }
 
     public void
@@ -17,7 +17,7 @@ public class Vast.Function : Object
             in_args += GI.Argument () { v_pointer = arrays[i] };
         }
         try {
-            _function_info.invoke (_callable_symbol,
+            _function_info.invoke (symbol,
                                    in_args,
                                    {},
                                    GI.Argument (),
