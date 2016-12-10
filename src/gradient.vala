@@ -18,11 +18,12 @@ public class Vast.Gradient : Object
             error ("Could not retreive '%s' from the '%s' namespace.", gradient_identifier, "Vast");
         }
 
-        var gradient_symbol_name = function.function_info.get_attribute ("vast.gradient_%s_%s_cname".printf (out_variable, in_variable)) ??
-                                   "%s_%s".printf ("vast", gradient_identifier);
+        var gradient_symbol_name = function.function_info.get_attribute ("vast.gradient_%s_%s_cname".printf (out_variable, in_variable));
 
         void* gradient_symbol;
-        if (!function.function_info.typelib.symbol (gradient_symbol_name, out gradient_symbol)) {
+        if (gradient_symbol_name == null) {
+            gradient_symbol = null; // will be guessed by 'Function'
+        } else if (!function.function_info.typelib.symbol (gradient_symbol_name, out gradient_symbol)) {
             error ("Could not retrieve symbol '%s' from the typelib.", gradient_symbol_name);
         }
 

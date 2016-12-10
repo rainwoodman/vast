@@ -554,6 +554,14 @@ int main (string[] args) {
         }
     });
 
+    Test.add_func ("/function/implicit_symbol", () => {
+        GI.Repository.get_default ().require ("Vast", null, 0);
+        var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
+        assert (GI.InfoType.FUNCTION == sin.type);
+        var function = new Function ((GI.FunctionInfo) sin);
+        assert (null != function.symbol);
+    });
+
     Test.add_func ("/vast/routines/math/sin", () => {
         var a = new Vast.Array (typeof (double),
                                 sizeof (double),
