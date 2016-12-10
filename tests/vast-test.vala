@@ -602,6 +602,13 @@ int main (string[] args) {
         for (var i = 0; i < 100; i++) {
             assert (19531250.0 == *(double*) z.get_pointer ({i}));
         }
+
+        var tmp = new Vast.Array (typeof (double), sizeof (double), {100});
+        dz_dy.invoke ({x, y, z, tmp});
+
+        for (var i = 0; i < 100; i++) {
+            assert (15717167.113614261 == *(double*) z.get_pointer ({i}));
+        }
     });
 
     return Test.run ();

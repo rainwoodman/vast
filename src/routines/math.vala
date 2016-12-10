@@ -124,12 +124,12 @@ namespace Vast.Math
     }
 
     public void
-    power_gradient_z_y (Array x, Array y, Array z)
+    power_gradient_z_y (Array x, Array y, Array z, Array tmp)
     {
-        // x ^ y * log (x) -> log (x ^ (x ^ y))
+        // x ^ y * log (x)
         power (x, y, z);
-        power (x, z, z); // FIXME: we bust infinity here :(
-        log (z, z);
+        log (x, tmp);
+        multiply (z, tmp, z);
     }
 
     public void
