@@ -541,6 +541,20 @@ int main (string[] args) {
         assert ('b' == mapped_file.get_contents ()[0]);
     });
 
+    Test.add_func ("/array/copy", () => {
+        var a = new Vast.Array (typeof (double), sizeof (double), {10});
+
+        a.set_from_value ({0}, 1.0);
+
+        var b = a.copy ();
+        assert (1 == b.dimension);
+        assert (10 == b.shape[0]);
+        assert (1.0 == b.get_value ({0}).get_double ());
+
+        b.set_from_value ({0}, 2);
+        assert (1.0 == a.get_value ({0}).get_double ());
+    });
+
     Test.add_func ("/vast/routines/math/sin", () => {
         var a = new Vast.Array (typeof (double),
                                 sizeof (double),

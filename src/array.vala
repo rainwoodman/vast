@@ -401,6 +401,17 @@ public class Vast.Array : Object
         return build ().axis (from_axis, to_axis).axis (to_axis, from_axis).end ();
     }
 
+    public Array
+    copy ()
+    {
+        return new Array (scalar_type,
+                          scalar_size,
+                          _shape[0:dimension],
+                          _strides,
+                          origin,
+                          new Bytes (data.get_data ()));
+    }
+
     public string
     to_string ()
     {
