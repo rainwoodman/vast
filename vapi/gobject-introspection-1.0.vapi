@@ -28,7 +28,7 @@ namespace GI {
 		public GI.BaseInfo container { get; }
 		public string name { get; }
 		public unowned string get_namespace ();
-		public GI.InfoType get_type ();
+		public GI.InfoType type { get; }
 		public GI.Typelib typelib { get; }
 		public bool is_deprecated ();
 		public bool iterate_attributes (ref GI.AttributeIter iterator, out unowned string name, out unowned string value);

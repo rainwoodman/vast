@@ -529,8 +529,7 @@ int main (string[] args) {
         assert (tl != null);
         var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
         assert (sin != null);
-        assert (GI.InfoType.FUNCTION == sin.get_type ());
-        assert ("math_cos" == sin.get_attribute ("vast.gradient"));
+        assert (GI.InfoType.FUNCTION == sin.type);
 
         void* sin_symbol;
         assert (tl.symbol ("vast_math_sin", out sin_symbol));
@@ -553,15 +552,6 @@ int main (string[] args) {
         for (var i = 0; i < 100; i++) {
             assert (1 == b.get_value ({i}).get_double ());
         }
-
-        var gradient = function.gradient ();
-        assert ("math_cos" == gradient.function_info.name);
-
-        gradient.invoke ({a, b, null});
-
-        for (var i = 0; i < 100; i++) {
-            assert (0 == b.get_value ({i}).get_double ());
-        }
     });
 
     Test.add_func ("/vast/routines/math/sin", () => {
@@ -579,6 +569,38 @@ int main (string[] args) {
 
         for (var i = 0; i < 100; i++) {
             assert (1 == b.get_value ({i}).get_double ());
+        }
+    });
+
+    Test.add_func ("/vast/gradient", () => {
+        unowned GI.Typelib tl = GI.Repository.get_default ().require ("Vast", null, 0);
+        assert (tl != null);
+        var pow = GI.Repository.get_default ().find_by_name ("Vast", "math_power");
+        assert (pow != null);
+        assert (GI.InfoType.FUNCTION == pow.type);
+
+        void* pow_symbol;
+        assert (tl.symbol ("vast_math_power", out pow_symbol));
+        assert (null != pow_symbol);
+        var gradient = new Gradient (new Function ((GI.FunctionInfo) pow, pow_symbol));
+
+        var dz_dx = gradient.get_partial_derivative ("z", "x");
+        var dz_dy = gradient.get_partial_derivative ("z", "y");
+
+        assert (dz_dx != null);
+        assert (dz_dy != null);
+
+        var x = new Vast.Array (typeof (double), sizeof (double), {100});
+        var y = new Vast.Array (typeof (double), sizeof (double), {100});
+        var z = new Vast.Array (typeof (double), sizeof (double), {100});
+
+        x.fill_value (5.0);
+        y.fill_value (10.0);
+
+        dz_dx.invoke ({x, y, z, null});
+
+        for (var i = 0; i < 100; i++) {
+            assert (19531250.0 == *(double*) z.get_pointer ({i}));
         }
     });
 

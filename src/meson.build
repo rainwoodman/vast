@@ -3,6 +3,7 @@ vast_sources = [
     'array.c',
     'iterator.vala',
     'function.vala',
+    'gradient.vala',
     'formatter.vala',
     'string-formatter.vala'
      ]
