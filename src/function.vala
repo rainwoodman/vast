@@ -12,9 +12,9 @@ public class Vast.Function : Object
     public void
     invoke (Array[] arrays)
     {
-        GI.Argument[] in_args = {};
+        var in_args = new GI.Argument[arrays.length + 1];
         for (var i = 0; i < arrays.length; i++) {
-            in_args += GI.Argument () { v_pointer = arrays[i] };
+            in_args[i] = GI.Argument () { v_pointer = arrays[i] };
         }
         try {
             _function_info.invoke (symbol,

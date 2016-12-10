@@ -547,7 +547,7 @@ int main (string[] args) {
                                 sizeof (double),
                                 {100});
 
-        function.invoke ({a, b, null});
+        function.invoke ({a, b});
 
         for (var i = 0; i < 100; i++) {
             assert (1 == b.get_value ({i}).get_double ());
@@ -597,7 +597,7 @@ int main (string[] args) {
         x.fill_value (5.0);
         y.fill_value (10.0);
 
-        dz_dx.invoke ({x, y, z, null});
+        dz_dx.invoke ({x, y, z});
 
         for (var i = 0; i < 100; i++) {
             assert (19531250.0 == *(double*) z.get_pointer ({i}));
