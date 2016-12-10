@@ -529,13 +529,9 @@ int main (string[] args) {
         assert (tl != null);
         var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
         assert (sin != null);
-        assert (GI.InfoType.FUNCTION == sin.type);
+        assert (GI.InfoType.FUNCTION == sin.get_type ());
 
-        void* sin_symbol;
-        assert (tl.symbol ("vast_math_sin", out sin_symbol));
-        assert (null != sin_symbol);
-
-        var function = new Vast.Function ((GI.FunctionInfo) sin, sin_symbol);
+        var function = new Vast.Function ((GI.FunctionInfo) sin);
 
         var a = new Vast.Array (typeof (double),
                                 sizeof (double),
@@ -552,14 +548,6 @@ int main (string[] args) {
         for (var i = 0; i < 100; i++) {
             assert (1 == b.get_value ({i}).get_double ());
         }
-    });
-
-    Test.add_func ("/function/implicit_symbol", () => {
-        GI.Repository.get_default ().require ("Vast", null, 0);
-        var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
-        assert (GI.InfoType.FUNCTION == sin.type);
-        var function = new Function ((GI.FunctionInfo) sin);
-        assert (null != function.symbol);
     });
 
     Test.add_func ("/vast/routines/math/sin", () => {
@@ -585,12 +573,9 @@ int main (string[] args) {
         assert (tl != null);
         var pow = GI.Repository.get_default ().find_by_name ("Vast", "math_power");
         assert (pow != null);
-        assert (GI.InfoType.FUNCTION == pow.type);
+        assert (GI.InfoType.FUNCTION == pow.get_type ());
 
-        void* pow_symbol;
-        assert (tl.symbol ("vast_math_power", out pow_symbol));
-        assert (null != pow_symbol);
-        var gradient = new Gradient (new Function ((GI.FunctionInfo) pow, pow_symbol));
+        var gradient = new Gradient (new Function ((GI.FunctionInfo) pow));
 
         var dz_dx = gradient.get_partial_derivative ("z", "x");
         var dz_dy = gradient.get_partial_derivative ("z", "y");
@@ -617,6 +602,17 @@ int main (string[] args) {
         for (var i = 0; i < 100; i++) {
             assert (15717167.113614261 == *(double*) z.get_pointer ({i}));
         }
+    });
+
+    Test.add_func ("/vast/gradient/custom_function_name", () => {
+        GI.Repository.get_default ().require ("Vast", null, 0);
+        var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
+
+        var gradient = new Gradient (new Function ((GI.FunctionInfo) sin));
+
+        var cos = gradient.get_partial_derivative ("z", "x");
+
+        assert ("math_cos" == cos.function_info.get_name ());
     });
 
     return Test.run ();

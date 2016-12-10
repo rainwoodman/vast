@@ -33,6 +33,7 @@ namespace Vast.Math
         }
     }
 
+    [Vast (gradient_z_x_function = "math_cos")]
     public void
     sin (Array x, Array z)
         requires (x.size == z.size)
@@ -52,12 +53,6 @@ namespace Vast.Math
                 z_iter.set_from_value (GLib.Math.sin (x_iter.get_value_as (typeof (double)).get_double ()));
             }
         }
-    }
-
-    public void
-    sin_gradient_z_x (Array x, Array z)
-    {
-        cos (x, z);
     }
 
     public void

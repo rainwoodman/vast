@@ -2,7 +2,8 @@
 
 [CCode (cprefix = "GI", gir_namespace = "GIRepository", gir_version = "2.0", lower_case_cprefix = "g_")]
 namespace GI {
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class ArgInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected ArgInfo ();
@@ -20,20 +21,23 @@ namespace GI {
 		public void load_type (out unowned GI.TypeInfo type);
 		public bool may_be_null ();
 	}
+	[CCode (cheader_filename = "girepository.h", lower_case_cprefix = "g_base_info_", lower_case_csuffix = "base_info_gtype", ref_function = "g_base_info_ref", type_id = "g_base_info_gtype_get_type ()", unref_function = "g_base_info_unref")]
 	[Compact]
-	[CCode (cheader_filename = "girepository.h", ref_function = "g_base_info_ref", unref_function = "g_base_info_unref", type_id = "GI_TYPE_BASE_INFO")]
 	public class BaseInfo {
+		[CCode (cname = "g_info_new")]
+		public BaseInfo (GI.InfoType type, GI.BaseInfo container, GI.Typelib typelib, uint32 offset);
 		public bool equal (GI.BaseInfo info2);
-		public unowned string? get_attribute (string name);
-		public GI.BaseInfo container { get; }
-		public string name { get; }
+		public unowned string get_attribute (string name);
+		public unowned GI.BaseInfo get_container ();
+		public unowned string get_name ();
 		public unowned string get_namespace ();
-		public GI.InfoType type { get; }
-		public GI.Typelib typelib { get; }
+		public GI.InfoType get_type ();
+		public unowned GI.Typelib get_typelib ();
 		public bool is_deprecated ();
 		public bool iterate_attributes (ref GI.AttributeIter iterator, out unowned string name, out unowned string value);
 	}
-	[CCode (cheader_filename = "girepository.h")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class CallableInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected CallableInfo ();
@@ -45,7 +49,7 @@ namespace GI {
 		public int get_n_args ();
 		public unowned string get_return_attribute (string name);
 		public GI.TypeInfo get_return_type ();
-		public bool invoke (void* function, GI.Argument[] in_args, GI.Argument[] out_args, GI.Argument return_value, bool is_method, bool @throws) throws GI.InvokeError;
+		public bool invoke (void* function, [CCode (array_length_cname = "n_in_args", array_length_pos = 2.5)] GI.Argument[] in_args, [CCode (array_length_cname = "n_out_args", array_length_pos = 3.5)] GI.Argument[] out_args, GI.Argument return_value, bool is_method, bool @throws) throws GI.InvokeError;
 		[Version (since = "1.34")]
 		public bool is_method ();
 		public bool iterate_return_attributes (ref GI.AttributeIter iterator, out unowned string name, out unowned string value);
@@ -54,18 +58,24 @@ namespace GI {
 		public bool may_return_null ();
 		public bool skip_return ();
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
-	public class CallbackInfo : GI.CallableInfo {
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
+	public class CallbackInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected CallbackInfo ();
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class ConstantInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected ConstantInfo ();
+		[Version (since = "1.30.1")]
+		public void free_value (GI.Argument value);
 		public GI.TypeInfo get_type ();
+		public int get_value (out GI.Argument value);
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class EnumInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected EnumInfo ();
@@ -79,25 +89,31 @@ namespace GI {
 		public GI.TypeTag get_storage_type ();
 		public GI.ValueInfo get_value (int n);
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class FieldInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected FieldInfo ();
+		public bool get_field (void* mem, GI.Argument value);
 		public GI.FieldInfoFlags get_flags ();
 		public int get_offset ();
 		public int get_size ();
 		public GI.TypeInfo get_type ();
+		public bool set_field (void* mem, GI.Argument value);
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
-	public class FunctionInfo : GI.CallableInfo {
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
+	public class FunctionInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected FunctionInfo ();
-		public GI.FunctionInfoFlags flags { get; }
-		public GI.PropertyInfo property { get; }
-		public string symbol { get; }
-		public GI.VFuncInfo vfunc { get; }
+		public GI.FunctionInfoFlags get_flags ();
+		public GI.PropertyInfo get_property ();
+		public unowned string get_symbol ();
+		public GI.VFuncInfo get_vfunc ();
+		public bool invoke ([CCode (array_length_cname = "n_in_args", array_length_pos = 1.5)] GI.Argument[] in_args, [CCode (array_length_cname = "n_out_args", array_length_pos = 2.5)] GI.Argument[] out_args, GI.Argument return_value) throws GI.InvokeError;
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class InterfaceInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected InterfaceInfo ();
@@ -119,7 +135,8 @@ namespace GI {
 		public GI.SignalInfo get_signal (int n);
 		public GI.VFuncInfo get_vfunc (int n);
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class ObjectInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected ObjectInfo ();
@@ -134,6 +151,7 @@ namespace GI {
 		public GI.FieldInfo get_field (int n);
 		public bool get_fundamental ();
 		public unowned string get_get_value_function ();
+		public unowned GI.ObjectInfoGetValueFunction get_get_value_function_pointer ();
 		public GI.InterfaceInfo get_interface (int n);
 		public GI.FunctionInfo get_method (int n);
 		public int get_n_constants ();
@@ -146,14 +164,18 @@ namespace GI {
 		public GI.ObjectInfo get_parent ();
 		public GI.PropertyInfo get_property (int n);
 		public unowned string get_ref_function ();
+		public unowned GI.ObjectInfoRefFunction get_ref_function_pointer ();
 		public unowned string get_set_value_function ();
+		public unowned GI.ObjectInfoSetValueFunction get_set_value_function_pointer ();
 		public GI.SignalInfo get_signal (int n);
 		public unowned string get_type_init ();
 		public unowned string get_type_name ();
 		public unowned string get_unref_function ();
+		public unowned GI.ObjectInfoUnrefFunction get_unref_function_pointer ();
 		public GI.VFuncInfo get_vfunc (int n);
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class PropertyInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected PropertyInfo ();
@@ -161,7 +183,8 @@ namespace GI {
 		public GI.Transfer get_ownership_transfer ();
 		public GI.TypeInfo get_type ();
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class RegisteredTypeInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected RegisteredTypeInfo ();
@@ -169,7 +192,8 @@ namespace GI {
 		public unowned string get_type_init ();
 		public unowned string get_type_name ();
 	}
-	[CCode (cheader_filename = "girepository.h", lower_case_csuffix = "irepository", type_id = "G_TYPE_IREPOSITORY")]
+	[CCode (cheader_filename = "girepository.h", lower_case_csuffix = "irepository", type_id = "g_irepository_get_type ()")]
+	[Compact]
 	public class Repository : GLib.Object {
 		[CCode (has_construct_function = false)]
 		protected Repository ();
@@ -178,7 +202,7 @@ namespace GI {
 		[Version (since = "1.29.17")]
 		public GI.EnumInfo find_by_error_domain (GLib.Quark domain);
 		public GI.BaseInfo find_by_gtype (GLib.Type gtype);
-		public GI.BaseInfo? find_by_name (string namespace_, string name);
+		public GI.BaseInfo find_by_name (string namespace_, string name);
 		public unowned string get_c_prefix (string namespace_);
 		public static unowned GI.Repository get_default ();
 		[CCode (array_length = false, array_null_terminated = true)]
@@ -198,18 +222,20 @@ namespace GI {
 		public unowned string load_typelib (GI.Typelib typelib, GI.RepositoryLoadFlags flags) throws GI.RepositoryError;
 		public static void prepend_library_path (string directory);
 		public static void prepend_search_path (string directory);
-		public unowned GI.Typelib? require (string namespace_, string? version, GI.RepositoryLoadFlags flags) throws GI.RepositoryError;
-		public unowned GI.Typelib require_private (string typelib_dir, string namespace_, string? version, GI.RepositoryLoadFlags flags) throws GI.RepositoryError;
+		public unowned GI.Typelib require (string namespace_, string? version, GI.RepositoryLoadFlags flags) throws GI.RepositoryError;
+		public unowned GI.Typelib require_private (string typelib_dir, string namespace_, string? version, GI.RepositoryLoadFlags flags) throws GLib.Error;
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
-	public class SignalInfo : GI.CallableInfo {
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
+	public class SignalInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected SignalInfo ();
 		public GI.VFuncInfo get_class_closure ();
 		public GLib.SignalFlags get_flags ();
 		public bool true_stops_emit ();
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class StructInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected StructInfo ();
@@ -224,7 +250,8 @@ namespace GI {
 		public bool is_foreign ();
 		public bool is_gtype_struct ();
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class TypeInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected TypeInfo ();
@@ -240,12 +267,12 @@ namespace GI {
 	[CCode (cheader_filename = "girepository.h", has_type_id = false)]
 	[Compact]
 	public class Typelib {
-		public Typelib.new_from_memory (uint8[] memory) throws GLib.Error;
-		public Typelib.new_from_mapped_file (GLib.MappedFile mfile) throws GLib.Error;
+		public void free ();
 		public unowned string get_namespace ();
-		public bool symbol (string symbol_name, out void* symbol);
+		public bool symbol (string symbol_name, void* symbol);
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class UnionInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected UnionInfo ();
@@ -265,8 +292,9 @@ namespace GI {
 	[Compact]
 	public class UnresolvedInfo {
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
-	public class VFuncInfo : GI.CallableInfo {
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
+	public class VFuncInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected VFuncInfo ();
 		public void* get_address (GLib.Type implementor_gtype) throws GLib.Error;
@@ -274,14 +302,16 @@ namespace GI {
 		public GI.FunctionInfo get_invoker ();
 		public int get_offset ();
 		public GI.SignalInfo get_signal ();
+		public bool invoke (GLib.Type implementor, [CCode (array_length_cname = "n_in_args", array_length_pos = 2.5)] GI.Argument[] in_args, [CCode (array_length_cname = "n_out_args", array_length_pos = 3.5)] GI.Argument[] out_args, GI.Argument return_value) throws GI.InvokeError;
 	}
-	[CCode (cheader_filename = "girepository.h", type_id = "GI_TYPE_BASE_INFO")]
+	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
+	[Compact]
 	public class ValueInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected ValueInfo ();
 		public int64 get_value ();
 	}
-	[CCode (cheader_filename = "girepository.h", has_type_id = false)]
+	[CCode (cheader_filename = "girepository.h")]
 	public struct Argument {
 		public bool v_boolean;
 		public int8 v_int8;
@@ -359,14 +389,7 @@ namespace GI {
 		ARG,
 		TYPE,
 		UNRESOLVED;
-		public unowned string to_string ();
-	}
-	[CCode (cheader_filename = "girepository.h", cprefix = "G_IREPOSITORY_ERROR_", has_type_id = false)]
-	public errordomain RepositoryError {
-		TYPELIB_NOT_FOUND,
-		NAMESPACE_MISMATCH,
-		NAMESPACE_VERSION_CONFLICT,
-		LIBRARY_NOT_FOUND
+		public static unowned string to_string (GI.InfoType type);
 	}
 	[CCode (cheader_filename = "girepository.h", cprefix = "G_IREPOSITORY_LOAD_FLAG_", has_type_id = false)]
 	[Flags]
@@ -411,7 +434,7 @@ namespace GI {
 		GHASH,
 		ERROR,
 		UNICHAR;
-		public unowned string to_string ();
+		public static unowned string to_string (GI.TypeTag type);
 	}
 	[CCode (cheader_filename = "girepository.h", cprefix = "GI_VFUNC_", has_type_id = false)]
 	[Flags]
@@ -421,12 +444,29 @@ namespace GI {
 		MUST_NOT_OVERRIDE,
 		THROWS
 	}
-	[CCode (cheader_filename = "girepository.h", cprefix = "G_INVOKE_ERROR_", has_type_id = false)]
+	[CCode (cheader_filename = "girepository.h", cname = "GInvokeError", cprefix = "G_INVOKE_ERROR_")]
+	[GIR (name = "nvokeError")]
 	public errordomain InvokeError {
 		FAILED,
 		SYMBOL_NOT_FOUND,
-		ARGUMENT_MISMATCH
+		ARGUMENT_MISMATCH;
+		public static GLib.Quark quark ();
 	}
-	[CCode (cheader_filename = "girepository.h")]
-	public static GI.BaseInfo info_new (GI.InfoType type, GI.BaseInfo container, GI.Typelib typelib, uint32 offset);
+	[CCode (cheader_filename = "girepository.h", cprefix = "G_IREPOSITORY_ERROR_")]
+	public errordomain RepositoryError {
+		TYPELIB_NOT_FOUND,
+		NAMESPACE_MISMATCH,
+		NAMESPACE_VERSION_CONFLICT,
+		LIBRARY_NOT_FOUND;
+		[CCode (cname = "g_irepository_error_quark")]
+		public static GLib.Quark quark ();
+	}
+	[CCode (cheader_filename = "girepository.h", has_target = false)]
+	public delegate void* ObjectInfoGetValueFunction (GLib.Value value);
+	[CCode (cheader_filename = "girepository.h", has_target = false)]
+	public delegate void* ObjectInfoRefFunction (void* object);
+	[CCode (cheader_filename = "girepository.h", has_target = false)]
+	public delegate void ObjectInfoSetValueFunction (GLib.Value value, void* object);
+	[CCode (cheader_filename = "girepository.h", has_target = false)]
+	public delegate void ObjectInfoUnrefFunction (void* object);
 }
