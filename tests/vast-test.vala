@@ -577,8 +577,8 @@ int main (string[] args) {
 
         var gradient = new Gradient (new Function ((GI.FunctionInfo) pow));
 
-        var dz_dx = gradient.get_partial_derivative ("z", "x");
-        var dz_dy = gradient.get_partial_derivative ("z", "y");
+        var dz_dx = gradient.find_partial_derivative ("z", "x");
+        var dz_dy = gradient.find_partial_derivative ("z", "y");
 
         assert (dz_dx != null);
         assert (dz_dy != null);
@@ -610,7 +610,7 @@ int main (string[] args) {
 
         var gradient = new Gradient (new Function ((GI.FunctionInfo) sin));
 
-        var cos = gradient.get_partial_derivative ("z", "x");
+        var cos = gradient.find_partial_derivative ("z", "x");
 
         assert ("math_cos" == cos.function_info.get_name ());
     });
