@@ -1,1 +1,1 @@
-routines_sources = files('math.vala')
+routines_sources = files('core.vala', 'math.vala')

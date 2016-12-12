@@ -4,6 +4,9 @@ test('test', executable('vast-test', 'vast-test.vala',
                           dependencies: [glib, gobject, gobject_introspection, gio, vast]),
      env: ['GI_TYPELIB_PATH=' + meson.current_build_dir() + '/../src'])
 
+test('core routines', executable('core-routines-test', 'core-routines-test.vala',
+                                 dependencies: [glib, gobject, gobject_introspection, gio, vast]))
+
 if g_ir_compiler.found()
     test('gi', find_program('gi-test.py'),
          env: ['GI_TYPELIB_PATH=' + meson.current_build_dir() + '/../src',
