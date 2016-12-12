@@ -3,6 +3,7 @@ vast_sources = [
     'array.c',
     'iterator.vala',
     'function.vala',
+    'gradient.vala',
     'formatter.vala',
     'string-formatter.vala'
      ]
@@ -10,10 +11,9 @@ vast_sources = [
 subdir('routines')
 
 vast_lib = library('vast-1.0', vast_sources + routines_sources,
-                    vala_args: ['--vapidir=' + meson.current_source_dir()],
                     vala_header: 'vast.h',
                     vala_gir: 'Vast-1.0.gir',
-                    dependencies: [glib, gobject, gio, math, posix],
+                    dependencies: [glib, gobject, gobject_introspection, gio, math, posix],
                     install: true)
 
 install_headers(meson.current_build_dir() + '/vast.h', subdir: 'vast-1.0')

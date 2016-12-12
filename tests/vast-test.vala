@@ -555,7 +555,7 @@ int main (string[] args) {
         assert (1.0 == a.get_value ({0}).get_double ());
     });
 
-    Test.add_func ("/vast/routines/math/sin", () => {
+    Test.add_func ("/routines/math/sin", () => {
         var a = new Vast.Array (typeof (double),
                                 sizeof (double),
                                 {100});
@@ -566,11 +566,84 @@ int main (string[] args) {
                                 sizeof (double),
                                 {100});
 
-        Vast.Math.sin (a, ref b);
+        foreach (var ptr in Vast.Math.sin (a, b)) {
+            assert (1 == *(double*) ptr);
+        }
+    });
+
+    Test.add_func ("/function", () => {
+        unowned GI.Typelib tl = GI.Repository.get_default ().require ("Vast", null, 0);
+        assert (tl != null);
+        var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
+        assert (sin != null);
+        assert (GI.InfoType.FUNCTION == sin.get_type ());
+
+        var function = new Vast.Function ((GI.FunctionInfo) sin);
+
+        var a = new Vast.Array (typeof (double),
+                                sizeof (double),
+                                {100});
+
+    a.fill_from_value (GLib.Math.PI / 2);
+
+    var b = new Vast.Array (typeof (double),
+                            sizeof (double),
+                            {100});
+
+    var c = function.invoke ({a, b});
+
+    assert (b == c);
+
+    for (var i = 0; i < 100; i++) {
+        assert (1 == b.get_value ({i}).get_double ());
+    }
+});
+
+Test.add_func ("/vast/gradient", () => {
+    unowned GI.Typelib tl = GI.Repository.get_default ().require ("Vast", null, 0);
+    assert (tl != null);
+    var pow = GI.Repository.get_default ().find_by_name ("Vast", "math_power");
+    assert (pow != null);
+    assert (GI.InfoType.FUNCTION == pow.get_type ());
+
+    var gradient = new Gradient (new Function ((GI.FunctionInfo) pow));
+
+    var dz_dx = gradient.find_partial_derivative ("z", "x");
+    var dz_dy = gradient.find_partial_derivative ("z", "y");
+
+    assert (dz_dx != null);
+    assert (dz_dy != null);
+
+    var x = new Vast.Array (typeof (double), sizeof (double), {100});
+    var y = new Vast.Array (typeof (double), sizeof (double), {100});
+    var z = new Vast.Array (typeof (double), sizeof (double), {100});
+
+    x.fill_from_value (5.0);
+    y.fill_from_value (10.0);
+
+        assert (z == dz_dx.invoke ({x, y, z}));
 
         for (var i = 0; i < 100; i++) {
-            assert (1 == b.get_value ({i}).get_double ());
+            assert (19531250.0 == *(double*) z.get_pointer ({i}));
         }
+
+        var tmp = new Vast.Array (typeof (double), sizeof (double), {100});
+        dz_dy.invoke ({x, y, z, tmp});
+
+        for (var i = 0; i < 100; i++) {
+            assert (15717167.113614261 == *(double*) z.get_pointer ({i}));
+        }
+    });
+
+    Test.add_func ("/vast/gradient/custom_function_name", () => {
+        GI.Repository.get_default ().require ("Vast", null, 0);
+        var sin = GI.Repository.get_default ().find_by_name ("Vast", "math_sin");
+
+        var gradient = new Gradient (new Function ((GI.FunctionInfo) sin));
+
+        var cos = gradient.find_partial_derivative ("z", "x");
+
+        assert ("math_cos" == cos.function_info.get_name ());
     });
 
     return Test.run ();
