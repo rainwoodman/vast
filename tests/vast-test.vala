@@ -590,7 +590,7 @@ int main (string[] args) {
                             sizeof (double),
                             {100});
 
-    var c = function.invoke ({a, b});
+    var c = function.invoke (x: a, z: b);
 
     assert (b == c);
 
@@ -621,14 +621,14 @@ Test.add_func ("/vast/gradient", () => {
     x.fill_from_value (5.0);
     y.fill_from_value (10.0);
 
-        assert (z == dz_dx.invoke ({x, y, z}));
+        assert (z == dz_dx.invoke (x: x, y: y, z: z));
 
         for (var i = 0; i < 100; i++) {
             assert (19531250.0 == *(double*) z.get_pointer ({i}));
         }
 
         var tmp = new Vast.Array (typeof (double), sizeof (double), {100});
-        dz_dy.invoke ({x, y, z, tmp});
+        dz_dy.invoke (x: x, y: y, z: z, tmp: tmp);
 
         for (var i = 0; i < 100; i++) {
             assert (15717167.113614261 == *(double*) z.get_pointer ({i}));

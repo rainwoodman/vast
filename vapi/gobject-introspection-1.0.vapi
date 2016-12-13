@@ -103,7 +103,7 @@ namespace GI {
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
 	[Compact]
-	public class FunctionInfo : GI.BaseInfo {
+	public class FunctionInfo : GI.CallableInfo {
 		[CCode (has_construct_function = false)]
 		protected FunctionInfo ();
 		public GI.FunctionInfoFlags get_flags ();
