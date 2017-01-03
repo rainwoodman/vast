@@ -23,7 +23,12 @@ using GLib;
 
 public class Vast.Network.Variable : Object
 {
-    public string name {get; construct set;}
+    internal uint8 _id[16];
+    private  char  _unparsed_id[37];
+
+    public string name {
+        get { return (string) _unparsed_id; }
+    }
 
     /* keep the reference counts for inputs.
      * if a dummy variable has been used as many as vincount
@@ -33,26 +38,21 @@ public class Vast.Network.Variable : Object
 
     public int vincount {get; internal set;}
     public int voutcount {get; internal set;}
-    static int _counter = 0;
 
     construct
     {
+        UUID.generate (_id);
+        UUID.unparse (_id, _unparsed_id);
         vincount = 0;
         voutcount = 0;
     }
 
     public Variable.dummy()
     {
-        var name = "D%08d".printf(_counter);
-        base(name : name);
-        _counter++;
     }
 
     public Variable()
     {
-        var name1 = "V%08d".printf(_counter);
-        base(name : name1);
-        _counter++;
     }
     public string to_string()
     {
