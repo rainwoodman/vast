@@ -19,5 +19,18 @@ class ArrayTestCase(unittest.TestCase):
         self.assertEqual(0, builder.get_dimension())
         self.assertIs(a, builder.get_array())
 
+    def test_function(self):
+        f = Vast.Function();
+
+    def test_graph(self):
+        return
+        g = Vast.Graph()
+        sin = Vast.Function()
+        v_x = Vast.GraphVariable(direction=Vast.GraphVariableDirection.IN)
+        v_z = Vast.GraphVariable(direction=Vast.GraphVariableDirection.OUT)
+        g.connectv(sin, [v_x, v_z])
+        e = Vast.SimpleGraphExecutor(graph=g)
+        b = e.compute(v_z);
+
 if __name__ == '__main__':
     unittest.main()

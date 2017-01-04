@@ -2,11 +2,13 @@ vast_sources = [
     'array.vala',
     'array.c',
     'iterator.vala',
-    'function.vala',
-    'gradient.vala',
     'formatter.vala',
     'string-formatter.vala',
     'graph.vala',
+    'graph-executor.vala',
+    'simple-graph-executor.vala',
+    'operation.vala',
+    'gi-operation.vala'
      ]
 
 subdir('routines')

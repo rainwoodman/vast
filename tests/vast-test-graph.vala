@@ -1,6 +1,6 @@
 using GLib;
 using Math;
-using Vast.Network;
+using Vast;
 
 class Operand: Object {
     public double x;
@@ -15,49 +15,35 @@ delegate double UFuncImpl1(double x);
 [CCode (has_target=false)]
 delegate double UFuncImpl2(double x, double y);
 
-class Operation1 : Vast.Network.Operation {
-    UFuncImpl1 impl;
+class Operation1 : Vast.Operation {
+    private UFuncImpl1 impl;
     public Operation1(string name, UFuncImpl1 impl)
     {
-        base(name, 1, 1);
+        string[] arguments = {"x", "y"};
+        Object (name: name, arguments: arguments);
         this.impl = impl;
     }
+
     public override void
-    prepare(Object [] inputs, Object? [] outputs)
+    invokev (Vast.Array[] arrays)
     {
-        for(var i = 0; i < this.nout; i ++) {
-            if(outputs[i] != null) continue;
-            outputs[i] = new Operand(0.0);
-        }
-    }
-    public override void
-    execute(Object[] inputs, Object[] outputs)
-    {
-        (outputs[0] as Operand).x = this.impl((inputs[0] as Operand).x);
+        arrays[2].set_from_value ({}, impl (arrays[0].get_value ({}).get_double ()));
     }
 }
 
-class Operation2 : Vast.Network.Operation {
+class Operation2 : Vast.Operation {
     UFuncImpl2 impl;
     public Operation2(string name, UFuncImpl2 impl)
     {
-        base(name, 2, 1);
+        string[] arguments = {"x", "y"};
+        Object (name: name, arguments: arguments);
         this.impl = impl;
     }
+
     public override void
-    prepare(Object [] inputs, Object? [] outputs)
+    invokev (Vast.Array[] arrays)
     {
-        for(var i = 0; i < this.nout; i ++) {
-            if(outputs[i] != null) continue;
-            outputs[i] = new Operand(0.0);
-        }
-    }
-    public override void
-    execute(Object[] inputs, Object[] outputs)
-    {
-        (outputs[0] as Operand).x = this.impl(
-                (inputs[0] as Operand).x,
-                (inputs[1] as Operand).x);
+        arrays[2].set_from_value ({}, impl (arrays[0].get_value ({}).get_double (), arrays[1].get_value ({}).get_double ()));
     }
 }
 
@@ -65,23 +51,36 @@ int main (string[] args) {
     Test.init (ref args);
 
     Test.add_func ("/graph", () => {
-        var osin = new Operation1("sin", Math.sin);
-        var ocos = new Operation1("cos", Math.cos);
-        var oatan2 = new Operation2("atan2", Math.atan2);
+        var osin = new Operation1("sin", GLib.Math.sin);
+        var ocos = new Operation1("cos", GLib.Math.cos);
+        var oatan2 = new Operation2("atan2", GLib.Math.atan2);
 
-        var graph = new Graph();
-        var X = graph.variable();
-        var Y = graph.variable();
-        var R1 = graph.dummy();
+        var graph = new Vast.Graph();
+        var X = graph.create_variable(Graph.Variable.Direction.IN);
+        var Y = graph.create_variable(Graph.Variable.Direction.OUT);
+        var R1 = graph.create_variable(Graph.Variable.Direction.INOUT);
 
-        graph.connect(osin, {X, R1});
-        graph.connect(ocos, {R1, Y});
+        // z = sin (x)
+        graph.connectv (osin, {X, R1});
+
+        // z = cos (x)
+        graph.connectv (ocos, {R1, Y});
+
         message("%s", graph.to_string());
-        var exec = new Executor(graph);
+        var exec = new SimpleGraphExecutor(graph);
 
-        exec.initialize(X, new Operand(1.0));
-        var y = exec.compute({Y})[0] as Operand;
-        assert (y.x == Math.cos(Math.sin(1.0)));
+        var x = new Vast.Array (typeof (double), sizeof (double), {});
+        x.fill_from_value (1.0);
+        exec.assign (X, x);
+
+        Vast.Array y;
+        try {
+            y = exec.compute({Y})[0];
+        } catch (Error err) {
+            assert_not_reached ();
+        }
+
+        assert (y.get_value ({}).get_double () == GLib.Math.cos(GLib.Math.sin(1.0)));
     });
 
     return Test.run ();
