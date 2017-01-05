@@ -3,7 +3,6 @@
 [CCode (cprefix = "GI", gir_namespace = "GIRepository", gir_version = "2.0", lower_case_cprefix = "g_")]
 namespace GI {
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class ArgInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected ArgInfo ();
@@ -37,7 +36,6 @@ namespace GI {
 		public bool iterate_attributes (ref GI.AttributeIter iterator, out unowned string name, out unowned string value);
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class CallableInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected CallableInfo ();
@@ -59,13 +57,11 @@ namespace GI {
 		public bool skip_return ();
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class CallbackInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected CallbackInfo ();
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class ConstantInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected ConstantInfo ();
@@ -75,7 +71,6 @@ namespace GI {
 		public int get_value (out GI.Argument value);
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class EnumInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected EnumInfo ();
@@ -90,7 +85,6 @@ namespace GI {
 		public GI.ValueInfo get_value (int n);
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class FieldInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected FieldInfo ();
@@ -102,7 +96,6 @@ namespace GI {
 		public bool set_field (void* mem, GI.Argument value);
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class FunctionInfo : GI.CallableInfo {
 		[CCode (has_construct_function = false)]
 		protected FunctionInfo ();
@@ -113,7 +106,6 @@ namespace GI {
 		public bool invoke ([CCode (array_length_cname = "n_in_args", array_length_pos = 1.5)] GI.Argument[] in_args, [CCode (array_length_cname = "n_out_args", array_length_pos = 2.5)] GI.Argument[] out_args, GI.Argument return_value) throws GI.InvokeError;
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class InterfaceInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected InterfaceInfo ();
@@ -136,7 +128,6 @@ namespace GI {
 		public GI.VFuncInfo get_vfunc (int n);
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class ObjectInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected ObjectInfo ();
@@ -175,7 +166,6 @@ namespace GI {
 		public GI.VFuncInfo get_vfunc (int n);
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class PropertyInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected PropertyInfo ();
@@ -184,7 +174,6 @@ namespace GI {
 		public GI.TypeInfo get_type ();
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class RegisteredTypeInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected RegisteredTypeInfo ();
@@ -193,7 +182,6 @@ namespace GI {
 		public unowned string get_type_name ();
 	}
 	[CCode (cheader_filename = "girepository.h", lower_case_csuffix = "irepository", type_id = "g_irepository_get_type ()")]
-	[Compact]
 	public class Repository : GLib.Object {
 		[CCode (has_construct_function = false)]
 		protected Repository ();
@@ -226,7 +214,6 @@ namespace GI {
 		public unowned GI.Typelib require_private (string typelib_dir, string namespace_, string? version, GI.RepositoryLoadFlags flags) throws GLib.Error;
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class SignalInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected SignalInfo ();
@@ -235,7 +222,6 @@ namespace GI {
 		public bool true_stops_emit ();
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class StructInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected StructInfo ();
@@ -251,7 +237,6 @@ namespace GI {
 		public bool is_gtype_struct ();
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class TypeInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected TypeInfo ();
@@ -269,10 +254,9 @@ namespace GI {
 	public class Typelib {
 		public void free ();
 		public unowned string get_namespace ();
-		public bool symbol (string symbol_name, void* symbol);
+		public bool symbol (string symbol_name, out void* symbol);
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class UnionInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected UnionInfo ();
@@ -293,7 +277,6 @@ namespace GI {
 	public class UnresolvedInfo {
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class VFuncInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected VFuncInfo ();
@@ -305,7 +288,6 @@ namespace GI {
 		public bool invoke (GLib.Type implementor, [CCode (array_length_cname = "n_in_args", array_length_pos = 2.5)] GI.Argument[] in_args, [CCode (array_length_cname = "n_out_args", array_length_pos = 3.5)] GI.Argument[] out_args, GI.Argument return_value) throws GI.InvokeError;
 	}
 	[CCode (cheader_filename = "girepository.h", type_id = "g_base_info_gtype_get_type ()")]
-	[Compact]
 	public class ValueInfo : GI.BaseInfo {
 		[CCode (has_construct_function = false)]
 		protected ValueInfo ();
