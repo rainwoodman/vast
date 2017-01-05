@@ -12,7 +12,10 @@ gio = dependency('gio-2.0', version: '>=2.32')
 math = meson.get_compiler('c').find_library('m')
 posix = meson.get_compiler('vala').find_library('posix')
 
+gocl = dependency('gocl-0.3', fallback: ['gocl', 'gocl_dep'], required: false)
+
 g_ir_compiler = find_program('g-ir-compiler', required: false)
 
 subdir('src')
+subdir('src/cl')
 subdir('tests')

@@ -8,6 +8,10 @@ vast_sources = [
     'string-formatter.vala'
      ]
 
+if gocl.found()
+    vast_sources += 'vast-cl-tensor.c'
+endif
+
 subdir('routines')
 
 vast_lib = library('vast-1.0', vast_sources + routines_sources,
