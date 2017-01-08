@@ -375,6 +375,13 @@ int main (string[] args) {
         assert (g.get_value({1}).get_double() == 2 * 5);
         assert (g.get_value({2}).get_double() == 3 * 5);
 
+        var h = a.build(1).end();
+
+        assert (h.dimension == 1);
+        assert (h.shape[0] == 10);
+        assert (h.strides[0] == 20 * sizeof (double));
+        assert (h.get_value ({0}).get_double () == 0);
+        assert (h.get_value ({1}).get_double () == 0);
     });
 
     Test.add_func ("/array/slice", () => {

@@ -328,7 +328,7 @@ public class Vast.Array : Object
     public Builder
     build (size_t new_dimension = 0)
     {
-        return new Builder(this, new_dimension.clamp (dimension, size_t.MAX));
+        return new Builder(this, new_dimension == 0 ? dimension : new_dimension);
     }
 
     /* method that is supposed to be compatible with for Vala slicing.
@@ -531,7 +531,6 @@ public class Vast.Array : Object
         private bool    removal[32];
 
         internal Builder(Array array, size_t dimension)
-            requires (dimension >= array.dimension)
         {
             base (array: array, dimension: dimension);
         }
