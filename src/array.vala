@@ -2,7 +2,6 @@ using GLib;
 
 public class Vast.Array : Object
 {
-    public const ssize_t NEW_AXIS = ssize_t.MAX;
     public const size_t DEFAULT_DIMENSION = size_t.MAX;
 
     /**
@@ -328,11 +327,12 @@ public class Vast.Array : Object
         return new Array (new_scalar_type, new_scalar_size, new_shape, new_strides, origin, data);
     }
 
-    public Builder build(size_t dimension = DEFAULT_DIMENSION)
+    public Builder
+    build (size_t new_dimension = DEFAULT_DIMENSION)
     {
-        if (dimension == DEFAULT_DIMENSION)
-            dimension = this._dimension;
-        return new Builder(this, dimension);
+        if (new_dimension == DEFAULT_DIMENSION)
+            new_dimension = this._dimension;
+        return new Builder(this, new_dimension);
     }
 
     /* method that is supposed to be compatible with for Vala slicing.
@@ -390,7 +390,7 @@ public class Vast.Array : Object
         var sb = this.build();
 
         for (var i = 0; i < _dimension; i ++) {
-            sb.axis(i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
+            sb.axis (i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
         }
         return sb.end();
     }
@@ -542,16 +542,10 @@ public class Vast.Array : Object
 
         construct
         {
-            for (var i = 0; i < array._dimension; i ++) {
-                shape[i]         = array.shape[i];
-                strides[i]       = array.strides[i];
+            for (var i = 0; i < dimension; i ++) {
+                shape[i]         = i < array.dimension ? array.shape[i] : 1;
+                strides[i]       = i < array.dimension ? array.strides[i] : 0;
                 original_axis[i] = i;
-                removal[i]       = false;
-            }
-            for (var i = array.dimension; i < dimension; i ++) {
-                shape[i]         = 1;
-                strides[i]       = 0;
-                original_axis[i] = NEW_AXIS;
                 removal[i]       = false;
             }
             origin = array.origin;
@@ -643,18 +637,18 @@ public class Vast.Array : Object
 
         /* use original_axis for new axis, a new shape[d] == 1 axis if NEW_AXIS*/
         public Builder
-        axis(ssize_t axis, ssize_t original=NEW_AXIS)
+        axis (ssize_t axis, ssize_t from_axis)
         {
-            axis = wrap_by_dimension(axis);
-            if (original != NEW_AXIS) {
-                original = wrap_by_dimension(original);
-                shape[axis] = array.shape[original];
-                strides[axis] = array.strides[original];
+            axis      = wrap_by_dimension (axis);
+            from_axis = wrap_by_dimension (from_axis);
+            if (from_axis < array.dimension) {
+                shape[axis]   = array.shape[from_axis];
+                strides[axis] = array.strides[from_axis];
             } else {
-                shape[axis] = 1;
+                shape[axis]   = 1;
                 strides[axis] = 0;
             }
-            original_axis[axis] = original;
+            original_axis[axis] = from_axis;
             return this;
         }
 
@@ -681,7 +675,9 @@ public class Vast.Array : Object
 
             for(var i = 0; i < dimension; i ++) {
                 var o = original_axis[i];
-                if (o == NEW_AXIS) continue;
+                if (o >= array.dimension) {
+                    continue;
+                }
                 n[o] ++;
             }
             for(var i = 0; i < array._dimension; i ++) {
