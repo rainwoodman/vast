@@ -2,8 +2,6 @@ using GLib;
 
 public class Vast.Array : Object
 {
-    public const size_t DEFAULT_DIMENSION = size_t.MAX;
-
     /**
      * GType of the scalar elements, immutable.
      */
@@ -328,11 +326,9 @@ public class Vast.Array : Object
     }
 
     public Builder
-    build (size_t new_dimension = DEFAULT_DIMENSION)
+    build (size_t new_dimension = 0)
     {
-        if (new_dimension == DEFAULT_DIMENSION)
-            new_dimension = this._dimension;
-        return new Builder(this, new_dimension);
+        return new Builder(this, new_dimension.clamp (dimension, size_t.MAX));
     }
 
     /* method that is supposed to be compatible with for Vala slicing.
