@@ -133,7 +133,7 @@ public class Vast.Array : Object
 
     public Array (Type      scalar_type,
                   size_t    scalar_size,
-                  size_t[]  shape,
+                  size_t[]  shape   = {},
                   [CCode (array_length = false)]
                   ssize_t[] strides = {},
                   size_t    origin  = 0,
@@ -155,7 +155,7 @@ public class Vast.Array : Object
 
     public Array.zeroed (Type      scalar_type,
                          size_t    scalar_size,
-                         size_t[]  shape,
+                         size_t[]  shape   = {},
                          [CCode (array_length = false)]
                          ssize_t[] strides = {},
                          size_t    origin  = 0)
