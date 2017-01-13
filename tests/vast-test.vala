@@ -562,22 +562,6 @@ int main (string[] args) {
         assert (1.0 == a.get_value ({0}).get_double ());
     });
 
-    Test.add_func ("/routines/math/sin", () => {
-        var a = new Vast.Array (typeof (double),
-                                sizeof (double),
-                                {100});
-
-        a.fill_from_value (GLib.Math.PI / 2);
-
-        var b = new Vast.Array (typeof (double),
-                                sizeof (double),
-                                {100});
-
-        foreach (var ptr in Vast.Math.sin (a, b)) {
-            assert (1 == *(double*) ptr);
-        }
-    });
-
     Test.add_func ("/function", () => {
         unowned GI.Typelib tl = GI.Repository.get_default ().require ("Vast", null, 0);
         assert (tl != null);
@@ -591,15 +575,31 @@ int main (string[] args) {
                                 sizeof (double),
                                 {100});
 
+        a.fill_from_value (GLib.Math.PI / 2);
+
+        var b = new Vast.Array (typeof (double),
+                                sizeof (double),
+                                {100});
+
+        function.invoke ({a, b});
+
+        for (var i = 0; i < 100; i++) {
+            assert (1 == b.get_value ({i}).get_double ());
+        }
+    });
+
+    Test.add_func ("/vast/routines/math/sin", () => {
+        var a = new Vast.Array (typeof (double),
+                                sizeof (double),
+                                {100});
+
     a.fill_from_value (GLib.Math.PI / 2);
 
     var b = new Vast.Array (typeof (double),
                             sizeof (double),
                             {100});
 
-    var c = function.invoke (x: a, z: b);
-
-    assert (b == c);
+    Vast.Math.sin (a, b);
 
     for (var i = 0; i < 100; i++) {
         assert (1 == b.get_value ({i}).get_double ());
