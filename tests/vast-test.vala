@@ -562,6 +562,20 @@ int main (string[] args) {
         assert (1.0 == a.get_value ({0}).get_double ());
     });
 
+    Test.add_func ("/array/broadcast_to", () => {
+        var a = new Vast.Array (typeof (double), sizeof (double));
+        a.fill_from_value (1);
+
+        var b = a.broadcast_to ({10});
+
+        assert (1 == b.dimension);
+        assert (10 == b.shape[0]);
+
+        for (var i = 0; i < 10; i++) {
+            assert (1 == b.get_value ({i}).get_double ());
+        }
+    });
+
     Test.add_func ("/function", () => {
         unowned GI.Typelib tl = GI.Repository.get_default ().require ("Vast", null, 0);
         assert (tl != null);

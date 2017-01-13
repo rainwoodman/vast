@@ -286,6 +286,16 @@ public class Vast.Array : Object
     }
 
     public Array
+    broadcast_to (size_t[] new_shape)
+    {
+        var sb = build (new_shape.length);
+        for (var i = 0; i < new_shape.length; i++) {
+            sb.broadcast (i, new_shape[i]);
+        }
+        return sb.end ();
+    }
+
+    public Array
     redim (size_t new_dimension)
         requires (new_dimension >= dimension)
     {
