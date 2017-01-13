@@ -581,7 +581,7 @@ int main (string[] args) {
                                 sizeof (double),
                                 {100});
 
-        function.invoke ({a, b});
+        function.invokev ({a, b});
 
         for (var i = 0; i < 100; i++) {
             assert (1 == b.get_value ({i}).get_double ());
@@ -628,7 +628,7 @@ Test.add_func ("/vast/gradient", () => {
     x.fill_from_value (5.0);
     y.fill_from_value (10.0);
 
-        assert (z == dz_dx.invoke (x: x, y: y, z: z));
+        dz_dx.invoke (x: x, y: y, z: z);
 
         for (var i = 0; i < 100; i++) {
             assert (19531250.0 == *(double*) z.get_pointer ({i}));

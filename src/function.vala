@@ -7,24 +7,24 @@ public class Vast.Function : Object
         base (function_info: function_info);
     }
 
-    public unowned Array
+    public void
     invokev (Array[] arrays)
         requires (arrays.length >= 2)
     {
-        var in_args    = new GI.Argument[arrays.length];
-        var return_arg = GI.Argument () { v_pointer = arrays[arrays.length - 1] };
+        var in_args = new GI.Argument[arrays.length];
         for (var i = 0; i < arrays.length; i++) {
             in_args[i] = GI.Argument () { v_pointer = arrays[i] };
         }
         try {
-            _function_info.invoke (in_args, {}, return_arg);
-            return (Array) return_arg.v_pointer;
+            _function_info.invoke (in_args,
+                                   {},
+                                   GI.Argument ());
         } catch (GI.InvokeError err) {
             error ("Could not call '%s.%s': %s.", _function_info.get_namespace (), _function_info.get_name (), err.message);
         }
     }
 
-    public unowned Array
+    public void
     invoke_valist (va_list list)
     {
         var args = new Array[function_info.get_n_args ()];
@@ -45,12 +45,12 @@ public class Vast.Function : Object
                 }
             }
         }
-        return invokev (args);
+        invokev (args);
     }
 
-    public unowned Array
+    public void
     invoke (...)
     {
-        return invoke_valist (va_list ());
+        invoke_valist (va_list ());
     }
 }
