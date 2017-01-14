@@ -40,7 +40,7 @@ public class Vast.Array : Object
     private ssize_t* _strides_in;
 
     /**
-     * Number of bytes to skip for traversing each axis, immutable.
+     * Number of scalars to skip for traversing each axis, immutable.
      *
      * The size is given by the 'dimension' property.
      */
@@ -75,7 +75,7 @@ public class Vast.Array : Object
     private uint8* _baseptr;
 
     /**
-     * Offset to the memory location of the first element in bytes.
+     * Offset to the memory location of the first element in number of scalars.
      *
      * Internally, a base pointer is computed from the 'data' property.
      */
@@ -97,7 +97,7 @@ public class Vast.Array : Object
         if (_strides_in == null) {
             /* assume C contiguous strides */
             for (var i = dimension; i > 0; i--) {
-                strides[i - 1] = (i == dimension) ? (ssize_t) scalar_size : strides[i] * (ssize_t) shape[i];
+                strides[i - 1] = (i == dimension) ? 1 : strides[i] * (ssize_t) shape[i];
             }
         } else {
             for (var i = 0; i < dimension; i ++) {
@@ -116,9 +116,9 @@ public class Vast.Array : Object
         /* provide a default bytes object for the buffer */
         data = data ?? new Bytes (new uint8[scalar_size * size]);
 
-        assert (origin < data.length);
+        assert (origin * scalar_size < data.length);
 
-        _baseptr = (uint8*) data.get_data () + origin;
+        _baseptr = (uint8*) data.get_data () + origin * scalar_size;
     }
 
     private static inline size_t
@@ -175,7 +175,7 @@ public class Vast.Array : Object
         for (var i = 0; i < _dimension; i++) {
             p += (size_t) (index[i] < 0 ? _shape[i] + index[i] : index[i]) * _strides[i];
         }
-        return p;
+        return p * _scalar_size;
     }
 
     public unowned void*
@@ -325,12 +325,13 @@ public class Vast.Array : Object
 
     public Array
     view_as (Type new_scalar_type, size_t new_scalar_size)
+        requires (scalar_size % new_scalar_size == 0 || new_scalar_size % scalar_size == 0)
     {
         var new_shape   = new size_t[dimension];
         var new_strides = new ssize_t[dimension];
         for (var i = 0; i < dimension; i++) {
             new_shape[i]   = (shape[i] * scalar_size) / new_scalar_size;
-            new_strides[i] = (strides[i] / (ssize_t) scalar_size) * (ssize_t) new_scalar_size;
+            new_strides[i] = (strides[i] * (ssize_t) new_scalar_size) / (ssize_t) scalar_size;
         }
         return new Array (new_scalar_type, new_scalar_size, new_shape, new_strides, origin, data);
     }

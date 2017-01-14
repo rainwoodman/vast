@@ -22,7 +22,7 @@ public class Vast.Iterator : Object
     private uint8* _baseptr;
 
     construct {
-        _baseptr = (uint8*) array.data.get_data () - array.origin;
+        _baseptr = (uint8*) array.data.get_data () - array.origin * array.scalar_size;
     }
 
     public Iterator (Array array)
@@ -46,12 +46,12 @@ public class Vast.Iterator : Object
 
         for (var i = array.dimension; i > 0; i--) {
             _cursor[i - 1] = _cursor[i - 1] + 1;
-            _offset        = _offset + array.strides[i - 1];
+            _offset        = _offset + array.strides[i - 1] * array.scalar_size;
             if (_cursor[i - 1] < array.shape[i - 1]) {
                 return true;
             } else {
                 _cursor[i - 1] -= (ssize_t) array.shape[i - 1];
-                _offset        -= array.shape[i - 1] * array.strides[i - 1];
+                _offset        -= array.shape[i - 1] * array.strides[i - 1] * array.scalar_size;
             }
         }
 
@@ -122,7 +122,7 @@ public class Vast.Iterator : Object
         _offset = 0;
         for (var i = 0; i < array.dimension; i++) {
             _cursor[i] = destination[i];
-            _offset   += destination[i] * array.strides[i];
+            _offset   += destination[i] * array.strides[i] * array.scalar_size;
         }
     }
 }

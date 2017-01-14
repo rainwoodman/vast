@@ -379,7 +379,7 @@ int main (string[] args) {
 
         assert (h.dimension == 1);
         assert (h.shape[0] == 10);
-        assert (h.strides[0] == 20 * sizeof (double));
+        assert (h.strides[0] == 20);
         assert (h.get_value ({0}).get_double () == 0);
         assert (h.get_value ({1}).get_double () == 0);
     });
