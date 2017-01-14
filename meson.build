@@ -1,6 +1,6 @@
 project('vast', 'c', 'vala',
         version: '0.0.1',
-        meson_version: '>=0.36')
+        meson_version: '==0.36.0')
 
 add_project_arguments(['--vapidir=' + meson.current_source_dir() + '/vapi'],
                       language: 'vala')
