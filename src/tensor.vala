@@ -1,6 +1,6 @@
 using GLib;
 
-public class Vast.Array : Object
+public class Vast.Tensor : Object
 {
     /**
      * GType of the scalar elements, immutable.
@@ -13,7 +13,7 @@ public class Vast.Array : Object
     public size_t scalar_size { get; construct; default = sizeof (void); }
 
     /**
-     * Number of independant axes, immutable. 0 indicates a scalar array.
+     * Number of independant axes, immutable. 0 indicates a scalar tensor.
      */
     public size_t dimension { get; construct; default = 0; }
 
@@ -54,7 +54,7 @@ public class Vast.Array : Object
     }
 
     /**
-     * Number of scalar elements in the array, immutable.
+     * Number of scalar elements in the tensor, immutable.
      */
     public size_t size { get; private set; }
 
@@ -64,9 +64,9 @@ public class Vast.Array : Object
      * If 'null', it will be allocated internally.
      *
      * It is mutable although {@link GLib.Bytes} specifies that it is an
-     * immutable array of bytes.
+     * immutable tensor of bytes.
      *
-     * Note that views of this array will share this {@link GLib.Bytes}
+     * Note that views of this tensor will share this {@link GLib.Bytes}
      * instance.
      */
     public Bytes? data { get; construct; default = null; }
@@ -82,7 +82,7 @@ public class Vast.Array : Object
     public size_t origin { get; construct; default = 0; }
 
     construct {
-        /* initializes the read-only attributes of the Array Object */
+        /* initializes the read-only attributes of the Tensor Object */
         assert (dimension <= 32);
 
         if (_shape_in == null) {
@@ -131,13 +131,13 @@ public class Vast.Array : Object
         return size;
     }
 
-    public Array (Type      scalar_type,
-                  size_t    scalar_size,
-                  size_t[]  shape   = {},
-                  [CCode (array_length = false)]
-                  ssize_t[] strides = {},
-                  size_t    origin  = 0,
-                  Bytes?    data    = null)
+    public Tensor (Type      scalar_type,
+                   size_t    scalar_size,
+                   size_t[]  shape   = {},
+                   [CCode (array_length = false)]
+                   ssize_t[] strides = {},
+                   size_t    origin  = 0,
+                   Bytes?    data    = null)
         requires (shape.length <= 32)
         requires (scalar_size > 0)
         requires (_size_from_shape (shape) > 0)
@@ -153,12 +153,12 @@ public class Vast.Array : Object
 
     private static extern Bytes _bytes_new_zeroed (size_t len);
 
-    public Array.zeroed (Type      scalar_type,
-                         size_t    scalar_size,
-                         size_t[]  shape   = {},
-                         [CCode (array_length = false)]
-                         ssize_t[] strides = {},
-                         size_t    origin  = 0)
+    public Tensor.zeroed (Type      scalar_type,
+                          size_t    scalar_size,
+                          size_t[]  shape   = {},
+                          [CCode (array_length = false)]
+                          ssize_t[] strides = {},
+                          size_t    origin  = 0)
     {
         this (scalar_type,
               scalar_size,
@@ -248,7 +248,7 @@ public class Vast.Array : Object
     }
 
     public void
-    fill_from_array (Array arr)
+    fill_from_tensor (Tensor arr)
         requires (size <= arr.size)
     {
         var iter     = iterator ();
@@ -273,11 +273,11 @@ public class Vast.Array : Object
         return new Iterator (this);
     }
 
-    public Array
+    public Tensor
     reshape (size_t[] new_shape)
         requires (_size_from_shape (_shape[0:dimension]) == _size_from_shape (new_shape))
     {
-        return new Array (scalar_type,
+        return new Tensor (scalar_type,
                           scalar_size,
                           new_shape,
                           {},
@@ -285,7 +285,7 @@ public class Vast.Array : Object
                           data);
     }
 
-    public Array
+    public Tensor
     broadcast_to (size_t[] new_shape)
     {
         var sb = build (new_shape.length);
@@ -295,7 +295,7 @@ public class Vast.Array : Object
         return sb.end ();
     }
 
-    public Array
+    public Tensor
     redim (size_t new_dimension)
         requires (new_dimension >= dimension)
     {
@@ -307,7 +307,7 @@ public class Vast.Array : Object
         return reshape (new_shape);
     }
 
-    public Array
+    public Tensor
     index (ssize_t[] idx)
         requires (idx.length <= dimension)
     {
@@ -315,7 +315,7 @@ public class Vast.Array : Object
         for (var i = 0; i < idx.length; i++) {
             new_origin += idx[i] * strides[i];
         }
-        return new Array (scalar_type,
+        return new Tensor (scalar_type,
                           scalar_size,
                           _shape[idx.length:dimension],
                           _strides[idx.length:dimension],
@@ -323,7 +323,7 @@ public class Vast.Array : Object
                           data);
     }
 
-    public Array
+    public Tensor
     view_as (Type new_scalar_type, size_t new_scalar_size)
         requires (scalar_size % new_scalar_size == 0 || new_scalar_size % scalar_size == 0)
     {
@@ -333,7 +333,7 @@ public class Vast.Array : Object
             new_shape[i]   = (shape[i] * scalar_size) / new_scalar_size;
             new_strides[i] = (strides[i] * (ssize_t) new_scalar_size) / (ssize_t) scalar_size;
         }
-        return new Array (new_scalar_type, new_scalar_size, new_shape, new_strides, origin, data);
+        return new Tensor (new_scalar_type, new_scalar_size, new_shape, new_strides, origin, data);
     }
 
     public Builder
@@ -344,7 +344,7 @@ public class Vast.Array : Object
 
     /* method that is supposed to be compatible with for Vala slicing.
      * require from <= to */
-    public Array
+    public Tensor
     slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
         var sb = this.build();
@@ -354,7 +354,7 @@ public class Vast.Array : Object
         return sb.end();
     }
 
-    public Array
+    public Tensor
     head ([CCode (array_length = false)] ssize_t[] to)
     {
         var sb = this.build();
@@ -364,7 +364,7 @@ public class Vast.Array : Object
         return sb.end();
     }
 
-    public Array
+    public Tensor
     tail ([CCode (array_length = false)] ssize_t[] from)
     {
         var sb = this.build();
@@ -374,7 +374,7 @@ public class Vast.Array : Object
         return sb.end();
     }
 
-    public Array
+    public Tensor
     step ([CCode (array_length = false)] ssize_t[] steps)
     {
         var sb = this.build();
@@ -385,13 +385,13 @@ public class Vast.Array : Object
         return sb.end();
     }
 
-    public Array
+    public Tensor
     flip (ssize_t axis = 0)
     {
         return build ().step (axis, -1).end ();
     }
 
-    public Array
+    public Tensor
     transpose ([CCode (array_length = false)] ssize_t[]? axes = null)
     {
         var sb = this.build();
@@ -402,16 +402,16 @@ public class Vast.Array : Object
         return sb.end();
     }
 
-    public Array
+    public Tensor
     swap (ssize_t from_axis = 0, ssize_t to_axis = 1)
     {
         return build ().axis (from_axis, to_axis).axis (to_axis, from_axis).end ();
     }
 
-    public Array
+    public Tensor
     copy ()
     {
-        return new Array (scalar_type,
+        return new Tensor (scalar_type,
                           scalar_size,
                           _shape[0:dimension],
                           _strides,
@@ -503,8 +503,8 @@ public class Vast.Array : Object
 
     public class Builder : Object
     {
-        /* The Builder gives a syntax to create a new Array viewing
-         * the current array.
+        /* The Builder gives a syntax to create a new Tensor viewing
+         * the current tensor.
          *
          * for each dimension we can use
          *
@@ -516,7 +516,7 @@ public class Vast.Array : Object
          * (easier to test once with have GIR working)
          *
          * we can also reroute the axis's shape and strides to any axis in the original
-         * array, or set it to a new axis (NEW_AXIS). (implement transpose, e.g.)
+         * tensor, or set it to a new axis (NEW_AXIS). (implement transpose, e.g.)
          *
          *  this.axis(axis, originalaxis)
          *
@@ -525,12 +525,12 @@ public class Vast.Array : Object
          *
          *  this.broadcast(axis, newshape)
          *
-         * the final build array is built after this.end() is called.
+         * the final build tensor is built after this.end() is called.
          *
          * methods can be chained or called in a loop.
          *
          */
-        public Array  array     { get; construct; }
+        public Tensor  tensor     { get; construct; }
         public size_t dimension { get; construct; }
 
         private size_t  shape[32];
@@ -541,20 +541,20 @@ public class Vast.Array : Object
         private ssize_t original_axis[32];
         private bool    removal[32];
 
-        internal Builder(Array array, size_t dimension)
+        internal Builder(Tensor tensor, size_t dimension)
         {
-            base (array: array, dimension: dimension);
+            base (tensor: tensor, dimension: dimension);
         }
 
         construct
         {
             for (var i = 0; i < dimension; i ++) {
-                shape[i]         = i < array.dimension ? array.shape[i] : 1;
-                strides[i]       = i < array.dimension ? array.strides[i] : 0;
+                shape[i]         = i < tensor.dimension ? tensor.shape[i] : 1;
+                strides[i]       = i < tensor.dimension ? tensor.strides[i] : 0;
                 original_axis[i] = i;
                 removal[i]       = false;
             }
-            origin = array.origin;
+            origin = tensor.origin;
         }
 
         /* from:to:step */
@@ -647,9 +647,9 @@ public class Vast.Array : Object
         {
             axis      = wrap_by_dimension (axis);
             from_axis = wrap_by_dimension (from_axis);
-            if (from_axis < array.dimension) {
-                shape[axis]   = array.shape[from_axis];
-                strides[axis] = array.strides[from_axis];
+            if (from_axis < tensor.dimension) {
+                shape[axis]   = tensor.shape[from_axis];
+                strides[axis] = tensor.strides[from_axis];
             } else {
                 shape[axis]   = 1;
                 strides[axis] = 0;
@@ -668,25 +668,25 @@ public class Vast.Array : Object
             return this;
         }
 
-        public Array
+        public Tensor
         end()
         {
             /* ensure each original_axes is used only once */
             int n[32];
 
-            /* XXX: this is dumb. how to zero initialize a vala array? */
-            for(var i = 0; i < array._dimension; i ++) {
+            /* XXX: this is dumb. how to zero initialize a vala tensor? */
+            for(var i = 0; i < tensor._dimension; i ++) {
                 n[i] = 0;
             }
 
             for(var i = 0; i < dimension; i ++) {
                 var o = original_axis[i];
-                if (o >= array.dimension) {
+                if (o >= tensor.dimension) {
                     continue;
                 }
                 n[o] ++;
             }
-            for(var i = 0; i < array._dimension; i ++) {
+            for(var i = 0; i < tensor._dimension; i ++) {
                 /* each original axis shall be used at most once */
                 assert (n[i] <= 1);
                 /* XXX: raised error shall be informative */
@@ -701,13 +701,13 @@ public class Vast.Array : Object
                 j ++;
             }
 
-            /* the axes are reasonable - create the array. */
-            return new Array (array.scalar_type,
-                              array.scalar_size,
-                              shape[0:j],
-                              strides,
-                              origin,
-                              array.data);
+            /* the axes are reasonable - create the tensor. */
+            return new Tensor (tensor.scalar_type,
+                               tensor.scalar_size,
+                               shape[0:j],
+                               strides,
+                               origin,
+                               tensor.data);
         }
 
         private ssize_t wrap_by_dimension(ssize_t axis)

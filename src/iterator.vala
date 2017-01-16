@@ -2,7 +2,7 @@ using GLib;
 
 public class Vast.Iterator : Object
 {
-    public Array array { get; construct; }
+    public Tensor tensor { get; construct; }
 
     [CCode (array_length = false)]
     private ssize_t[] _cursor = null;
@@ -22,12 +22,12 @@ public class Vast.Iterator : Object
     private uint8* _baseptr;
 
     construct {
-        _baseptr = (uint8*) array.data.get_data () - array.origin * array.scalar_size;
+        _baseptr = (uint8*) tensor.data.get_data () - tensor.origin * tensor.scalar_size;
     }
 
-    public Iterator (Array array)
+    public Iterator (Tensor tensor)
     {
-        base (array: array);
+        base (tensor: tensor);
     }
 
     public bool
@@ -35,23 +35,23 @@ public class Vast.Iterator : Object
     {
         if (_cursor == null) {
             /*
-             * For scalar-like array, we cannot use an empty '_cursor' as it
+             * For scalar-like tensor, we cannot use an empty '_cursor' as it
              * would be interpreted as 'null', thus we create a phony one.
              */
-            _cursor = new ssize_t[array.dimension.clamp (1, size_t.MAX)];
-            Memory.set (_cursor, 0, array.dimension.clamp (1, size_t.MAX) * sizeof (ssize_t));
+            _cursor = new ssize_t[tensor.dimension.clamp (1, size_t.MAX)];
+            Memory.set (_cursor, 0, tensor.dimension.clamp (1, size_t.MAX) * sizeof (ssize_t));
             _offset = 0;
             return true;
         }
 
-        for (var i = array.dimension; i > 0; i--) {
+        for (var i = tensor.dimension; i > 0; i--) {
             _cursor[i - 1] = _cursor[i - 1] + 1;
-            _offset        = _offset + array.strides[i - 1] * array.scalar_size;
-            if (_cursor[i - 1] < array.shape[i - 1]) {
+            _offset        = _offset + tensor.strides[i - 1] * tensor.scalar_size;
+            if (_cursor[i - 1] < tensor.shape[i - 1]) {
                 return true;
             } else {
-                _cursor[i - 1] -= (ssize_t) array.shape[i - 1];
-                _offset        -= array.shape[i - 1] * array.strides[i - 1] * array.scalar_size;
+                _cursor[i - 1] -= (ssize_t) tensor.shape[i - 1];
+                _offset        -= tensor.shape[i - 1] * tensor.strides[i - 1] * tensor.scalar_size;
             }
         }
 
@@ -77,7 +77,7 @@ public class Vast.Iterator : Object
     get_value ()
         requires (_cursor != null)
     {
-        return array._memory_to_value (_baseptr + _offset);
+        return tensor._memory_to_value (_baseptr + _offset);
     }
 
     public Value
@@ -87,7 +87,7 @@ public class Vast.Iterator : Object
         if (get_value ().transform (ref dest_value)) {
             return dest_value;
         } else {
-            error ("Could not transform '%s' into '%s'.", array.scalar_type.name (),
+            error ("Could not transform '%s' into '%s'.", tensor.scalar_type.name (),
                                                           dest_type.name ());
         }
     }
@@ -96,7 +96,7 @@ public class Vast.Iterator : Object
     set_from_pointer (void* val)
         requires (_cursor != null)
     {
-        Memory.copy (_baseptr + _offset, val, array.scalar_size);
+        Memory.copy (_baseptr + _offset, val, tensor.scalar_size);
     }
 
     public void
@@ -104,7 +104,7 @@ public class Vast.Iterator : Object
         requires (_cursor != null)
     {
         var val_copy = val;
-        array._value_to_memory (ref val_copy, _baseptr + _offset);
+        tensor._value_to_memory (ref val_copy, _baseptr + _offset);
     }
 
     public void
@@ -117,12 +117,12 @@ public class Vast.Iterator : Object
     move ([CCode (array_length = false)] ssize_t[] destination)
     {
         if (_cursor == null) {
-            _cursor = new ssize_t[array.dimension];
+            _cursor = new ssize_t[tensor.dimension];
         }
         _offset = 0;
-        for (var i = 0; i < array.dimension; i++) {
+        for (var i = 0; i < tensor.dimension; i++) {
             _cursor[i] = destination[i];
-            _offset   += destination[i] * array.strides[i] * array.scalar_size;
+            _offset   += destination[i] * tensor.strides[i] * tensor.scalar_size;
         }
     }
 }

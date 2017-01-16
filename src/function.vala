@@ -8,12 +8,12 @@ public class Vast.Function : Object
     }
 
     public void
-    invokev (Array[] arrays)
-        requires (arrays.length >= 2)
+    invokev (Tensor[] tensors)
+        requires (tensors.length >= 2)
     {
-        var in_args = new GI.Argument[arrays.length];
-        for (var i = 0; i < arrays.length; i++) {
-            in_args[i] = GI.Argument () { v_pointer = arrays[i] };
+        var in_args = new GI.Argument[tensors.length];
+        for (var i = 0; i < tensors.length; i++) {
+            in_args[i] = GI.Argument () { v_pointer = tensors[i] };
         }
         try {
             _function_info.invoke (in_args,
@@ -27,15 +27,15 @@ public class Vast.Function : Object
     public void
     invoke_valist (va_list list)
     {
-        var args = new Array[function_info.get_n_args ()];
+        var args = new Tensor[function_info.get_n_args ()];
         for (;;) {
             unowned string name = list.arg<string?> ();
-            unowned Array  arr  = list.arg<Array?>  ();
+            unowned Tensor  arr  = list.arg<Tensor?>  ();
             if (name == null) {
                 break;
             }
             if (arr == null) {
-                error ("Expected an array after named argument '%s'.", name);
+                error ("Expected an tensor after named argument '%s'.", name);
             }
             for (var i = function_info.get_n_args (); i > 0; i--) {
                 var arg_info = function_info.get_arg (i - 1);

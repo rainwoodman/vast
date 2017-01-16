@@ -3,12 +3,12 @@ using GLib;
 public abstract class Vast.Formatter : Object
 {
     /**
-     * The array this is formatting.
+     * The tensor this is formatting.
      */
-    public Array array { get; construct; }
+    public Tensor tensor { get; construct; }
 
     /**
-     * Format the array into the provided {@link GLib.OutputStream}.
+     * Format the tensor into the provided {@link GLib.OutputStream}.
      */
     public abstract bool to_stream (OutputStream @out, Cancellable? cancellable = null) throws Error;
 

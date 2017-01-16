@@ -1,7 +1,7 @@
 namespace Vast.Math
 {
     public void
-    add (Array x, Array y, Array z)
+    add (Tensor x, Tensor y, Tensor z)
     {
         var x_iter = x.iterator ();
         var y_iter = y.iterator ();
@@ -12,7 +12,7 @@ namespace Vast.Math
     }
 
     public void
-    negative (Array x, Array z)
+    negative (Tensor x, Tensor z)
         requires (x.size == z.size)
     {
         var x_iter = x.iterator ();
@@ -23,7 +23,7 @@ namespace Vast.Math
     }
 
     public void
-    multiply (Array x, Array y, Array z)
+    multiply (Tensor x, Tensor y, Tensor z)
     {
         var x_iter = x.iterator ();
         var y_iter = y.iterator ();
@@ -35,7 +35,7 @@ namespace Vast.Math
 
     [Vast (gradient_z_x_function = "math_cos")]
     public void
-    sin (Array x, Array z)
+    sin (Tensor x, Tensor z)
         requires (x.size == z.size)
     {
         var x_iter = x.iterator ();
@@ -56,7 +56,7 @@ namespace Vast.Math
     }
 
     public void
-    cos (Array x, Array z)
+    cos (Tensor x, Tensor z)
         requires (x.size == z.size)
     {
         var x_iter = x.iterator ();
@@ -77,14 +77,14 @@ namespace Vast.Math
     }
 
     public void
-    cos_gradient_z_x (Array x, Array z)
+    cos_gradient_z_x (Tensor x, Tensor z)
     {
         sin (x, z);
         negative (z, z);
     }
 
     public void
-    power (Array x, Array y, Array z)
+    power (Tensor x, Tensor y, Tensor z)
         requires (x.size == y.size)
         requires (x.size == z.size)
     {
@@ -110,7 +110,7 @@ namespace Vast.Math
     }
 
     public void
-    power_gradient_z_x (Array x, Array y, Array z)
+    power_gradient_z_x (Tensor x, Tensor y, Tensor z)
     {
         z.fill_from_value (-1);
         add (y, z, z);      // z = a - z = a - 1
@@ -119,7 +119,7 @@ namespace Vast.Math
     }
 
     public void
-    power_gradient_z_y (Array x, Array y, Array z, Array tmp)
+    power_gradient_z_y (Tensor x, Tensor y, Tensor z, Tensor tmp)
     {
         // x ^ y * log (x)
         power (x, y, z);
@@ -128,7 +128,7 @@ namespace Vast.Math
     }
 
     public void
-    log (Array x, Array z)
+    log (Tensor x, Tensor z)
     {
         var x_iter = x.iterator ();
         var z_iter = z.iterator ();
