@@ -1,6 +1,6 @@
 vast_sources = [
-    'array.vala',
-    'array.c',
+    'tensor.vala',
+    'tensor.c',
     'iterator.vala',
     'function.vala',
     'gradient.vala',

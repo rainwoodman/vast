@@ -1,8 +1,8 @@
 public class Vast.StringFormatter : Vast.Formatter
 {
-    public StringFormatter (Array array)
+    public StringFormatter (Tensor tensor)
     {
-        Object (array: array);
+        Object (tensor: tensor);
     }
 
     private inline void
@@ -10,37 +10,37 @@ public class Vast.StringFormatter : Vast.Formatter
     {
         // scalar style
         @out.put_byte ('\n', cancellable);
-        if (index.length == array.dimension) {
+        if (index.length == tensor.dimension) {
             @out.put_byte ('[');
-            @out.put_string (array.get_value (index).strdup_contents (), cancellable);
+            @out.put_string (tensor.get_value (index).strdup_contents (), cancellable);
             @out.put_byte (']', cancellable);
         }
 
         // vector style
-        else if (index.length == array.dimension - 1) {
+        else if (index.length == tensor.dimension - 1) {
             @out.put_byte ('[');
-            for (var i = 0; i < array.shape[index.length]; i++) {
+            for (var i = 0; i < tensor.shape[index.length]; i++) {
                 if (i > 0)
                     @out.put_byte (' ');
                 // index and print the scalar
                 ssize_t[] subindex = index;
                 subindex += i;
-                @out.put_string (array.get_value (subindex).strdup_contents (), cancellable);
-                if (i < array.shape[index.length] - 1)
+                @out.put_string (tensor.get_value (subindex).strdup_contents (), cancellable);
+                if (i < tensor.shape[index.length] - 1)
                     @out.put_byte ('\n', cancellable);
             }
             @out.put_byte (']', cancellable);
         }
 
         // matrix style
-        else if (index.length == array.dimension - 2) {
+        else if (index.length == tensor.dimension - 2) {
             @out.put_byte ('[');
             // last dim is printed vertically
-            for (var j = 0; j < array.shape[index.length + 1]; j++) {
+            for (var j = 0; j < tensor.shape[index.length + 1]; j++) {
                 if (j > 0) {
                     @out.put_byte (' ', cancellable);
                 }
-                for (var i = 0; i < array.shape[index.length]; i++) {
+                for (var i = 0; i < tensor.shape[index.length]; i++) {
                     if (i > 0) {
                         @out.put_byte (' ', cancellable);
                     }
@@ -50,15 +50,15 @@ public class Vast.StringFormatter : Vast.Formatter
                     ssize_t[] subindex = index;
                     subindex += i;
                     subindex += j;
-                    @out.put_string (array.get_value (subindex).strdup_contents (), cancellable);
+                    @out.put_string (tensor.get_value (subindex).strdup_contents (), cancellable);
 
-                    if (j == array.shape[index.length + 1] - 1) {
+                    if (j == tensor.shape[index.length + 1] - 1) {
                         @out.put_byte (']', cancellable);
                     } else {
                         @out.put_byte (',', cancellable);
                     }
                 }
-                if (j < array.shape[index.length + 1] - 1) {
+                if (j < tensor.shape[index.length + 1] - 1) {
                     @out.put_byte ('\n', cancellable);
                 }
             }
@@ -68,7 +68,7 @@ public class Vast.StringFormatter : Vast.Formatter
         // embedded matrix style (humans can't see beyond!)
         else {
             @out.put_byte ('[');
-            for (var i = 0; i < array.shape[index.length]; i++) {
+            for (var i = 0; i < tensor.shape[index.length]; i++) {
                 ssize_t[] subindex = index;
                 subindex += i;
                 _append_from_index (@out, subindex, cancellable);

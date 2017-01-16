@@ -4,9 +4,9 @@ using Vast;
 int main (string[] args) {
     Test.init (ref args);
 
-    Test.add_func ("/array", () => {
-        var a = new Vast.Array (typeof (double), sizeof (double), {10});
-        var b = new Vast.Array (typeof (double), sizeof (double), {10}, {}, 0, a.data);
+    Test.add_func ("/tensor", () => {
+        var a = new Tensor (typeof (double), sizeof (double), {10});
+        var b = new Tensor (typeof (double), sizeof (double), {10}, {}, 0, a.data);
 
         assert (a.data == b.data);
 
@@ -29,16 +29,16 @@ int main (string[] args) {
         assert (5.0f == a.get_value_as ({5}, typeof (float)));
     });
 
-    Test.add_func ("/array/zeroed", () => {
-        var arr = new Vast.Array (typeof (int), sizeof (int), {10});
+    Test.add_func ("/tensor/zeroed", () => {
+        var arr = new Tensor (typeof (int), sizeof (int), {10});
 
         for (var i = 0; i < 10; i++) {
             assert (0 == arr.get_value ({i}).get_int ());
         }
     });
 
-    Test.add_func ("/array/fill_from_pointer", () => {
-        var arr = new Vast.Array (typeof (int), sizeof (int), {10});
+    Test.add_func ("/tensor/fill_from_pointer", () => {
+        var arr = new Tensor (typeof (int), sizeof (int), {10});
 
         arr.fill_from_value (1);
 
@@ -47,9 +47,9 @@ int main (string[] args) {
         }
     });
 
-    Test.add_func ("/array/fill_from_array", () => {
-        var a = new Vast.Array (typeof (int), sizeof (int), {100});
-        var b = new Vast.Array.zeroed (typeof (int), sizeof (int), {100});
+    Test.add_func ("/tensor/fill_from_tensor", () => {
+        var a = new Tensor (typeof (int), sizeof (int), {100});
+        var b = new Tensor.zeroed (typeof (int), sizeof (int), {100});
 
         a.fill_from_value (1);
 
@@ -57,15 +57,15 @@ int main (string[] args) {
             assert (1 == a.get_value ({i}).get_int ());
         }
 
-        a.fill_from_array (b);
+        a.fill_from_tensor (b);
 
         for (var i = 0; i < 100; i++) {
             assert (0 == a.get_value ({i}).get_int ());
         }
     });
 
-    Test.add_func ("/array/scalar_like", () => {
-        var a = new Vast.Array (typeof (double), sizeof (double), {});
+    Test.add_func ("/tensor/scalar_like", () => {
+        var a = new Tensor (typeof (double), sizeof (double), {});
 
         assert (1 == a.size);
         assert (null != a.data);
@@ -79,8 +79,8 @@ int main (string[] args) {
         assert (!a_iter.next ());
     });
 
-    Test.add_func ("/array/gobject_construction", () => {
-        var a = Object.new (typeof (Vast.Array)) as Vast.Array;
+    Test.add_func ("/tensor/gobject_construction", () => {
+        var a = Object.new (typeof (Tensor)) as Tensor;
 
         assert (0 == a.dimension);
         assert (typeof (void) == a.scalar_type);
@@ -91,7 +91,7 @@ int main (string[] args) {
         assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), size: 1, mem: 1B".printf (sizeof (void)) == a.to_string ());
 
         size_t [] shape = {2, 2, 2, 4};
-        var b = Object.new (typeof (Vast.Array), "dimension", shape.length, "shape", shape) as Vast.Array;
+        var b = Object.new (typeof (Tensor), "dimension", shape.length, "shape", shape) as Tensor;
         assert (typeof (void) == b.scalar_type);
         assert (sizeof (void) == b.scalar_size);
         assert (2 == b.shape[0]);
@@ -106,8 +106,8 @@ int main (string[] args) {
         assert (null != b.data);
     });
 
-    Test.add_func ("/array/iterator", () => {
-        var a = new Vast.Array (typeof (double), sizeof (double), {5, 2});
+    Test.add_func ("/tensor/iterator", () => {
+        var a = new Tensor (typeof (double), sizeof (double), {5, 2});
 
         for (var i = 0; i < 5; i++) {
             for (var j = 0; j < 2; j++) {
@@ -134,11 +134,11 @@ int main (string[] args) {
         assert (0 == iter.get_value ().get_double ());
     });
 
-    Test.add_func ("/array/to_string", () => {
-        var s = new Vast.Array (typeof (double), sizeof (double), {1});
+    Test.add_func ("/tensor/to_string", () => {
+        var s = new Tensor (typeof (double), sizeof (double), {1});
         s.set_from_value ({1}, 1);
 
-        var v = new Vast.Array (typeof (double), sizeof (double), {6});
+        var v = new Tensor (typeof (double), sizeof (double), {6});
         v.set_from_value ({0}, 1);
         v.set_from_value ({1}, 1);
         v.set_from_value ({2}, 1);
@@ -146,21 +146,21 @@ int main (string[] args) {
         v.set_from_value ({4}, 1);
         v.set_from_value ({5}, 1);
 
-        var m = new Vast.Array (typeof (double), sizeof (double), {5, 6});
+        var m = new Tensor (typeof (double), sizeof (double), {5, 6});
         m.set_from_value ({0, 1}, 1);
         m.set_from_value ({0, 2}, 1);
         m.set_from_value ({0, 3}, 1);
         m.set_from_value ({0, 4}, 1);
         m.set_from_value ({0, 5}, 1);
 
-        var a = new Vast.Array (typeof (double), sizeof (double), {4, 5, 6});
+        var a = new Tensor (typeof (double), sizeof (double), {4, 5, 6});
         a.set_from_value ({0, 0, 1}, 1);
         a.set_from_value ({0, 0, 2}, 1);
         a.set_from_value ({0, 0, 3}, 1);
         a.set_from_value ({0, 0, 4}, 1);
         a.set_from_value ({0, 0, 5}, 1);
 
-        var b = new Vast.Array (typeof (double), sizeof (double), {1, 2, 3, 4, 5, 6});
+        var b = new Tensor (typeof (double), sizeof (double), {1, 2, 3, 4, 5, 6});
         assert (6 == b.dimension);
         b.set_from_value ({0, 0, 0, 0, 0, 1}, 1);
         b.set_from_value ({0, 0, 0, 0, 0, 2}, 1);
@@ -168,18 +168,18 @@ int main (string[] args) {
         b.set_from_value ({0, 0, 0, 0, 0, 4}, 1);
         b.set_from_value ({0, 0, 0, 0, 0, 5}, 1);
 
-        var c = new Vast.Array (typeof (double), sizeof (double), {1});
+        var c = new Tensor (typeof (double), sizeof (double), {1});
     });
 
-    Test.add_func ("/array/reshape", () => {
-        var a = new Vast.Array (typeof (char), sizeof (char), {10});
+    Test.add_func ("/tensor/reshape", () => {
+        var a = new Tensor (typeof (char), sizeof (char), {10});
         var b = a.reshape ({5, 2});
         assert (5 == b.shape[0]);
         assert (2 == b.shape[1]);
     });
 
-    Test.add_func ("/array/redim", () => {
-        var a = new Vast.Array (typeof (char), sizeof (char), {10});
+    Test.add_func ("/tensor/redim", () => {
+        var a = new Tensor (typeof (char), sizeof (char), {10});
         var b = a.redim (5);
         assert (10 == b.shape[0]);
         assert (1 == b.shape[1]);
@@ -188,8 +188,8 @@ int main (string[] args) {
         assert (1 == b.shape[4]);
     });
 
-    Test.add_func ("/array/compact", () => {
-        var a = new Vast.Array (typeof (uint8), sizeof (uint8), {200});
+    Test.add_func ("/tensor/compact", () => {
+        var a = new Tensor (typeof (uint8), sizeof (uint8), {200});
 
         assert (sizeof (uint8) * 200 == a.size);
 
@@ -197,8 +197,8 @@ int main (string[] args) {
         assert (10 == a.get_value ({0}).get_uchar ());
     });
 
-    Test.add_func ("/array/string", () => {
-        var a = new Vast.Array (typeof (string), sizeof (char) * 10, {10});
+    Test.add_func ("/tensor/string", () => {
+        var a = new Tensor (typeof (string), sizeof (char) * 10, {10});
 
         a.set_from_value  ({0}, "test");
 
@@ -213,12 +213,12 @@ int main (string[] args) {
         assert ("abcd" == a.get_string ({1}));
     });
 
-    Test.add_func ("/array/large", () => {
-        var a = new Vast.Array (typeof (char), sizeof (char), {100, 100, 100, 100});
+    Test.add_func ("/tensor/large", () => {
+        var a = new Tensor (typeof (char), sizeof (char), {100, 100, 100, 100});
     });
 
-    Test.add_func ("/array/boxed_type", () => {
-        var a = new Vast.Array (typeof (DateTime), 128 /* wild guess... */, {10});
+    Test.add_func ("/tensor/boxed_type", () => {
+        var a = new Tensor (typeof (DateTime), 128 /* wild guess... */, {10});
         var b = new DateTime.now_utc ();
         a.set_from_value ({0}, b);
 
@@ -230,8 +230,8 @@ int main (string[] args) {
         assert (b.to_string () == e.to_string ());
     });
 
-    Test.add_func ("/array/negative_indexing", () => {
-        var a = new Vast.Array (typeof (double), sizeof (double), {10, 20});
+    Test.add_func ("/tensor/negative_indexing", () => {
+        var a = new Tensor (typeof (double), sizeof (double), {10, 20});
 
         for(var i = 0; i < 10; i ++) {
             for (var j = 0; j < 20; j++) {
@@ -254,8 +254,8 @@ int main (string[] args) {
         }
     });
 
-    Test.add_func ("/array/index", () => {
-        var a = new Vast.Array (typeof (int64), sizeof (int64), {30, 30});
+    Test.add_func ("/tensor/index", () => {
+        var a = new Tensor (typeof (int64), sizeof (int64), {30, 30});
 
         for (var i = 0; i < 30; i++) {
             for (var j = 0; j < 30; j++) {
@@ -276,8 +276,8 @@ int main (string[] args) {
         }
     });
 
-    Test.add_func ("/array/view_as", () => {
-        var a = new Vast.Array (typeof (double), sizeof (double), {10, 20});
+    Test.add_func ("/tensor/view_as", () => {
+        var a = new Tensor (typeof (double), sizeof (double), {10, 20});
 
         assert (a.shape[0] * 2 == a.view_as (typeof (float), sizeof (float)).shape[0]);
         assert (a.shape[1] * 2 == a.view_as (typeof (float), sizeof (float)).shape[1]);
@@ -288,8 +288,8 @@ int main (string[] args) {
         assert (a.shape[1] == a.view_as (typeof (double), sizeof (double)).shape[1]);
     });
 
-    Test.add_func ("/array/viewbuilder", () => {
-        var a = new Vast.Array (typeof (double), sizeof (double), {10, 20});
+    Test.add_func ("/tensor/viewbuilder", () => {
+        var a = new Tensor (typeof (double), sizeof (double), {10, 20});
 
         for(var i = 0; i < 10; i ++) {
             for (var j = 0; j < 20; j++) {
@@ -384,8 +384,8 @@ int main (string[] args) {
         assert (h.get_value ({1}).get_double () == 0);
     });
 
-    Test.add_func ("/array/slice", () => {
-        var a = new Vast.Array (typeof (int64), sizeof (int64), {30, 30});
+    Test.add_func ("/tensor/slice", () => {
+        var a = new Tensor (typeof (int64), sizeof (int64), {30, 30});
 
         for (var i = 0; i < 30; i++) {
             for (var j = 0; j < 30; j++) {
@@ -428,19 +428,19 @@ int main (string[] args) {
         assert (10 == a.tail ({-10, -10}).shape[0]);
     });
 
-    Test.add_func ("/array/step", () => {
-        var array = new Vast.Array (typeof (int64), sizeof (int64), {10});
+    Test.add_func ("/tensor/step", () => {
+        var tensor = new Tensor (typeof (int64), sizeof (int64), {10});
 
         for (var i = 0; i < 10; i++) {
-            array.set_from_value ({i}, i);
+            tensor.set_from_value ({i}, i);
         }
 
-        assert (5 == array.step ({2}).shape[0]);
-        assert (10 == array.step ({1}).shape[0]);
-        assert (2 == array.step ({5}).shape[0]);
-        assert (3 == array.step ({3}).shape[0]);
+        assert (5 == tensor.step ({2}).shape[0]);
+        assert (10 == tensor.step ({1}).shape[0]);
+        assert (2 == tensor.step ({5}).shape[0]);
+        assert (3 == tensor.step ({3}).shape[0]);
 
-        var stepped = array.step ({2});
+        var stepped = tensor.step ({2});
 
         assert (0 == stepped.get_value ({0}).get_int64 ());
         assert (2 == stepped.get_value ({1}).get_int64 ());
@@ -448,7 +448,7 @@ int main (string[] args) {
         assert (6 == stepped.get_value ({3}).get_int64 ());
         assert (8 == stepped.get_value ({4}).get_int64 ());
 
-        var b = array.step ({-1});
+        var b = tensor.step ({-1});
         assert (9 == b.get_value ({0}).get_int64 ());
         assert (8 == b.get_value ({1}).get_int64 ());
         assert (7 == b.get_value ({2}).get_int64 ());
@@ -456,8 +456,8 @@ int main (string[] args) {
         assert (0 == b.get_value ({9}).get_int64 ());
     });
 
-    Test.add_func ("/array/flip", () => {
-        var a = new Vast.Array (typeof (int64), sizeof (int64), {10});
+    Test.add_func ("/tensor/flip", () => {
+        var a = new Tensor (typeof (int64), sizeof (int64), {10});
 
         for (var i = 0; i < 10; i++) {
             a.set_from_value ({i}, i);
@@ -470,22 +470,22 @@ int main (string[] args) {
         }
     });
 
-    Test.add_func ("/array/transpose", () => {
-        var array = new Vast.Array (typeof (double), sizeof (double), {2, 2});
+    Test.add_func ("/tensor/transpose", () => {
+        var tensor = new Tensor (typeof (double), sizeof (double), {2, 2});
 
-        array.set_from_value ({0, 0}, 1);
-        array.set_from_value ({0, 1}, 2);
-        array.set_from_value ({1, 0}, 3);
-        array.set_from_value ({1, 1}, 4);
+        tensor.set_from_value ({0, 0}, 1);
+        tensor.set_from_value ({0, 1}, 2);
+        tensor.set_from_value ({1, 0}, 3);
+        tensor.set_from_value ({1, 1}, 4);
 
-        var transposed = array.transpose (); // implicit dim 0 and 1
+        var transposed = tensor.transpose (); // implicit dim 0 and 1
 
         assert (1 == transposed.get_value ({0, 0}).get_double ());
         assert (2 == transposed.get_value ({1, 0}).get_double ());
         assert (3 == transposed.get_value ({0, 1}).get_double ());
         assert (4 == transposed.get_value ({1, 1}).get_double ());
 
-        var identity = array.transpose ({1, 0});
+        var identity = tensor.transpose ({1, 0});
 
         assert (1 == identity.get_value ({0, 0}).get_double ());
         assert (2 == identity.get_value ({1, 0}).get_double ());
@@ -493,15 +493,15 @@ int main (string[] args) {
         assert (4 == identity.get_value ({1, 1}).get_double ());
     });
 
-    Test.add_func ("/array/transpose/negative_indexing", () => {
-        var array = new Vast.Array (typeof (double), sizeof (double), {2, 2});
+    Test.add_func ("/tensor/transpose/negative_indexing", () => {
+        var tensor = new Tensor (typeof (double), sizeof (double), {2, 2});
 
-        array.set_from_value ({0, 0}, 1);
-        array.set_from_value ({0, 1}, 2);
-        array.set_from_value ({1, 0}, 3);
-        array.set_from_value ({1, 1}, 4);
+        tensor.set_from_value ({0, 0}, 1);
+        tensor.set_from_value ({0, 1}, 2);
+        tensor.set_from_value ({1, 0}, 3);
+        tensor.set_from_value ({1, 1}, 4);
 
-        var transposed = array.transpose ({-1, -2}); // two last dims
+        var transposed = tensor.transpose ({-1, -2}); // two last dims
 
         assert (1 == transposed.get_value ({0, 0}).get_double ());
         assert (2 == transposed.get_value ({1, 0}).get_double ());
@@ -509,15 +509,15 @@ int main (string[] args) {
         assert (4 == transposed.get_value ({1, 1}).get_double ());
     });
 
-    Test.add_func ("/array/swap", () => {
-        var array = new Vast.Array (typeof (double), sizeof (double), {2, 2});
+    Test.add_func ("/tensor/swap", () => {
+        var tensor = new Tensor (typeof (double), sizeof (double), {2, 2});
 
-        array.set_from_value ({0, 0}, 1);
-        array.set_from_value ({0, 1}, 2);
-        array.set_from_value ({1, 0}, 3);
-        array.set_from_value ({1, 1}, 4);
+        tensor.set_from_value ({0, 0}, 1);
+        tensor.set_from_value ({0, 1}, 2);
+        tensor.set_from_value ({1, 0}, 3);
+        tensor.set_from_value ({1, 1}, 4);
 
-        var swapped = array.swap (0, 1);
+        var swapped = tensor.swap (0, 1);
 
         assert (1 == swapped.get_value ({0, 0}).get_double ());
         assert (2 == swapped.get_value ({1, 0}).get_double ());
@@ -525,7 +525,7 @@ int main (string[] args) {
         assert (4 == swapped.get_value ({1, 1}).get_double ());
     });
 
-    Test.add_func ("/array/mapped", () => {
+    Test.add_func ("/tensor/mapped", () => {
         FileUtils.set_contents ("test", "a");
         MappedFile mapped_file;
 
@@ -535,7 +535,7 @@ int main (string[] args) {
             assert_not_reached ();
         }
 
-        var a = new Vast.Array (typeof (char), sizeof (char),
+        var a = new Tensor (typeof (char), sizeof (char),
                                       {1},
                                       {},
                                       0,
@@ -548,8 +548,8 @@ int main (string[] args) {
         assert ('b' == mapped_file.get_contents ()[0]);
     });
 
-    Test.add_func ("/array/copy", () => {
-        var a = new Vast.Array (typeof (double), sizeof (double), {10});
+    Test.add_func ("/tensor/copy", () => {
+        var a = new Tensor (typeof (double), sizeof (double), {10});
 
         a.set_from_value ({0}, 1.0);
 
@@ -562,8 +562,8 @@ int main (string[] args) {
         assert (1.0 == a.get_value ({0}).get_double ());
     });
 
-    Test.add_func ("/array/broadcast_to", () => {
-        var a = new Vast.Array (typeof (double), sizeof (double));
+    Test.add_func ("/tensor/broadcast_to", () => {
+        var a = new Tensor (typeof (double), sizeof (double));
         a.fill_from_value (1);
 
         var b = a.broadcast_to ({10});
@@ -585,13 +585,13 @@ int main (string[] args) {
 
         var function = new Vast.Function ((GI.FunctionInfo) sin);
 
-        var a = new Vast.Array (typeof (double),
+        var a = new Tensor (typeof (double),
                                 sizeof (double),
                                 {100});
 
         a.fill_from_value (GLib.Math.PI / 2);
 
-        var b = new Vast.Array (typeof (double),
+        var b = new Tensor (typeof (double),
                                 sizeof (double),
                                 {100});
 
@@ -603,13 +603,13 @@ int main (string[] args) {
     });
 
     Test.add_func ("/vast/routines/math/sin", () => {
-        var a = new Vast.Array (typeof (double),
+        var a = new Tensor (typeof (double),
                                 sizeof (double),
                                 {100});
 
     a.fill_from_value (GLib.Math.PI / 2);
 
-    var b = new Vast.Array (typeof (double),
+    var b = new Tensor (typeof (double),
                             sizeof (double),
                             {100});
 
@@ -635,9 +635,9 @@ Test.add_func ("/vast/gradient", () => {
     assert (dz_dx != null);
     assert (dz_dy != null);
 
-    var x = new Vast.Array (typeof (double), sizeof (double), {100});
-    var y = new Vast.Array (typeof (double), sizeof (double), {100});
-    var z = new Vast.Array (typeof (double), sizeof (double), {100});
+    var x = new Tensor (typeof (double), sizeof (double), {100});
+    var y = new Tensor (typeof (double), sizeof (double), {100});
+    var z = new Tensor (typeof (double), sizeof (double), {100});
 
     x.fill_from_value (5.0);
     y.fill_from_value (10.0);
@@ -648,7 +648,7 @@ Test.add_func ("/vast/gradient", () => {
             assert (19531250.0 == *(double*) z.get_pointer ({i}));
         }
 
-        var tmp = new Vast.Array (typeof (double), sizeof (double), {100});
+        var tmp = new Tensor (typeof (double), sizeof (double), {100});
         dz_dy.invoke (x: x, y: y, z: z, tmp: tmp);
 
         for (var i = 0; i < 100; i++) {
