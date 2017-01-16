@@ -15,9 +15,9 @@ class TensorTestCase(unittest.TestCase):
         a = Vast.Tensor(scalar_type=float, scalar_size=8)
         b = a.build(0).broadcast(0, 5).end()
 
-        builder = Vast.TensorBuilder(array=a, dimension=0)
+        builder = Vast.TensorBuilder(tensor=a, dimension=0)
         self.assertEqual(0, builder.get_dimension())
-        self.assertIs(a, builder.get_array())
+        self.assertIs(a, builder.get_tensor())
 
 if __name__ == '__main__':
     unittest.main()
