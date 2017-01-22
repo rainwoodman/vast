@@ -8,6 +8,7 @@ vast_sources = [
     'graph-executor.vala',
     'simple-graph-executor.vala',
     'operation.vala',
+    'simple-operation.vala',
     'gi-operation.vala'
      ]
 
