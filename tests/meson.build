@@ -4,6 +4,12 @@ test('test', executable('vast-test', 'vast-test.vala',
                           dependencies: [glib, gobject, gobject_introspection, gio, vast]),
      env: ['GI_TYPELIB_PATH=' + meson.current_build_dir() + '/../src'])
 
+if gocl.found()
+    test('gocl', executable('gocl-test', 'gocl-test.vala',
+                            dependencies: [glib, gobject, gobject_introspection, gio, vast, gocl]),
+         env: ['G_TEST_SRCDIR=' + meson.current_source_dir()])
+endif
+
 if g_ir_compiler.found()
     test('gi', find_program('gi-test.py'),
          env: ['GI_TYPELIB_PATH=' + meson.current_build_dir() + '/../src',
