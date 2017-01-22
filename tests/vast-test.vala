@@ -79,6 +79,21 @@ int main (string[] args) {
         assert (!a_iter.next ());
     });
 
+    Test.add_func ("/tensor/wrap_scalar", () => {
+        var scalar = malloc (sizeof (double));
+        *(double*) scalar = 5.0;
+        var a = new Tensor.wrap_scalar (typeof (double), sizeof (double), scalar);
+        assert (scalar == a.get_pointer ({}));
+        assert (5.0 == *(double*) a.get_pointer ({}));
+
+        var b = a.broadcast_to ({5, 5});
+        for (var i = 0; i < 5; i++) {
+            for (var j = 0; j < 5; j++) {
+                assert (scalar == b.get_pointer ({i, j}));
+            }
+        }
+    });
+
     Test.add_func ("/tensor/gobject_construction", () => {
         var a = Object.new (typeof (Tensor)) as Tensor;
 

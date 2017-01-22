@@ -133,6 +133,7 @@ public class Vast.Tensor : Object
 
     public Tensor (Type      scalar_type,
                    size_t    scalar_size,
+                   [CCode (array_length_pos = 2.1, array_length_cname = "dimension", array_length_type = "gsize")]
                    size_t[]  shape   = {},
                    [CCode (array_length = false)]
                    ssize_t[] strides = {},
@@ -153,20 +154,15 @@ public class Vast.Tensor : Object
 
     private static extern Bytes _bytes_new_zeroed (size_t len);
 
-    public Tensor.zeroed (Type      scalar_type,
-                          size_t    scalar_size,
-                          size_t[]  shape   = {},
-                          [CCode (array_length = false)]
-                          ssize_t[] strides = {},
-                          size_t    origin  = 0)
-    {
-        this (scalar_type,
-              scalar_size,
-              shape,
-              strides,
-              origin,
-              _bytes_new_zeroed (_size_from_shape (shape) * scalar_size));
-    }
+    public extern Tensor.zeroed (Type      scalar_type,
+                                 size_t    scalar_size,
+                                 [CCode (array_length_pos = 2.1, array_length_cname = "dimension", array_length_type = "gsize")]
+                                 size_t[]  shape   = {},
+                                 [CCode (array_length = false)]
+                                 ssize_t[] strides = {},
+                                 size_t    origin  = 0);
+
+    public extern Tensor.wrap_scalar (Type scalar_type, size_t scalar_size, void* scalar);
 
     private inline size_t
     _offset_from_index ([CCode (array_length = false)] ssize_t[] index)
