@@ -15,7 +15,7 @@ public class Vast.Tensor : Object
     /**
      * Number of independant axes, immutable. 0 indicates a scalar tensor.
      */
-    public size_t dimension { get; construct; default = 0; }
+    public size_t rank { get; construct; default = 0; }
 
     private size_t  _shape[32];
     /* placeholder which will be copied in '_shape' later */
@@ -24,7 +24,7 @@ public class Vast.Tensor : Object
     /**
      * Length of each axis in bytes, immutable.
      *
-     * The size is given by the 'dimension' property.
+     * The size is given by the 'rank' property.
      */
     public size_t* shape {
         get {
@@ -42,7 +42,7 @@ public class Vast.Tensor : Object
     /**
      * Number of scalars to skip for traversing each axis, immutable.
      *
-     * The size is given by the 'dimension' property.
+     * The size is given by the 'rank' property.
      */
     public ssize_t* strides {
         get {
@@ -83,24 +83,24 @@ public class Vast.Tensor : Object
 
     construct {
         /* initializes the read-only attributes of the Tensor Object */
-        assert (dimension <= 32);
+        assert (rank <= 32);
 
         if (_shape_in == null) {
-            assert (dimension == 0);
+            assert (rank == 0);
         } else {
             /* We will copy the in-values from g_object_new */
-            Memory.copy (_shape, _shape_in, dimension * sizeof (size_t));
+            Memory.copy (_shape, _shape_in, rank * sizeof (size_t));
             /* the input pointers from gobject is no longer useful, void them.*/
             _shape_in = null;
         }
 
         if (_strides_in == null) {
             /* assume C contiguous strides */
-            for (var i = dimension; i > 0; i--) {
-                strides[i - 1] = (i == dimension) ? 1 : strides[i] * (ssize_t) shape[i];
+            for (var i = rank; i > 0; i--) {
+                strides[i - 1] = (i == rank) ? 1 : strides[i] * (ssize_t) shape[i];
             }
         } else {
-            for (var i = 0; i < dimension; i ++) {
+            for (var i = 0; i < rank; i ++) {
                 strides[i] = _strides_in[i];
             }
             /* the input pointers from gobject is no longer useful, void them.*/
@@ -109,7 +109,7 @@ public class Vast.Tensor : Object
 
         /* calculate size, since it is immutable, we do it once here */
         size = 1;
-        for (var i = 0; i < dimension; i ++) {
+        for (var i = 0; i < rank; i ++) {
             size *= shape[i];
         }
 
@@ -133,7 +133,7 @@ public class Vast.Tensor : Object
 
     public Tensor (Type      scalar_type,
                    size_t    scalar_size,
-                   [CCode (array_length_pos = 2.1, array_length_cname = "dimension", array_length_type = "gsize")]
+                   [CCode (array_length_pos = 2.1, array_length_cname = "rank", array_length_type = "gsize")]
                    size_t[]  shape   = {},
                    [CCode (array_length = false)]
                    ssize_t[] strides = {},
@@ -145,7 +145,7 @@ public class Vast.Tensor : Object
     {
         base (scalar_type: scalar_type,
               scalar_size: scalar_size,
-              dimension:   shape.length,
+              rank:        shape.length,
               shape:       shape,
               strides:     strides,
               data:        data,
@@ -156,7 +156,7 @@ public class Vast.Tensor : Object
 
     public extern Tensor.zeroed (Type      scalar_type,
                                  size_t    scalar_size,
-                                 [CCode (array_length_pos = 2.1, array_length_cname = "dimension", array_length_type = "gsize")]
+                                 [CCode (array_length_pos = 2.1, array_length_cname = "rank", array_length_type = "gsize")]
                                  size_t[]  shape   = {},
                                  [CCode (array_length = false)]
                                  ssize_t[] strides = {},
@@ -168,7 +168,7 @@ public class Vast.Tensor : Object
     _offset_from_index ([CCode (array_length = false)] ssize_t[] index)
     {
         size_t p = 0;
-        for (var i = 0; i < _dimension; i++) {
+        for (var i = 0; i < _rank; i++) {
             p += (size_t) (index[i] < 0 ? _shape[i] + index[i] : index[i]) * _strides[i];
         }
         return p * _scalar_size;
@@ -271,7 +271,7 @@ public class Vast.Tensor : Object
 
     public Tensor
     reshape (size_t[] new_shape)
-        requires (_size_from_shape (_shape[0:dimension]) == _size_from_shape (new_shape))
+        requires (_size_from_shape (_shape[0:rank]) == _size_from_shape (new_shape))
     {
         return new Tensor (scalar_type,
                           scalar_size,
@@ -292,12 +292,12 @@ public class Vast.Tensor : Object
     }
 
     public Tensor
-    redim (size_t new_dimension)
-        requires (new_dimension >= dimension)
+    redim (size_t new_rank)
+        requires (new_rank >= rank)
     {
-        var new_shape = new size_t[new_dimension];
-        Memory.copy (new_shape, shape, dimension * sizeof (size_t));
-        for (var i = dimension; i < new_dimension; i++) {
+        var new_shape = new size_t[new_rank];
+        Memory.copy (new_shape, shape, rank * sizeof (size_t));
+        for (var i = rank; i < new_rank; i++) {
             new_shape[i] = 1;
         }
         return reshape (new_shape);
@@ -305,7 +305,7 @@ public class Vast.Tensor : Object
 
     public Tensor
     index (ssize_t[] idx)
-        requires (idx.length <= dimension)
+        requires (idx.length <= rank)
     {
         var new_origin = origin;
         for (var i = 0; i < idx.length; i++) {
@@ -313,8 +313,8 @@ public class Vast.Tensor : Object
         }
         return new Tensor (scalar_type,
                           scalar_size,
-                          _shape[idx.length:dimension],
-                          _strides[idx.length:dimension],
+                          _shape[idx.length:rank],
+                          _strides[idx.length:rank],
                           new_origin,
                           data);
     }
@@ -323,9 +323,9 @@ public class Vast.Tensor : Object
     view_as (Type new_scalar_type, size_t new_scalar_size)
         requires (scalar_size % new_scalar_size == 0 || new_scalar_size % scalar_size == 0)
     {
-        var new_shape   = new size_t[dimension];
-        var new_strides = new ssize_t[dimension];
-        for (var i = 0; i < dimension; i++) {
+        var new_shape   = new size_t[rank];
+        var new_strides = new ssize_t[rank];
+        for (var i = 0; i < rank; i++) {
             new_shape[i]   = (shape[i] * scalar_size) / new_scalar_size;
             new_strides[i] = (strides[i] * (ssize_t) new_scalar_size) / (ssize_t) scalar_size;
         }
@@ -333,9 +333,9 @@ public class Vast.Tensor : Object
     }
 
     public Builder
-    build (size_t new_dimension = 0)
+    build (size_t new_rank = 0)
     {
-        return new Builder(this, new_dimension == 0 ? dimension : new_dimension);
+        return new Builder(this, new_rank == 0 ? rank : new_rank);
     }
 
     /* method that is supposed to be compatible with for Vala slicing.
@@ -344,7 +344,7 @@ public class Vast.Tensor : Object
     slice ([CCode (array_length = false)] ssize_t[] from, [CCode (array_length = false)] ssize_t[] to)
     {
         var sb = this.build();
-        for (var i = 0; i < _dimension; i ++) {
+        for (var i = 0; i < _rank; i ++) {
             sb.slice(i, from[i], to[i]);
         }
         return sb.end();
@@ -354,7 +354,7 @@ public class Vast.Tensor : Object
     head ([CCode (array_length = false)] ssize_t[] to)
     {
         var sb = this.build();
-        for (var i = 0; i < _dimension; i ++) {
+        for (var i = 0; i < _rank; i ++) {
             sb.head(i, to[i]);
         }
         return sb.end();
@@ -364,7 +364,7 @@ public class Vast.Tensor : Object
     tail ([CCode (array_length = false)] ssize_t[] from)
     {
         var sb = this.build();
-        for (var i = 0; i < _dimension; i ++) {
+        for (var i = 0; i < _rank; i ++) {
             sb.tail(i, from[i]);
         }
         return sb.end();
@@ -375,7 +375,7 @@ public class Vast.Tensor : Object
     {
         var sb = this.build();
 
-        for (var i = 0; i < _dimension; i ++) {
+        for (var i = 0; i < _rank; i ++) {
             sb.step(i, steps[i]);
         }
         return sb.end();
@@ -392,8 +392,8 @@ public class Vast.Tensor : Object
     {
         var sb = this.build();
 
-        for (var i = 0; i < _dimension; i ++) {
-            sb.axis (i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _dimension));
+        for (var i = 0; i < _rank; i ++) {
+            sb.axis (i, (axes != null)? axes[i]: (ssize_t) ((i+1) % _rank));
         }
         return sb.end();
     }
@@ -409,7 +409,7 @@ public class Vast.Tensor : Object
     {
         return new Tensor (scalar_type,
                           scalar_size,
-                          _shape[0:dimension],
+                          _shape[0:rank],
                           _strides,
                           origin,
                           new Bytes (data.get_data ()));
@@ -421,26 +421,26 @@ public class Vast.Tensor : Object
         StringBuilder sb = new StringBuilder ();
         sb.append_printf ("dtype: %s, ", scalar_type.name ());
         sb.append_printf ("dsize: %" + size_t.FORMAT + ", ", scalar_size);
-        sb.append_printf ("dimension: %" + size_t.FORMAT + ", ", dimension);
+        sb.append_printf ("rank: %" + size_t.FORMAT + ", ", rank);
         sb.append_printf ("shape: (");
-        for (var i = 0; i < dimension; i++) {
+        for (var i = 0; i < rank; i++) {
             sb.append_printf ("%" + size_t.FORMAT, shape[i]);
-            if (i < dimension - 1) {
+            if (i < rank - 1) {
                 sb.append (", ");
             }
         }
         sb.append ("), ");
         sb.append_printf ("strides: (");
-        for (var i = 0; i < dimension; i++) {
+        for (var i = 0; i < rank; i++) {
             sb.append_printf ("%" + ssize_t.FORMAT, strides[i]);
-            if (i < dimension - 1) {
+            if (i < rank - 1) {
                 sb.append (", ");
             }
         }
         sb.append ("), ");
         sb.append_printf ("size: %" + size_t.FORMAT + ", ", size);
         sb.append_printf ("mem: %" + size_t.FORMAT + "B", data == null ? 0 : data.length);
-        if (dimension == 0) {
+        if (rank == 0) {
             return sb.str;
         }
         var @out = new MemoryOutputStream.resizable ();
@@ -502,7 +502,7 @@ public class Vast.Tensor : Object
         /* The Builder gives a syntax to create a new Tensor viewing
          * the current tensor.
          *
-         * for each dimension we can use
+         * for each rank we can use
          *
          *  this.slice(axis, step, from, to)
          *
@@ -527,7 +527,7 @@ public class Vast.Tensor : Object
          *
          */
         public Tensor  tensor     { get; construct; }
-        public size_t dimension { get; construct; }
+        public size_t rank { get; construct; }
 
         private size_t  shape[32];
         private ssize_t strides[32];
@@ -537,16 +537,16 @@ public class Vast.Tensor : Object
         private ssize_t original_axis[32];
         private bool    removal[32];
 
-        internal Builder(Tensor tensor, size_t dimension)
+        internal Builder(Tensor tensor, size_t rank)
         {
-            base (tensor: tensor, dimension: dimension);
+            base (tensor: tensor, rank: rank);
         }
 
         construct
         {
-            for (var i = 0; i < dimension; i ++) {
-                shape[i]         = i < tensor.dimension ? tensor.shape[i] : 1;
-                strides[i]       = i < tensor.dimension ? tensor.strides[i] : 0;
+            for (var i = 0; i < rank; i ++) {
+                shape[i]         = i < tensor.rank ? tensor.shape[i] : 1;
+                strides[i]       = i < tensor.rank ? tensor.strides[i] : 0;
                 original_axis[i] = i;
                 removal[i]       = false;
             }
@@ -596,7 +596,7 @@ public class Vast.Tensor : Object
             ssize_t step = 1)
         {
             /* if step is 0, mark the axis for removal */
-            axis = wrap_by_dimension(axis);
+            axis = wrap_by_rank(axis);
 
             ssize_t from, to;
             if(qfrom == null) {
@@ -641,9 +641,9 @@ public class Vast.Tensor : Object
         public Builder
         axis (ssize_t axis, ssize_t from_axis)
         {
-            axis      = wrap_by_dimension (axis);
-            from_axis = wrap_by_dimension (from_axis);
-            if (from_axis < tensor.dimension) {
+            axis      = wrap_by_rank (axis);
+            from_axis = wrap_by_rank (from_axis);
+            if (from_axis < tensor.rank) {
                 shape[axis]   = tensor.shape[from_axis];
                 strides[axis] = tensor.strides[from_axis];
             } else {
@@ -657,7 +657,7 @@ public class Vast.Tensor : Object
         public Builder
         broadcast(ssize_t axis, size_t newshape)
         {
-            axis = wrap_by_dimension(axis);
+            axis = wrap_by_rank(axis);
             assert (shape[axis] == 1 || strides[axis] == 0 || shape[axis] == newshape);
             strides[axis] = 0;
             shape[axis] = newshape;
@@ -671,18 +671,18 @@ public class Vast.Tensor : Object
             int n[32];
 
             /* XXX: this is dumb. how to zero initialize a vala tensor? */
-            for(var i = 0; i < tensor._dimension; i ++) {
+            for(var i = 0; i < tensor._rank; i ++) {
                 n[i] = 0;
             }
 
-            for(var i = 0; i < dimension; i ++) {
+            for(var i = 0; i < rank; i ++) {
                 var o = original_axis[i];
-                if (o >= tensor.dimension) {
+                if (o >= tensor.rank) {
                     continue;
                 }
                 n[o] ++;
             }
-            for(var i = 0; i < tensor._dimension; i ++) {
+            for(var i = 0; i < tensor._rank; i ++) {
                 /* each original axis shall be used at most once */
                 assert (n[i] <= 1);
                 /* XXX: raised error shall be informative */
@@ -690,7 +690,7 @@ public class Vast.Tensor : Object
 
             /* remove axes that are marked for removal due to indexing */
             ssize_t j = 0;
-            for(var i = 0; i < dimension; i ++) {
+            for(var i = 0; i < rank; i ++) {
                 if(removal[i]) continue;
                 shape[j] = shape[i];
                 strides[j] = strides[i];
@@ -706,9 +706,9 @@ public class Vast.Tensor : Object
                                tensor.data);
         }
 
-        private ssize_t wrap_by_dimension(ssize_t axis)
+        private ssize_t wrap_by_rank(ssize_t axis)
         {
-            return (axis < 0) ? ((ssize_t) dimension + axis) : axis;
+            return (axis < 0) ? ((ssize_t) rank + axis) : axis;
         }
     }
 

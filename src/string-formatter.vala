@@ -10,14 +10,14 @@ public class Vast.StringFormatter : Vast.Formatter
     {
         // scalar style
         @out.put_byte ('\n', cancellable);
-        if (index.length == tensor.dimension) {
+        if (index.length == tensor.rank) {
             @out.put_byte ('[');
             @out.put_string (tensor.get_value (index).strdup_contents (), cancellable);
             @out.put_byte (']', cancellable);
         }
 
         // vector style
-        else if (index.length == tensor.dimension - 1) {
+        else if (index.length == tensor.rank - 1) {
             @out.put_byte ('[');
             for (var i = 0; i < tensor.shape[index.length]; i++) {
                 if (i > 0)
@@ -33,7 +33,7 @@ public class Vast.StringFormatter : Vast.Formatter
         }
 
         // matrix style
-        else if (index.length == tensor.dimension - 2) {
+        else if (index.length == tensor.rank - 2) {
             @out.put_byte ('[');
             // last dim is printed vertically
             for (var j = 0; j < tensor.shape[index.length + 1]; j++) {

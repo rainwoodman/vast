@@ -97,16 +97,16 @@ int main (string[] args) {
     Test.add_func ("/tensor/gobject_construction", () => {
         var a = Object.new (typeof (Tensor)) as Tensor;
 
-        assert (0 == a.dimension);
+        assert (0 == a.rank);
         assert (typeof (void) == a.scalar_type);
         assert (sizeof (void) == a.scalar_size);
         assert (1 == a.size);
         assert (0 == a.origin);
         assert (null != a.data);
-        assert ("dtype: void, dsize: %lu, dimension: 0, shape: (), strides: (), size: 1, mem: 1B".printf (sizeof (void)) == a.to_string ());
+        assert ("dtype: void, dsize: %lu, rank: 0, shape: (), strides: (), size: 1, mem: 1B".printf (sizeof (void)) == a.to_string ());
 
         size_t [] shape = {2, 2, 2, 4};
-        var b = Object.new (typeof (Tensor), "dimension", shape.length, "shape", shape) as Tensor;
+        var b = Object.new (typeof (Tensor), "rank", shape.length, "shape", shape) as Tensor;
         assert (typeof (void) == b.scalar_type);
         assert (sizeof (void) == b.scalar_size);
         assert (2 == b.shape[0]);
@@ -176,7 +176,7 @@ int main (string[] args) {
         a.set_from_value ({0, 0, 5}, 1);
 
         var b = new Tensor (typeof (double), sizeof (double), {1, 2, 3, 4, 5, 6});
-        assert (6 == b.dimension);
+        assert (6 == b.rank);
         b.set_from_value ({0, 0, 0, 0, 0, 1}, 1);
         b.set_from_value ({0, 0, 0, 0, 0, 2}, 1);
         b.set_from_value ({0, 0, 0, 0, 0, 3}, 1);
@@ -278,11 +278,11 @@ int main (string[] args) {
             }
         }
 
-        assert (2 == a.index ({}).dimension);
-        assert (1 == a.index ({0}).dimension);
+        assert (2 == a.index ({}).rank);
+        assert (1 == a.index ({0}).rank);
         assert (0 == a.index ({0}).get_value ({0}).get_int64 ());
         assert (100 == a.index ({10}).get_value ({10}).get_int64 ());
-        assert (0 == a.index ({10, 10}).dimension);
+        assert (0 == a.index ({10, 10}).rank);
         assert (100 == a.index ({10, 10}).get_value ({}).get_int64 ());
 
         for (var i = 0; i < 30; i++) {
@@ -386,13 +386,13 @@ int main (string[] args) {
                  .index(1, 5)
                  .end();
 
-        assert (g.dimension == 1);
+        assert (g.rank == 1);
         assert (g.get_value({1}).get_double() == 2 * 5);
         assert (g.get_value({2}).get_double() == 3 * 5);
 
         var h = a.build(1).end();
 
-        assert (h.dimension == 1);
+        assert (h.rank == 1);
         assert (h.shape[0] == 10);
         assert (h.strides[0] == 20);
         assert (h.get_value ({0}).get_double () == 0);
@@ -569,7 +569,7 @@ int main (string[] args) {
         a.set_from_value ({0}, 1.0);
 
         var b = a.copy ();
-        assert (1 == b.dimension);
+        assert (1 == b.rank);
         assert (10 == b.shape[0]);
         assert (1.0 == b.get_value ({0}).get_double ());
 
@@ -583,7 +583,7 @@ int main (string[] args) {
 
         var b = a.broadcast_to ({10});
 
-        assert (1 == b.dimension);
+        assert (1 == b.rank);
         assert (10 == b.shape[0]);
 
         for (var i = 0; i < 10; i++) {

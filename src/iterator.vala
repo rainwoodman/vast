@@ -38,13 +38,13 @@ public class Vast.Iterator : Object
              * For scalar-like tensor, we cannot use an empty '_cursor' as it
              * would be interpreted as 'null', thus we create a phony one.
              */
-            _cursor = new ssize_t[tensor.dimension.clamp (1, size_t.MAX)];
-            Memory.set (_cursor, 0, tensor.dimension.clamp (1, size_t.MAX) * sizeof (ssize_t));
+            _cursor = new ssize_t[tensor.rank.clamp (1, size_t.MAX)];
+            Memory.set (_cursor, 0, tensor.rank.clamp (1, size_t.MAX) * sizeof (ssize_t));
             _offset = 0;
             return true;
         }
 
-        for (var i = tensor.dimension; i > 0; i--) {
+        for (var i = tensor.rank; i > 0; i--) {
             _cursor[i - 1] = _cursor[i - 1] + 1;
             _offset        = _offset + tensor.strides[i - 1] * tensor.scalar_size;
             if (_cursor[i - 1] < tensor.shape[i - 1]) {
@@ -117,10 +117,10 @@ public class Vast.Iterator : Object
     move ([CCode (array_length = false)] ssize_t[] destination)
     {
         if (_cursor == null) {
-            _cursor = new ssize_t[tensor.dimension];
+            _cursor = new ssize_t[tensor.rank];
         }
         _offset = 0;
-        for (var i = 0; i < tensor.dimension; i++) {
+        for (var i = 0; i < tensor.rank; i++) {
             _cursor[i] = destination[i];
             _offset   += destination[i] * tensor.strides[i] * tensor.scalar_size;
         }
